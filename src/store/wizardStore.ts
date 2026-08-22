@@ -25,8 +25,13 @@ export interface RoomItemState {
   cbm: number;         // quantity * unitCbm
 }
 
-export type RoomItems = Record<string, RoomItemState>;
-export type AllRoomsState = Record<RoomCategory, RoomItems>;
+export interface RoomData {
+  items: Record<string, RoomItemState>;
+  note: string;
+  images: string[];
+}
+
+export type AllRoomsState = Record<RoomCategory, RoomData>;
 
 export interface OptionState {
   quantity: number;
@@ -44,23 +49,24 @@ export interface ResourceState {
 interface WizardState {
   currentStep: number;
   customerInfo: CustomerInfo;
-  roomItems: AllRoomsState;
+  roomItems: AllRoomsState; // RoomData 객체로 유지
   totalCbm: number;
   calculatedVehicles: VehicleRecommendation; 
   
   options: OptionsState;
-  sttMemo: string;
-  images: string[];
+  sttMemo: string;          // Step 3 종합 협의사항
   resources: ResourceState;
   
   setStep: (step: number) => void;
   updateCustomerInfo: (info: Partial<CustomerInfo>) => void;
   updateRoomItemQuantity: (room: RoomCategory, itemName: string, quantity: number) => void;
   changeItemVariant: (room: RoomCategory, itemName: string, variantName: string, customCbm: number) => void;
+  updateRoomNote: (room: RoomCategory, note: string) => void;
+  addRoomImage: (room: RoomCategory, url: string) => void;
+  removeRoomImage: (room: RoomCategory, url: string) => void;
+  
   updateOption: (optionName: string, quantity: number) => void;
   setSttMemo: (memo: string) => void;
-  addImage: (url: string) => void;
-  removeImage: (url: string) => void;
   updateResources: (info: Partial<ResourceState>) => void;
   updateMaterial: (materialName: string, quantity: number) => void;
   recalculateCbm: () => void;
@@ -74,7 +80,7 @@ const initialCustomerInfo: CustomerInfo = {
 };
 
 const initialRoomItems: AllRoomsState = (Object.keys(ROOM_CATEGORIES) as RoomCategory[]).reduce((acc, room) => {
-  acc[room] = {};
+  acc[room] = { items: {}, note: '', images: [] };
   return acc;
 }, {} as AllRoomsState);
 
@@ -95,7 +101,6 @@ export const useWizardStore = create<WizardState>()(
       calculatedVehicles: { fiveTon: 0, twoHalfTon: 0, oneTon: 0 },
       options: {},
       sttMemo: '',
-      images: [],
       resources: initialResources,
       
       setStep: (step) => set({ currentStep: step }),
@@ -107,10 +112,9 @@ export const useWizardStore = create<WizardState>()(
       updateRoomItemQuantity: (room, itemName, quantity) => {
         set((state) => {
           const newRoomItems = { ...state.roomItems };
-          let currentItem = newRoomItems[room][itemName];
+          let currentItem = newRoomItems[room].items[itemName];
           
           if (!currentItem) {
-            // Find default variant
             const masterItem = ROOM_CATEGORIES[room].find(i => i.name === itemName);
             if (!masterItem) return state;
             const defaultVariant = masterItem.variants.find(v => v.isDefault) || masterItem.variants[1] || masterItem.variants[0];
@@ -123,8 +127,8 @@ export const useWizardStore = create<WizardState>()(
             };
           }
           
-          newRoomItems[room] = {
-            ...newRoomItems[room],
+          newRoomItems[room].items = {
+            ...newRoomItems[room].items,
             [itemName]: {
               ...currentItem,
               quantity,
@@ -140,10 +144,10 @@ export const useWizardStore = create<WizardState>()(
       changeItemVariant: (room, itemName, variantName, customCbm) => {
         set((state) => {
           const newRoomItems = { ...state.roomItems };
-          let currentItem = newRoomItems[room][itemName] || { quantity: 0 };
+          let currentItem = newRoomItems[room].items[itemName] || { quantity: 0 };
           
-          newRoomItems[room] = {
-            ...newRoomItems[room],
+          newRoomItems[room].items = {
+            ...newRoomItems[room].items,
             [itemName]: {
               ...currentItem,
               variantName,
@@ -156,6 +160,27 @@ export const useWizardStore = create<WizardState>()(
         });
         get().recalculateCbm();
       },
+
+      updateRoomNote: (room, note) => set((state) => ({
+        roomItems: {
+          ...state.roomItems,
+          [room]: { ...state.roomItems[room], note }
+        }
+      })),
+
+      addRoomImage: (room, url) => set((state) => ({
+        roomItems: {
+          ...state.roomItems,
+          [room]: { ...state.roomItems[room], images: [...state.roomItems[room].images, url] }
+        }
+      })),
+
+      removeRoomImage: (room, url) => set((state) => ({
+        roomItems: {
+          ...state.roomItems,
+          [room]: { ...state.roomItems[room], images: state.roomItems[room].images.filter(img => img !== url) }
+        }
+      })),
 
       updateOption: (optionName, quantity) => {
         set((state) => {
@@ -177,9 +202,6 @@ export const useWizardStore = create<WizardState>()(
 
       setSttMemo: (memo) => set({ sttMemo: memo }),
       
-      addImage: (url) => set((state) => ({ images: [...state.images, url] })),
-      removeImage: (url) => set((state) => ({ images: state.images.filter(img => img !== url) })),
-      
       updateResources: (info) => set((state) => ({
         resources: { ...state.resources, ...info }
       })),
@@ -195,8 +217,8 @@ export const useWizardStore = create<WizardState>()(
         const { roomItems, resources } = get();
         let totalCbm = 0;
         
-        Object.values(roomItems).forEach(room => {
-          Object.values(room).forEach(item => { totalCbm += item.cbm; });
+        Object.values(roomItems).forEach(roomData => {
+          Object.values(roomData.items).forEach(item => { totalCbm += item.cbm; });
         });
         
         totalCbm = Math.round(totalCbm * 10) / 10;
@@ -217,12 +239,11 @@ export const useWizardStore = create<WizardState>()(
         calculatedVehicles: { fiveTon: 0, twoHalfTon: 0, oneTon: 0 },
         options: {},
         sttMemo: '',
-        images: [],
         resources: initialResources,
       })
     }),
     {
-      name: 'tongin-wizard-storage',
+      name: 'tongin-wizard-storage-v2', // 로컬스토리지 충돌 방지용 키 변경
       storage: createJSONStorage(() => localStorage),
     }
   )

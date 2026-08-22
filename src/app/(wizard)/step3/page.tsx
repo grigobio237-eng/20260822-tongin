@@ -5,22 +5,18 @@ import { useWizardStore } from '@/store/wizardStore';
 import { useRouter } from 'next/navigation';
 import { OPTION_ITEMS } from '@/lib/constants/items';
 import { useSpeechToText } from '@/hooks/useSpeechToText';
-import { compressToWebP } from '@/lib/imageCompression';
-import { Mic, MicOff, Camera, Trash2, Loader2 } from 'lucide-react';
+import { Mic, MicOff } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function Step3Page() {
   const { 
     options, updateOption, 
     sttMemo, setSttMemo, 
-    images, addImage, removeImage,
     resources, updateResources, updateMaterial,
     calculatedVehicles, setStep 
   } = useWizardStore();
   
   const router = useRouter();
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSttResult = (text: string) => {
     setSttMemo(sttMemo ? `${sttMemo} ${text}` : text);
@@ -41,37 +37,6 @@ export default function Step3Page() {
   const handleOptionToggle = (optionName: string, defaultPrice: number) => {
     const isSelected = !!options[optionName];
     updateOption(optionName, isSelected ? 0 : 1);
-  };
-
-  const handlePhotoCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setIsUploading(true);
-      const { blob, previewUrl } = await compressToWebP(file);
-      
-      const formData = new FormData();
-      formData.append('file', blob, 'photo.webp');
-      formData.append('contractId', 'temp-draft'); // 향후 실제 계약 ID 사용
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!res.ok) throw new Error('Upload failed');
-      
-      const data = await res.json();
-      addImage(data.url || previewUrl); // fallback to preview if API fails gracefully in dev
-      
-    } catch (err) {
-      console.error(err);
-      alert('이미지 업로드에 실패했습니다.');
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
   };
 
   const PACKING_MATERIALS = ['이불BOX', '옷BOX', '아이스BOX', '종이BOX', '팟도(大)', '팟도(中)', '담보루', '에어캡', '랩', '테이프'];
@@ -138,47 +103,6 @@ export default function Step3Page() {
         </div>
       </section>
 
-      {/* 3. 현장 사진 촬영 */}
-      <section>
-        <h2 className="text-xl font-bold mb-4">현장 사진 촬영</h2>
-        <div className="bg-white rounded-xl shadow-sm border p-4 space-y-4">
-          <div className="flex items-center justify-between">
-             <span className="text-sm text-gray-500">최대 1600px, WebP 자동 압축</span>
-             <button 
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              className="flex items-center gap-2 bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50"
-             >
-               {isUploading ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
-               {isUploading ? '업로드 중...' : '사진 촬영 / 첨부'}
-             </button>
-             <input 
-               type="file" 
-               accept="image/*" 
-               capture="environment" 
-               className="hidden" 
-               ref={fileInputRef}
-               onChange={handlePhotoCapture}
-             />
-          </div>
-          
-          {images.length > 0 && (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-4">
-              {images.map((img, idx) => (
-                <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border group">
-                  <img src={img} alt={`현장사진 ${idx+1}`} className="w-full h-full object-cover" />
-                  <button 
-                    onClick={() => removeImage(img)}
-                    className="absolute top-1 right-1 p-1.5 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* 4. 리소스 및 포장재료 */}
       <section>

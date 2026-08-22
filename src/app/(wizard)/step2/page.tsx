@@ -74,7 +74,7 @@ export default function Step2Page() {
       {/* Items Grid */}
       <div className="bg-white rounded-xl shadow-sm border p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         {ROOM_CATEGORIES[activeTab].map((item) => {
-          const itemState = roomItems[activeTab]?.[item.name];
+          const itemState = roomItems[activeTab]?.items?.[item.name];
           const qty = itemState?.quantity || 0;
           
           // 표시할 기본 variant 찾기
@@ -119,7 +119,90 @@ export default function Step2Page() {
         })}
       </div>
 
-      {/* Footer sticky bar */}
+      {/* Room specific Notes and Images */}
+      <div className="bg-white rounded-xl shadow-sm border p-4 space-y-4">
+        <h3 className="font-bold text-gray-800 border-b pb-2">{activeTab} 현장 사진 및 특이사항</h3>
+        
+        {/* Images */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">현장 사진</label>
+          <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
+            {roomItems[activeTab]?.images?.map((imgUrl, idx) => (
+              <div key={idx} className="relative w-24 h-24 shrink-0 snap-start border rounded-lg overflow-hidden group">
+                <img src={imgUrl} alt={`Room photo ${idx}`} className="w-full h-full object-cover" />
+                <button 
+                  onClick={() => useWizardStore.getState().removeRoomImage(activeTab, imgUrl)}
+                  className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            <label className="w-24 h-24 shrink-0 flex flex-col items-center justify-center border-2 border-dashed rounded-lg text-gray-400 hover:text-blue-500 hover:border-blue-500 cursor-pointer transition-colors">
+              <Plus className="w-6 h-6 mb-1" />
+              <span className="text-xs font-medium">사진 추가</span>
+              <input 
+                type="file" 
+                accept="image/*" 
+                capture="environment" 
+                className="hidden" 
+                onChange={async (e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    const { compressToWebP } = await import('@/lib/imageCompression');
+                    try {
+                      const { blob } = await compressToWebP(file);
+                      const formData = new FormData();
+                      formData.append('file', blob);
+                      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                      if(res.ok) {
+                        const { url } = await res.json();
+                        useWizardStore.getState().addRoomImage(activeTab, url);
+                      }
+                    } catch (e) {
+                      console.error("Upload failed", e);
+                    }
+                  }
+                }}
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Note (STT) */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">공간 특이사항 (음성/수기)</label>
+          <div className="flex gap-2 items-start">
+            <textarea 
+              value={roomItems[activeTab]?.note || ''}
+              onChange={(e) => useWizardStore.getState().updateRoomNote(activeTab, e.target.value)}
+              placeholder="예: 장롱 우측 하단 스크래치 있음, 문틀 파손 주의 등"
+              className="flex-1 border rounded-lg p-3 min-h-[80px] text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+            <button 
+              onClick={async () => {
+                if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+                  const recognition = new SpeechRecognition();
+                  recognition.lang = 'ko-KR';
+                  recognition.interimResults = false;
+                  recognition.onresult = (e: any) => {
+                    const text = e.results[0][0].transcript;
+                    const currentNote = useWizardStore.getState().roomItems[activeTab]?.note || '';
+                    useWizardStore.getState().updateRoomNote(activeTab, currentNote ? `${currentNote} ${text}` : text);
+                  };
+                  recognition.start();
+                } else {
+                  alert('음성 인식을 지원하지 않는 브라우저입니다.');
+                }
+              }}
+              className="p-3 bg-blue-50 text-blue-600 rounded-lg shrink-0 border border-blue-100 hover:bg-blue-100 active:bg-blue-200"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div>
@@ -152,7 +235,7 @@ export default function Step2Page() {
             
             <div className="p-4 overflow-y-auto space-y-3">
               {modalState.item.variants.map((v) => {
-                const currentVariantName = roomItems[modalState.room]?.[modalState.item.name]?.variantName;
+                const currentVariantName = roomItems[modalState.room]?.items?.[modalState.item.name]?.variantName;
                 const isSelected = currentVariantName === v.name || (!currentVariantName && v.isDefault);
                 
                 return (

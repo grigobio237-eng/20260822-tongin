@@ -147,8 +147,23 @@ export const ContractPdfDocument = ({ data, signatureUrl }: { data: any, signatu
         </View>
       </View>
 
+      {/* Memos */}
+      <View style={{ marginTop: 15 }}>
+        <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 5 }}>종합 및 공간별 특이사항</Text>
+        <View style={{ border: '1px solid #ddd', padding: 10 }}>
+          {data.sttMemo && <Text style={{ marginBottom: 5, color: '#d97706' }}>[종합] {data.sttMemo}</Text>}
+          {Object.entries(data.roomItems || {}).map(([room, roomData]: any) => {
+            if (!roomData.note) return null;
+            return <Text key={room} style={{ marginBottom: 3 }}>[{room}] {roomData.note}</Text>;
+          })}
+          {!data.sttMemo && !Object.values(data.roomItems || {}).some((rd: any) => rd.note) && (
+            <Text style={{ color: '#999' }}>입력된 특이사항이 없습니다.</Text>
+          )}
+        </View>
+      </View>
+
       {/* Terms & Notices */}
-      <View style={{ marginTop: 20, fontSize: 8, color: '#555', lineHeight: 1.5 }}>
+      <View style={{ marginTop: 15, fontSize: 8, color: '#555', lineHeight: 1.5 }}>
         <Text>▶ 현금·유가증권, 귀금속은 고객이 직접 관리하며 사업자는 책임지지 않습니다.</Text>
         <Text>▶ 도배/잔금 및 대기시 대기료 별도, 에어컨 설치시 부·자재비 별도</Text>
         <Text>▶ 도착지환경에 따라 추가비용이 발생할 수 있습니다. (차량진입 불가시, 계단작업 및 이송작업시)</Text>
@@ -163,7 +178,32 @@ export const ContractPdfDocument = ({ data, signatureUrl }: { data: any, signatu
           <Text style={{ fontStyle: 'italic', marginLeft: 10 }}>(서명 없음)</Text>
         )}
       </View>
-
     </Page>
+
+    {/* Page 2: Photos */}
+    {(() => {
+      const photos: { room: string, url: string }[] = [];
+      Object.entries(data.roomItems || {}).forEach(([room, roomData]: any) => {
+        (roomData.images || []).forEach((url: string) => photos.push({ room, url }));
+      });
+
+      if (photos.length === 0) return null;
+
+      return (
+        <Page size="A4" style={styles.page}>
+          <View style={styles.header}>
+            <Text style={styles.title}>이사견적·계약서 (별첨: 현장 사진)</Text>
+          </View>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 10 }}>
+            {photos.map((photo, idx) => (
+              <View key={idx} style={{ width: '31%', marginBottom: 15 }}>
+                <Text style={{ fontSize: 9, marginBottom: 4, fontWeight: 'bold' }}>[{photo.room}] 사진 {idx + 1}</Text>
+                <PdfImage src={photo.url} style={{ width: '100%', height: 120, objectFit: 'cover', border: '1px solid #ccc' }} />
+              </View>
+            ))}
+          </View>
+        </Page>
+      );
+    })()}
   </Document>
 );
