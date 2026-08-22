@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { OPTION_ITEMS } from '@/lib/constants/items';
 
 export interface SettingsState {
   vehiclePrices: {
@@ -11,15 +12,27 @@ export interface SettingsState {
     male: number;
     female: number;
   };
+  optionPrices: Record<string, number>;
   isLoading: boolean;
   
   fetchSettings: () => Promise<void>;
-  updateSettings: (vehiclePrices: SettingsState['vehiclePrices'], workerPrices: SettingsState['workerPrices']) => Promise<void>;
+  updateSettings: (
+    vehiclePrices: SettingsState['vehiclePrices'], 
+    workerPrices: SettingsState['workerPrices'],
+    optionPrices: SettingsState['optionPrices']
+  ) => Promise<void>;
 }
+
+// 초기 옵션 단가는 items.ts의 defaultPrice를 기본으로 함
+const initialOptionPrices = OPTION_ITEMS.reduce((acc, item) => {
+  acc[item.name] = item.defaultPrice;
+  return acc;
+}, {} as Record<string, number>);
 
 const defaultValues = {
   vehiclePrices: { fiveTon: 300000, twoHalfTon: 200000, oneTon: 150000 },
   workerPrices: { male: 200000, female: 150000 },
+  optionPrices: initialOptionPrices,
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -35,8 +48,9 @@ export const useSettingsStore = create<SettingsState>()(
           if (res.ok) {
             const data = await res.json();
             set({
-              vehiclePrices: data.vehiclePrices,
-              workerPrices: data.workerPrices
+              vehiclePrices: data.vehiclePrices || get().vehiclePrices,
+              workerPrices: data.workerPrices || get().workerPrices,
+              optionPrices: data.optionPrices || get().optionPrices,
             });
           }
         } catch (error) {
@@ -46,16 +60,16 @@ export const useSettingsStore = create<SettingsState>()(
         }
       },
 
-      updateSettings: async (vehiclePrices, workerPrices) => {
+      updateSettings: async (vehiclePrices, workerPrices, optionPrices) => {
         set({ isLoading: true });
         try {
           // Optimistic update
-          set({ vehiclePrices, workerPrices });
+          set({ vehiclePrices, workerPrices, optionPrices });
           
           const res = await fetch('/api/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ vehiclePrices, workerPrices })
+            body: JSON.stringify({ vehiclePrices, workerPrices, optionPrices })
           });
           
           if (!res.ok) {

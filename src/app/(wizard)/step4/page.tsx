@@ -35,9 +35,10 @@ export default function Step4Page() {
 
   let optionsCost = 0;
   const calculatedOptions = Object.entries(options).map(([name, opt]) => {
-    let price = opt.totalPrice;
+    const basePrice = settingsStore.optionPrices[name] ?? (opt.totalPrice / Math.max(1, opt.quantity));
+    let price = basePrice * opt.quantity;
     if (name.includes('대기료')) {
-      price = opt.totalPrice * totalWorkers; // 기본 5만원 * 인원수
+      price = basePrice * opt.quantity * totalWorkers;
     }
     optionsCost += price;
     return { name, price };

@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { OPTION_ITEMS } from '@/lib/constants/items';
 import { useSpeechToText } from '@/hooks/useSpeechToText';
@@ -16,6 +17,7 @@ export default function Step3Page() {
     calculatedVehicles, setStep 
   } = useWizardStore();
   
+  const optionPrices = useSettingsStore(state => state.optionPrices);
   const router = useRouter();
 
   const handleSttResult = (text: string) => {
@@ -34,9 +36,10 @@ export default function Step3Page() {
     router.push('/step2');
   };
 
-  const handleOptionToggle = (optionName: string, defaultPrice: number) => {
+  const handleOptionToggle = (optionName: string) => {
     const isSelected = !!options[optionName];
-    updateOption(optionName, isSelected ? 0 : 1);
+    const price = optionPrices[optionName] ?? 0;
+    updateOption(optionName, isSelected ? 0 : 1, price);
   };
 
   const PACKING_MATERIALS = [
@@ -53,6 +56,7 @@ export default function Step3Page() {
         <div className="bg-white rounded-xl shadow-sm border p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {OPTION_ITEMS.map(opt => {
             const isSelected = !!options[opt.name];
+            const price = optionPrices[opt.name] ?? opt.defaultPrice;
             return (
               <label 
                 key={opt.name} 
@@ -63,16 +67,14 @@ export default function Step3Page() {
               >
                 <div className="flex items-center gap-3">
                   <input 
-                    type="checkbox" 
-                    className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    type="checkbox"
                     checked={isSelected}
-                    onChange={() => handleOptionToggle(opt.name, opt.defaultPrice)}
+                    onChange={() => handleOptionToggle(opt.name)}
+                    className="w-4 h-4 text-blue-600 rounded"
                   />
-                  <span className="font-medium text-gray-800">{opt.name}</span>
+                  <span className="font-medium text-sm">{opt.name}</span>
                 </div>
-                <span className="text-sm font-semibold text-gray-600">
-                  {opt.defaultPrice.toLocaleString()}원
-                </span>
+                <span className="text-sm text-gray-500 font-semibold">{price.toLocaleString()}원</span>
               </label>
             );
           })}

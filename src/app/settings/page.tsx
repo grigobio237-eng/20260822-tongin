@@ -1,33 +1,36 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSettingsStore, SettingsState } from '@/store/settingsStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowLeft, Save } from 'lucide-react';
+import { OPTION_ITEMS } from '@/lib/constants/items';
 
 export default function SettingsPage() {
   const router = useRouter();
   const store = useSettingsStore();
   const [localVehiclePrices, setLocalVehiclePrices] = useState(store.vehiclePrices);
   const [localWorkerPrices, setLocalWorkerPrices] = useState(store.workerPrices);
+  const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
 
   useEffect(() => {
-    // Only fetch if not already loaded from persist, or just fetch to sync
-    store.fetchSettings().then(() => {
-      setLocalVehiclePrices(useSettingsStore.getState().vehiclePrices);
-      setLocalWorkerPrices(useSettingsStore.getState().workerPrices);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // Sync if state is updated
+    setLocalVehiclePrices(store.vehiclePrices);
+    setLocalWorkerPrices(store.workerPrices);
+    setLocalOptionPrices(store.optionPrices);
+  }, [store.vehiclePrices, store.workerPrices, store.optionPrices]);
 
   const handleSave = async () => {
-    await store.updateSettings(localVehiclePrices, localWorkerPrices);
+    await store.updateSettings(localVehiclePrices, localWorkerPrices, localOptionPrices);
     router.back();
   };
 
-  if (store.isLoading && localVehiclePrices.fiveTon === 0) {
-    return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
-  }
+  const handleOptionChange = (optionName: string, value: number) => {
+    setLocalOptionPrices(prev => ({
+      ...prev,
+      [optionName]: value
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 pb-32">
@@ -112,13 +115,35 @@ export default function SettingsPage() {
               </div>
             </div>
           </section>
-        </div>
 
-        <div className="flex justify-end pt-4">
+          <section>
+            <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">옵션 품목 단가 설정</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              {OPTION_ITEMS.map((option) => (
+                <div key={option.name}>
+                  <label className="block text-sm font-semibold mb-2">{option.name}</label>
+                  <div className="relative">
+                    <input 
+                      type="number"
+                      value={localOptionPrices[option.name] ?? option.defaultPrice}
+                      onChange={(e) => handleOptionChange(option.name, Number(e.target.value))}
+                      className="w-full border rounded-lg p-3 text-right font-bold pr-10"
+                    />
+                    <span className="absolute right-4 top-3 text-gray-500">원</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg">
+        <div className="max-w-3xl mx-auto flex justify-end">
           <button 
             onClick={handleSave}
             disabled={store.isLoading}
-            className="flex items-center gap-2 bg-gray-900 text-white px-8 py-3 rounded-xl font-bold shadow hover:bg-black transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-slate-800 disabled:opacity-50"
           >
             {store.isLoading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
             설정 저장 및 돌아가기

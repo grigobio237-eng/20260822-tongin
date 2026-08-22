@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
         id: 'global_config',
         vehiclePrices: body.vehiclePrices || DEFAULT_SETTINGS.vehiclePrices,
         workerPrices: body.workerPrices || DEFAULT_SETTINGS.workerPrices,
+        optionPrices: body.optionPrices || {},
         updatedAt: new Date().toISOString()
       }
     }, { status: 200 });

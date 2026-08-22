@@ -67,7 +67,7 @@ interface WizardState {
   addRoomImage: (room: RoomCategory, url: string) => void;
   removeRoomImage: (room: RoomCategory, url: string) => void;
   
-  updateOption: (optionName: string, quantity: number) => void;
+  updateOption: (optionName: string, quantity: number, price: number) => void;
   setSttMemo: (memo: string) => void;
   updateResources: (info: Partial<ResourceState>) => void;
   updateMaterial: (materialName: string, quantity: number) => void;
@@ -188,18 +188,15 @@ export const useWizardStore = create<WizardState>()(
         }
       })),
 
-      updateOption: (optionName, quantity) => {
+      updateOption: (optionName, quantity, price) => {
         set((state) => {
-          const optionDef = OPTION_ITEMS.find(o => o.name === optionName);
-          if (!optionDef) return state;
-          
           const newOptions = { ...state.options };
           if (quantity <= 0) {
             delete newOptions[optionName];
           } else {
             newOptions[optionName] = {
               quantity,
-              totalPrice: quantity * optionDef.defaultPrice
+              totalPrice: quantity * price
             };
           }
           return { options: newOptions };
