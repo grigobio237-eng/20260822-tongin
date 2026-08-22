@@ -241,4 +241,5 @@ export const OPTION_ITEMS: OptionDef[] = [
   { name: '홈시어터/탈·부착', defaultPrice: 30000 },
   { name: '계단/이송작업비', defaultPrice: 50000 },
   { name: '보관료', defaultPrice: 100000 },
+  { name: '대기료 (1시간 이상 지연 시)', defaultPrice: 50000 },
 ];

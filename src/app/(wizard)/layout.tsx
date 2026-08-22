@@ -1,11 +1,20 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
+import { useSettingsStore } from '@/store/settingsStore';
+import { Settings } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
   const currentStep = useWizardStore(state => state.currentStep);
+  const fetchSettings = useSettingsStore(state => state.fetchSettings);
+  const router = useRouter();
+  
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
   
   const steps = [
     { num: 1, label: '기본정보' },
@@ -17,8 +26,8 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header / Step Indicator */}
-      <header className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+      <header className="bg-white border-b sticky top-0 z-10 relative">
+        <div className="max-w-4xl mx-auto px-4 py-4 relative">
           <div className="flex items-center justify-between">
             {steps.map((step, idx) => (
               <div key={step.num} className="flex flex-col items-center flex-1">
@@ -42,6 +51,13 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
               </div>
             ))}
           </div>
+          <button 
+            onClick={() => router.push('/settings')}
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-700 p-2 bg-white rounded-full shadow-sm border"
+            aria-label="단가 설정"
+          >
+            <Settings size={20} />
+          </button>
         </div>
       </header>
 

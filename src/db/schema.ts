@@ -75,3 +75,18 @@ export const contractImages = sqliteTable('contract_images', {
   metadata: text('metadata'), // JSON 문자열 (해상도, 용량 등)
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 });
+
+// 5. 전역 설정 (단가 등)
+export const systemSettings = sqliteTable('system_settings', {
+  id: text('id').primaryKey().default('global_config'),
+  vehiclePrices: text('vehicle_prices', { mode: 'json' }).$type<{
+    fiveTon: number;
+    twoHalfTon: number;
+    oneTon: number;
+  }>().notNull(),
+  workerPrices: text('worker_prices', { mode: 'json' }).$type<{
+    male: number;
+    female: number;
+  }>().notNull(),
+  updatedAt: text('updated_at').notNull(),
+});

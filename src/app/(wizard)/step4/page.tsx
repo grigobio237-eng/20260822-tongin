@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import SignaturePad from '@/components/wizard/SignaturePad';
 import { pdf } from '@react-pdf/renderer';
@@ -11,6 +12,7 @@ import clsx from 'clsx';
 
 export default function Step4Page() {
   const store = useWizardStore();
+  const settingsStore = useSettingsStore();
   const { customerInfo, options, reset, setStep } = store;
   const router = useRouter();
   
@@ -21,8 +23,14 @@ export default function Step4Page() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedContract, setCompletedContract] = useState<{ id: string, pdfUrl: string } | null>(null);
 
-  // Calculate base costs (demo logic)
-  const baseCost = 1000000; // 100만원 임시 책정 (실제로는 차량/인원 기반 산출)
+  // Calculate base costs based on dynamic settings
+  const baseCost = 
+    (store.resources.vehicles.fiveTon * settingsStore.vehiclePrices.fiveTon) +
+    (store.resources.vehicles.twoHalfTon * settingsStore.vehiclePrices.twoHalfTon) +
+    (store.resources.vehicles.oneTon * settingsStore.vehiclePrices.oneTon) +
+    (store.resources.workerMale * settingsStore.workerPrices.male) +
+    (store.resources.workerFemale * settingsStore.workerPrices.female);
+
   const optionsCost = Object.values(options).reduce((sum, opt) => sum + opt.totalPrice, 0);
   
   const subTotal = baseCost + optionsCost;
