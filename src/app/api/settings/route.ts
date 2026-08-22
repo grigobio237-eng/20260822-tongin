@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
 
@@ -11,14 +10,10 @@ const DEFAULT_SETTINGS = {
 
 export async function GET(req: NextRequest) {
   try {
-    let d1: any = null;
-    try {
-      d1 = (getRequestContext().env as any).DB;
-    } catch (e) {
-      d1 = typeof process !== 'undefined' && process.env ? process.env.DB : null;
-    }
+    // Edge runtime에서 Cloudflare 바인딩은 process.env로 주입됨
+    const d1 = (typeof process !== 'undefined' && process.env) ? (process.env.DB as any) : null;
     
-    if (!d1) {
+    if (!d1 || !d1.prepare) {
       console.warn('D1 DB not found in environment, returning defaults.');
       return NextResponse.json(DEFAULT_SETTINGS);
     }
@@ -50,22 +45,17 @@ export async function GET(req: NextRequest) {
       workerPrices: typeof record.worker_prices === 'string' ? JSON.parse(record.worker_prices) : record.worker_prices,
       updatedAt: record.updated_at
     });
-  } catch (error) {
-    console.error('Error fetching settings:', error);
+  } catch (error: any) {
+    console.error('Error fetching settings:', error.message);
     return NextResponse.json(DEFAULT_SETTINGS);
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    let d1: any = null;
-    try {
-      d1 = (getRequestContext().env as any).DB;
-    } catch (e) {
-      d1 = typeof process !== 'undefined' && process.env ? process.env.DB : null;
-    }
+    const d1 = (typeof process !== 'undefined' && process.env) ? (process.env.DB as any) : null;
     
-    if (!d1) {
+    if (!d1 || !d1.prepare) {
       return NextResponse.json({ error: 'DB configuration missing' }, { status: 500 });
     }
 
@@ -100,8 +90,8 @@ export async function POST(req: NextRequest) {
         updatedAt
       }
     });
-  } catch (error) {
-    console.error('Error saving settings:', error);
+  } catch (error: any) {
+    console.error('Error saving settings:', error.message);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
