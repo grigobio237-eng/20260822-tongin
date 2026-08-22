@@ -1,18 +1,20 @@
 name = "tongin-contract-app"
 compatibility_date = "2024-03-20"
 pages_build_output_dir = ".vercel/output/static"
+compatibility_flags = ["nodejs_compat"]
 
-# Cloudflare D1 바인딩 설정
-[[d1_databases]]
-binding = "DB"
-database_name = "tongin-db"
-database_id = "<YOUR_D1_DATABASE_ID>" # 실제 Cloudflare 대시보드에서 발급받은 ID로 교체
+# Cloudflare D1 바인딩 (Dashboard에서 설정하는 것을 권장하여 임시 주석 처리)
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "tongin-db"
+# database_id = "실제-D1-UUID-입력"
 
-# Cloudflare R2 바인딩 설정
-[[r2_buckets]]
-binding = "BUCKET"
-bucket_name = "tongin-bucket"
+# Cloudflare R2 바인딩
+# [[r2_buckets]]
+# binding = "BUCKET"
+# bucket_name = "tongin-bucket"
 
 # 환경 변수 설정
-[vars]
-NEXT_PUBLIC_API_URL = "http://localhost:8788" # 로컬 개발용 URL
+# NEXT_PUBLIC__API_URL은 로컬 테스트용이므로 프로덕션 배포 시에는 주석 처리하거나 제거합니다.
+# [vars]
+# NEXT_PUBLIC_API_URL = "http://localhost:8788"
