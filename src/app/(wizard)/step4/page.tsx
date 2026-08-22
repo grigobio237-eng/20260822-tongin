@@ -31,7 +31,17 @@ export default function Step4Page() {
     (store.resources.workerMale * settingsStore.workerPrices.male) +
     (store.resources.workerFemale * settingsStore.workerPrices.female);
 
-  const optionsCost = Object.values(options).reduce((sum, opt) => sum + opt.totalPrice, 0);
+  const totalWorkers = store.resources.workerMale + store.resources.workerFemale;
+
+  let optionsCost = 0;
+  const calculatedOptions = Object.entries(options).map(([name, opt]) => {
+    let price = opt.totalPrice;
+    if (name.includes('대기료')) {
+      price = opt.totalPrice * totalWorkers; // 기본 5만원 * 인원수
+    }
+    optionsCost += price;
+    return { name, price };
+  });
   
   const subTotal = baseCost + optionsCost;
   
@@ -208,6 +218,18 @@ export default function Step4Page() {
                     if (!qty) return null;
                     return <span key={mat} className="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">{mat} : {qty}</span>;
                   })}
+                </div>
+              </div>
+            )}
+            {calculatedOptions.length > 0 && (
+              <div className="col-span-2 border-t pt-3 mt-1">
+                <span className="block text-xs text-gray-500 mb-1">추가 옵션 품목</span>
+                <div className="flex gap-2 flex-wrap">
+                  {calculatedOptions.map((opt) => (
+                    <span key={opt.name} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-semibold border border-blue-100">
+                      {opt.name} {opt.name.includes('대기료') ? `(${totalWorkers}명)` : ''}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
