@@ -9,12 +9,10 @@ import clsx from 'clsx';
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
   const currentStep = useWizardStore(state => state.currentStep);
-  const fetchSettings = useSettingsStore(state => state.fetchSettings);
   const router = useRouter();
   
-  useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
+  // NOTE: Cloudflare Pages Edge 런타임 500 에러를 방지하기 위해 
+  // 전역 layout 마운트 시 서버 API 호출을 임시 비활성화합니다.
   
   const steps = [
     { num: 1, label: '기본정보' },
