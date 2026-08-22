@@ -56,6 +56,8 @@ interface WizardState {
   options: OptionsState;
   sttMemo: string;          // Step 3 종합 협의사항
   resources: ResourceState;
+  surcharge: { noEvilSpirits: boolean, endOfMonth: boolean };
+  discount: number;
   
   setStep: (step: number) => void;
   updateCustomerInfo: (info: Partial<CustomerInfo>) => void;
@@ -69,6 +71,8 @@ interface WizardState {
   setSttMemo: (memo: string) => void;
   updateResources: (info: Partial<ResourceState>) => void;
   updateMaterial: (materialName: string, quantity: number) => void;
+  updateSurcharge: (key: 'noEvilSpirits' | 'endOfMonth', value: boolean) => void;
+  setDiscount: (amount: number) => void;
   recalculateCbm: () => void;
   reset: () => void;
 }
@@ -102,6 +106,8 @@ export const useWizardStore = create<WizardState>()(
       options: {},
       sttMemo: '',
       resources: initialResources,
+      surcharge: { noEvilSpirits: false, endOfMonth: false },
+      discount: 0,
       
       setStep: (step) => set({ currentStep: step }),
       
@@ -213,6 +219,12 @@ export const useWizardStore = create<WizardState>()(
         }
       })),
       
+      updateSurcharge: (key, value) => set((state) => ({
+        surcharge: { ...state.surcharge, [key]: value }
+      })),
+
+      setDiscount: (amount) => set({ discount: amount }),
+      
       recalculateCbm: () => {
         const { roomItems, resources } = get();
         let totalCbm = 0;
@@ -240,6 +252,8 @@ export const useWizardStore = create<WizardState>()(
         options: {},
         sttMemo: '',
         resources: initialResources,
+        surcharge: { noEvilSpirits: false, endOfMonth: false },
+        discount: 0,
       })
     }),
     {

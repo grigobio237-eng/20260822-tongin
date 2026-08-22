@@ -24,7 +24,13 @@ export default function Step4Page() {
   // Calculate base costs (demo logic)
   const baseCost = 1000000; // 100만원 임시 책정 (실제로는 차량/인원 기반 산출)
   const optionsCost = Object.values(options).reduce((sum, opt) => sum + opt.totalPrice, 0);
-  const totalCost = baseCost + optionsCost;
+  
+  const subTotal = baseCost + optionsCost;
+  
+  const surchargeRatio = (store.surcharge?.noEvilSpirits ? 0.2 : 0) + (store.surcharge?.endOfMonth ? 0.6 : 0);
+  const surchargeAmount = subTotal * surchargeRatio;
+  
+  const totalCost = subTotal + surchargeAmount - (store.discount || 0);
   const balance = totalCost - deposit;
 
   const handlePrev = () => {
@@ -198,6 +204,34 @@ export default function Step4Page() {
               </div>
             )}
           </div>
+          
+          {/* 할증 적용 */}
+          <div className="p-4 border-t bg-gray-50 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div>
+              <span className="block text-sm font-bold text-gray-800">이사 특수일 할증</span>
+              <p className="text-xs text-gray-500">손없는 날이나 월말의 경우 기본 비용 및 옵션에 할증이 붙습니다.</p>
+            </div>
+            <div className="flex gap-3">
+              <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 border rounded-lg hover:bg-blue-50 transition-colors">
+                <input 
+                  type="checkbox" 
+                  className="w-4 h-4 text-blue-600"
+                  checked={store.surcharge?.noEvilSpirits || false}
+                  onChange={(e) => store.updateSurcharge('noEvilSpirits', e.target.checked)}
+                />
+                <span className="text-sm font-medium">손없는 날 (20%)</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 border rounded-lg hover:bg-blue-50 transition-colors">
+                <input 
+                  type="checkbox" 
+                  className="w-4 h-4 text-blue-600"
+                  checked={store.surcharge?.endOfMonth || false}
+                  onChange={(e) => store.updateSurcharge('endOfMonth', e.target.checked)}
+                />
+                <span className="text-sm font-medium">월말 (60%)</span>
+              </label>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -212,6 +246,28 @@ export default function Step4Page() {
           <div className="flex justify-between items-center py-2 border-b">
             <span className="text-gray-600">옵션 추가비용</span>
             <span className="font-semibold">{optionsCost.toLocaleString()}원</span>
+          </div>
+          {surchargeAmount > 0 && (
+            <div className="flex justify-between items-center py-2 border-b text-red-600">
+              <span>특수일 할증 (+{surchargeRatio * 100}%)</span>
+              <span className="font-semibold">+{surchargeAmount.toLocaleString()}원</span>
+            </div>
+          )}
+          <div className="flex justify-between items-center py-2 border-b">
+            <span className="text-gray-600">수동 할인</span>
+            <div className="flex items-center gap-2">
+              <span className="text-blue-600 font-semibold">-</span>
+              <div className="relative">
+                <input 
+                  type="number"
+                  className="border rounded px-2 py-1 w-28 text-right font-semibold text-blue-600 outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="0"
+                  value={store.discount || ''}
+                  onChange={(e) => store.setDiscount(Number(e.target.value))}
+                />
+                <span className="absolute right-2 top-1.5 text-xs text-gray-400">원</span>
+              </div>
+            </div>
           </div>
           <div className="flex justify-between items-center py-2 bg-gray-50 rounded px-3">
             <span className="font-bold text-gray-800">총계 (VAT 별도)</span>
