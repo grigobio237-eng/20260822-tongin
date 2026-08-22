@@ -125,6 +125,82 @@ export default function Step4Page() {
 
   return (
     <div className="space-y-8 pb-24">
+      {/* 0. 계약 내용 최종 확인 */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">계약 내용 최종 확인</h2>
+        <div className="bg-white rounded-xl shadow-sm border overflow-hidden text-sm">
+          {/* 작업 조건 */}
+          <div className="border-b p-4">
+            <h3 className="font-bold text-gray-800 mb-2">작업 조건 및 도착지 상황</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-gray-50 p-3 rounded-lg border">
+                <span className="block text-xs text-gray-500 mb-1">이사 전 (출발지)</span>
+                <p className="font-semibold">{customerInfo.departureFloor || '?'}층</p>
+                <div className="flex gap-1 mt-1 flex-wrap">
+                  {customerInfo.departureConditions.length > 0 ? (
+                    customerInfo.departureConditions.map(c => (
+                      <span key={c} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">{c}</span>
+                    ))
+                  ) : (
+                    <span className="text-gray-400 text-xs">조건 미선택</span>
+                  )}
+                </div>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg border">
+                <span className="block text-xs text-gray-500 mb-1">이사 후 (도착지)</span>
+                <p className="font-semibold">{customerInfo.arrivalFloor || '?'}층</p>
+                <div className="flex gap-1 mt-1 flex-wrap">
+                  {customerInfo.arrivalConditions.length > 0 ? (
+                    customerInfo.arrivalConditions.map(c => (
+                      <span key={c} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">{c}</span>
+                    ))
+                  ) : (
+                    <span className="text-gray-400 text-xs">조건 미선택</span>
+                  )}
+                </div>
+                {customerInfo.arrivalStatus && (
+                  <div className="mt-2 pt-2 border-t">
+                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs">{customerInfo.arrivalStatus}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          {/* 자원 및 물량 */}
+          <div className="p-4 grid grid-cols-2 gap-4">
+            <div>
+              <span className="block text-xs text-gray-500 mb-1">총 이사 물량</span>
+              <p className="font-bold text-lg text-blue-600">{store.totalCbm} <span className="text-sm text-gray-800">CBM</span></p>
+            </div>
+            <div>
+              <span className="block text-xs text-gray-500 mb-1">작업 인원</span>
+              <p className="font-bold">남 {store.resources.workerMale}명 / 여 {store.resources.workerFemale}명</p>
+            </div>
+            <div className="col-span-2 border-t pt-3 mt-1">
+              <span className="block text-xs text-gray-500 mb-1">투입 차량</span>
+              <p className="font-bold">
+                {store.resources.vehicles.fiveTon > 0 && `5톤 ${store.resources.vehicles.fiveTon}대 `}
+                {store.resources.vehicles.twoHalfTon > 0 && `2.5톤 ${store.resources.vehicles.twoHalfTon}대 `}
+                {store.resources.vehicles.oneTon > 0 && `1톤 ${store.resources.vehicles.oneTon}대`}
+                {(store.resources.vehicles.fiveTon === 0 && store.resources.vehicles.twoHalfTon === 0 && store.resources.vehicles.oneTon === 0) && '선택 안됨'}
+              </p>
+            </div>
+            {Object.keys(store.resources.materials).length > 0 && (
+              <div className="col-span-2 border-t pt-3 mt-1">
+                <span className="block text-xs text-gray-500 mb-1">포장 재료</span>
+                <div className="flex gap-2 flex-wrap">
+                  {Object.entries(store.resources.materials).map(([mat, qty]) => {
+                    if (!qty) return null;
+                    return <span key={mat} className="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">{mat} : {qty}</span>;
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* 1. 정산 금액 요약 */}
       <section>
         <h2 className="text-xl font-bold mb-4">비용 정산</h2>

@@ -39,7 +39,11 @@ export default function Step3Page() {
     updateOption(optionName, isSelected ? 0 : 1);
   };
 
-  const PACKING_MATERIALS = ['이불BOX', '옷BOX', '아이스BOX', '종이BOX', '팟도(大)', '팟도(中)', '담보루', '에어캡', '랩', '테이프'];
+  const PACKING_MATERIALS = [
+    '장농', '냉장고', '이불BOX', '中BOX', '팟도大', '쇼파', '랩', '침대',
+    '분해장농', '김치냉장고大', '옷BOX', '小BOX', '팟도中', '세탁기', '에어캡',
+    '5단서랍장', '김치냉장고中', '아이스BOX', '종이BOX', '담보루', '피아노', '테이프'
+  ];
 
   return (
     <div className="space-y-8 pb-24">

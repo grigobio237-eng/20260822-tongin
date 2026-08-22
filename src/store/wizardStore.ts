@@ -86,8 +86,8 @@ const initialRoomItems: AllRoomsState = (Object.keys(ROOM_CATEGORIES) as RoomCat
 
 const initialResources: ResourceState = {
   vehicles: { fiveTon: 0, twoHalfTon: 0, oneTon: 0 },
-  workerMale: 0,
-  workerFemale: 0,
+  workerMale: 3,
+  workerFemale: 1,
   materials: {}
 };
 
