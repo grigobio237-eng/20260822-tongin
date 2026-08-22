@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
 
@@ -10,14 +11,18 @@ const DEFAULT_SETTINGS = {
 
 export async function GET(req: NextRequest) {
   try {
-    const d1 = process.env.DB as any;
+    let d1: any = null;
+    try {
+      d1 = (getRequestContext().env as any).DB;
+    } catch (e) {
+      d1 = typeof process !== 'undefined' && process.env ? process.env.DB : null;
+    }
     
     if (!d1) {
       console.warn('D1 DB not found in environment, returning defaults.');
       return NextResponse.json(DEFAULT_SETTINGS);
     }
 
-    // Use raw D1 query to avoid Drizzle edge issues
     const { results } = await d1.prepare("SELECT * FROM system_settings WHERE id = 'global_config'").all();
 
     if (!results || results.length === 0) {
@@ -53,7 +58,12 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const d1 = process.env.DB as any;
+    let d1: any = null;
+    try {
+      d1 = (getRequestContext().env as any).DB;
+    } catch (e) {
+      d1 = typeof process !== 'undefined' && process.env ? process.env.DB : null;
+    }
     
     if (!d1) {
       return NextResponse.json({ error: 'DB configuration missing' }, { status: 500 });
