@@ -92,7 +92,7 @@ export const ContractPdfDocument = ({ data, signatureUrl }: { data: any, signatu
       <View style={styles.infoSection}>
         <View style={styles.infoCol}>
           <Text style={styles.infoLabel}>고객명</Text>
-          <Text style={styles.infoValue}>{data.customerInfo.name}</Text>
+          <Text style={styles.infoValue}>{data.customerInfo.name} 님</Text>
         </View>
         <View style={styles.infoCol}>
           <Text style={styles.infoLabel}>연락처</Text>

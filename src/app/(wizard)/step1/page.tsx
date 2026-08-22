@@ -23,6 +23,16 @@ export default function Step1Page() {
     updateCustomerInfo({ [key]: updated });
   };
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 남기기
+    if (value.length > 3 && value.length <= 7) {
+      value = `${value.slice(0, 3)}-${value.slice(3)}`;
+    } else if (value.length > 7) {
+      value = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7, 11)}`;
+    }
+    updateCustomerInfo({ phone: value });
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold">고객 및 기본 정보</h2>
@@ -31,20 +41,26 @@ export default function Step1Page() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">고객명</label>
-            <input 
-              type="text" 
-              className="w-full border rounded-lg p-2.5"
-              value={customerInfo.name}
-              onChange={(e) => updateCustomerInfo({ name: e.target.value })}
-            />
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                className="w-full border rounded-lg p-2.5"
+                placeholder="홍길동"
+                value={customerInfo.name}
+                onChange={(e) => updateCustomerInfo({ name: e.target.value })}
+              />
+              <span className="text-gray-600 font-medium whitespace-nowrap">님</span>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">연락처</label>
             <input 
               type="tel" 
+              maxLength={13}
+              placeholder="010-0000-0000"
               className="w-full border rounded-lg p-2.5"
               value={customerInfo.phone}
-              onChange={(e) => updateCustomerInfo({ phone: e.target.value })}
+              onChange={handlePhoneChange}
             />
           </div>
         </div>

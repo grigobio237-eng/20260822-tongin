@@ -20,7 +20,9 @@ export interface CustomerInfo {
 
 export interface RoomItemState {
   quantity: number;
-  cbm: number; 
+  variantName: string; // "10자 (3통, 기본)" 등
+  unitCbm: number;     // 4.5
+  cbm: number;         // quantity * unitCbm
 }
 
 export type RoomItems = Record<string, RoomItemState>;
@@ -33,7 +35,7 @@ export interface OptionState {
 export type OptionsState = Record<string, OptionState>;
 
 export interface ResourceState {
-  vehicles: VehicleRecommendation; // User overridden or auto-calculated
+  vehicles: VehicleRecommendation;
   workerMale: number;
   workerFemale: number;
   materials: Record<string, number>;
@@ -44,17 +46,17 @@ interface WizardState {
   customerInfo: CustomerInfo;
   roomItems: AllRoomsState;
   totalCbm: number;
-  calculatedVehicles: VehicleRecommendation; // Auto-calculated baseline
+  calculatedVehicles: VehicleRecommendation; 
   
   options: OptionsState;
   sttMemo: string;
-  images: string[]; // R2 Image URLs
+  images: string[];
   resources: ResourceState;
   
-  // Actions
   setStep: (step: number) => void;
   updateCustomerInfo: (info: Partial<CustomerInfo>) => void;
-  updateRoomItem: (room: RoomCategory, itemName: string, quantity: number) => void;
+  updateRoomItemQuantity: (room: RoomCategory, itemName: string, quantity: number) => void;
+  changeItemVariant: (room: RoomCategory, itemName: string, variantName: string, customCbm: number) => void;
   updateOption: (optionName: string, quantity: number) => void;
   setSttMemo: (memo: string) => void;
   addImage: (url: string) => void;
@@ -102,16 +104,54 @@ export const useWizardStore = create<WizardState>()(
         customerInfo: { ...state.customerInfo, ...info } 
       })),
       
-      updateRoomItem: (room, itemName, quantity) => {
+      updateRoomItemQuantity: (room, itemName, quantity) => {
         set((state) => {
-          const itemDef = ROOM_CATEGORIES[room].find(i => i.name === itemName);
-          if (!itemDef) return state;
-
           const newRoomItems = { ...state.roomItems };
+          let currentItem = newRoomItems[room][itemName];
+          
+          if (!currentItem) {
+            // Find default variant
+            const masterItem = ROOM_CATEGORIES[room].find(i => i.name === itemName);
+            if (!masterItem) return state;
+            const defaultVariant = masterItem.variants.find(v => v.isDefault) || masterItem.variants[1] || masterItem.variants[0];
+            
+            currentItem = {
+              quantity: 0,
+              variantName: defaultVariant.name,
+              unitCbm: defaultVariant.cbm,
+              cbm: 0,
+            };
+          }
+          
           newRoomItems[room] = {
             ...newRoomItems[room],
-            [itemName]: { quantity, cbm: quantity * itemDef.defaultCbm }
+            [itemName]: {
+              ...currentItem,
+              quantity,
+              cbm: quantity * currentItem.unitCbm
+            }
           };
+          
+          return { roomItems: newRoomItems };
+        });
+        get().recalculateCbm();
+      },
+
+      changeItemVariant: (room, itemName, variantName, customCbm) => {
+        set((state) => {
+          const newRoomItems = { ...state.roomItems };
+          let currentItem = newRoomItems[room][itemName] || { quantity: 0 };
+          
+          newRoomItems[room] = {
+            ...newRoomItems[room],
+            [itemName]: {
+              ...currentItem,
+              variantName,
+              unitCbm: customCbm,
+              cbm: currentItem.quantity * customCbm
+            }
+          };
+          
           return { roomItems: newRoomItems };
         });
         get().recalculateCbm();
@@ -162,8 +202,6 @@ export const useWizardStore = create<WizardState>()(
         totalCbm = Math.round(totalCbm * 10) / 10;
         const calculated = calculateVehicles(totalCbm);
         
-        // Auto-update resource vehicles if they haven't been manually set yet, 
-        // or just keep them in sync for simplicity (assuming baseline updates).
         set({ 
           totalCbm, 
           calculatedVehicles: calculated,
