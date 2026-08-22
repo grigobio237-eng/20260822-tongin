@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
+import { useRouter } from 'next/navigation';
 import { ROOM_CATEGORIES, RoomCategory, MasterItem } from '@/lib/constants/items';
 import clsx from 'clsx';
 import { Check, ChevronDown, Plus, Minus, X } from 'lucide-react';
@@ -12,6 +13,7 @@ interface ModalState {
 }
 
 export default function Step2Page() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<RoomCategory>('방 1');
   const [modalState, setModalState] = useState<ModalState | null>(null);
   const [customCbmInput, setCustomCbmInput] = useState<string>('');
@@ -216,8 +218,18 @@ export default function Step2Page() {
             </p>
           </div>
           <div className="flex gap-2">
-            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50" onClick={() => setStep(1)}>이전</button>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" onClick={() => setStep(3)}>다음 (옵션)</button>
+            <button 
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50" 
+              onClick={() => { setStep(1); router.push('/step1'); }}
+            >
+              이전
+            </button>
+            <button 
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" 
+              onClick={() => { setStep(3); router.push('/step3'); }}
+            >
+              다음 (옵션)
+            </button>
           </div>
         </div>
       </div>
