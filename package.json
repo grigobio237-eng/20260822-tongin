@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pages:build": "npx @cloudflare/next-on-pages@1 --passthrough-functions"
+    "pages:build": "npx @cloudflare/next-on-pages@1"
   },
   "dependencies": {
     "@react-pdf/renderer": "^3.4.4",

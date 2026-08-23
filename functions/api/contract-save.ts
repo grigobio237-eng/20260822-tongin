@@ -1,8 +1,4 @@
-interface Env {
-  DB: D1Database;
-}
-
-export const onRequestGet: PagesFunction<Env> = async (context) => {
+export const onRequestGet = async (context: any) => {
   return new Response(
     JSON.stringify({
       status: 'online',
@@ -13,7 +9,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   );
 };
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
+export const onRequestPost = async (context: any) => {
   try {
     const db = context.env.DB;
     if (!db) {
