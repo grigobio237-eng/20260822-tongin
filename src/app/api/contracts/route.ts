@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+export const runtime = 'edge';
+
 // import { drizzle } from 'drizzle-orm/d1';
 // import { contracts, contractItems, contractOptions } from '@/db/schema';
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const runtime = 'edge';
 
 const DEFAULT_SETTINGS = {
   id: 'global_config',
