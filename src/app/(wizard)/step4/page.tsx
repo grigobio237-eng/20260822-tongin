@@ -97,25 +97,17 @@ export default function Step4Page() {
     
     setIsSubmitting(true);
     try {
-      // 1. Generate PDF Blob
-      const pdfBlob = await pdf(
-        <ContractPdfDocument data={store} signatureUrl={signatureData} />
-      ).toBlob();
-      const pdfBase64 = await blobToBase64(pdfBlob);
-
       // 2. API Call (JSON)
       const res = await fetch('/api/contracts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          id: `CT_${Date.now()}`,
           customerInfo,
           options,
           totalCost,
           deposit,
           balance,
-          signatureBase64: signatureData,
-          pdfBase64: pdfBase64,
-          // include other necessary fields for DB
           totalCbm: store.totalCbm,
           resources: {
             vehicles: store.resources?.vehicles || {},
