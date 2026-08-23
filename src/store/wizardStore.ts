@@ -12,9 +12,11 @@ export interface CustomerInfo {
   departureAddress: string;
   departureFloor: string;
   departureConditions: string[]; 
+  departureLadderCount?: number;
   arrivalAddress: string;
   arrivalFloor: string;
   arrivalConditions: string[];
+  arrivalLadderCount?: number;
   arrivalStatus: string;
 }
 
@@ -79,8 +81,8 @@ interface WizardState {
 
 const initialCustomerInfo: CustomerInfo = {
   name: '', phone: '', contractDate: '', packingDate: '', movingDate: '',
-  departureAddress: '', departureFloor: '', departureConditions: [],
-  arrivalAddress: '', arrivalFloor: '', arrivalConditions: [], arrivalStatus: '',
+  departureAddress: '', departureFloor: '', departureConditions: [], departureLadderCount: 1,
+  arrivalAddress: '', arrivalFloor: '', arrivalConditions: [], arrivalLadderCount: 1, arrivalStatus: '',
 };
 
 const initialRoomItems: AllRoomsState = (Object.keys(ROOM_CATEGORIES) as RoomCategory[]).reduce((acc, room) => {

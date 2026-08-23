@@ -117,20 +117,41 @@ export default function Step1Page() {
               onChange={(e) => updateCustomerInfo({ departureFloor: e.target.value })}
             />
           </div>
-          <div className="flex gap-2">
-            {['사다리', '계단', '승강기'].map(cond => (
-              <button
-                key={cond}
-                onClick={() => handleConditionToggle('departure', cond)}
-                className={`px-4 py-2 rounded-full text-sm border ${
-                  customerInfo.departureConditions.includes(cond) 
-                    ? 'bg-blue-100 border-blue-500 text-blue-700' 
-                    : 'bg-gray-50 border-gray-200 text-gray-600'
-                }`}
-              >
-                {cond}
-              </button>
-            ))}
+          <div className="flex flex-wrap gap-2 items-center">
+            {['사다리', '계단', '승강기'].map(cond => {
+              const isSelected = customerInfo.departureConditions.includes(cond);
+              return (
+                <div key={cond} className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleConditionToggle('departure', cond)}
+                    className={`px-4 py-2 rounded-full text-sm border ${
+                      isSelected
+                        ? 'bg-blue-100 border-blue-500 text-blue-700' 
+                        : 'bg-gray-50 border-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {cond}
+                  </button>
+                  {cond === '사다리' && isSelected && (
+                    <div className="flex items-center gap-1 bg-gray-100 rounded-full px-2 py-1">
+                      <button 
+                        onClick={() => updateCustomerInfo({ departureLadderCount: Math.max(1, (customerInfo.departureLadderCount || 1) - 1) })}
+                        className="w-6 h-6 flex items-center justify-center bg-white rounded-full text-gray-600 border shadow-sm hover:bg-gray-50"
+                      >
+                        -
+                      </button>
+                      <span className="w-6 text-center text-sm font-semibold">{customerInfo.departureLadderCount || 1}</span>
+                      <button 
+                        onClick={() => updateCustomerInfo({ departureLadderCount: (customerInfo.departureLadderCount || 1) + 1 })}
+                        className="w-6 h-6 flex items-center justify-center bg-white rounded-full text-gray-600 border shadow-sm hover:bg-gray-50"
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -153,20 +174,41 @@ export default function Step1Page() {
               onChange={(e) => updateCustomerInfo({ arrivalFloor: e.target.value })}
             />
           </div>
-          <div className="flex gap-2">
-            {['사다리', '계단', '승강기'].map(cond => (
-              <button
-                key={cond}
-                onClick={() => handleConditionToggle('arrival', cond)}
-                className={`px-4 py-2 rounded-full text-sm border ${
-                  customerInfo.arrivalConditions.includes(cond) 
-                    ? 'bg-blue-100 border-blue-500 text-blue-700' 
-                    : 'bg-gray-50 border-gray-200 text-gray-600'
-                }`}
-              >
-                {cond}
-              </button>
-            ))}
+          <div className="flex flex-wrap gap-2 items-center">
+            {['사다리', '계단', '승강기'].map(cond => {
+              const isSelected = customerInfo.arrivalConditions.includes(cond);
+              return (
+                <div key={cond} className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleConditionToggle('arrival', cond)}
+                    className={`px-4 py-2 rounded-full text-sm border ${
+                      isSelected
+                        ? 'bg-blue-100 border-blue-500 text-blue-700' 
+                        : 'bg-gray-50 border-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {cond}
+                  </button>
+                  {cond === '사다리' && isSelected && (
+                    <div className="flex items-center gap-1 bg-gray-100 rounded-full px-2 py-1">
+                      <button 
+                        onClick={() => updateCustomerInfo({ arrivalLadderCount: Math.max(1, (customerInfo.arrivalLadderCount || 1) - 1) })}
+                        className="w-6 h-6 flex items-center justify-center bg-white rounded-full text-gray-600 border shadow-sm hover:bg-gray-50"
+                      >
+                        -
+                      </button>
+                      <span className="w-6 text-center text-sm font-semibold">{customerInfo.arrivalLadderCount || 1}</span>
+                      <button 
+                        onClick={() => updateCustomerInfo({ arrivalLadderCount: (customerInfo.arrivalLadderCount || 1) + 1 })}
+                        className="w-6 h-6 flex items-center justify-center bg-white rounded-full text-gray-600 border shadow-sm hover:bg-gray-50"
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
           <div className="pt-2 border-t mt-2">
             <label className="block text-sm font-medium mb-2 text-gray-600">도착지 상황</label>
