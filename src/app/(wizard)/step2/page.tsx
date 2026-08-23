@@ -73,6 +73,14 @@ export default function Step2Page() {
         ))}
       </div>
 
+      {/* Items Grid Header */}
+      <div className="flex justify-between items-center px-1">
+        <h3 className="font-bold text-gray-800">{activeTab} 물품 목록</h3>
+        <div className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
+          소계: {Object.values(roomItems[activeTab]?.items || {}).reduce((acc, item) => acc + (item.cbm || 0), 0).toFixed(1)} CBM
+        </div>
+      </div>
+
       {/* Items Grid */}
       <div className="bg-white rounded-xl shadow-sm border p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         {ROOM_CATEGORIES[activeTab].map((item) => {
