@@ -6,36 +6,29 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   try {
     let db: any = null;
-
-    // 1. Cloudflare D1 바인딩 안전 획득 (Fallback 체인)
     try {
       const ctx = getRequestContext();
-      if ((ctx as any)?.env?.DB) {
-        db = (ctx as any).env.DB;
-      }
-    } catch (e) {
-      console.warn('getRequestContext failed, fallbacking...', e);
-    }
+      if ((ctx as any)?.env?.DB) db = (ctx as any).env.DB;
+    } catch (e) {}
 
     if (!db && (process.env as any)?.DB) {
       db = (process.env as any).DB;
     }
 
     if (!db) {
-      return Response.json(
-        { success: false, error: 'Cloudflare D1 바인딩(DB)을 찾을 수 없습니다.' },
-        { status: 500 }
-      );
+      return Response.json({ success: false, error: 'DB 바인딩 없음' }, { status: 500 });
     }
 
-    // 2. 요청 Body 파싱
     const body = (await req.json()) as any;
     const customer = body.customerInfo || {};
     const resources = body.resources || {};
     const contractId = body.id || `CT_${Date.now()}`;
     const now = Math.floor(Date.now() / 1000);
 
-    // 3. D1 네이티브 직접 INSERT (D1 SQL)
+    // NOT NULL 필드 무조건 빈 문자열/기본값 보장
+    const departureAddress = customer.departureAddress || customer.fromAddress || '출발지 미입력';
+    const arrivalAddress = customer.arrivalAddress || customer.toAddress || '도착지 미입력';
+
     const sql = `
       INSERT INTO contracts (
         id, customer_name, customer_phone, contract_date, packing_date, moving_date,
@@ -48,17 +41,17 @@ export async function POST(req: Request) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const result = await db.prepare(sql).bind(
+    await db.prepare(sql).bind(
       contractId,
-      String(customer.name || '미입력'),
+      String(customer.name || '고객'),
       String(customer.phone || '010-0000-0000'),
       String(customer.contractDate || '2026-08-23'),
       String(customer.packingDate || '2026-08-23'),
       String(customer.movingDate || '2026-08-23'),
-      String(customer.departureAddress || ''),
+      departureAddress,
       Number(customer.departureFloor) || 1,
       JSON.stringify(customer.departureConditions || []),
-      String(customer.arrivalAddress || ''),
+      arrivalAddress,
       Number(customer.arrivalFloor) || 1,
       JSON.stringify(customer.arrivalConditions || []),
       String(customer.arrivalStatus || '당일이사'),
@@ -81,18 +74,11 @@ export async function POST(req: Request) {
     ).run();
 
     return Response.json(
-      { success: true, message: '계약서가 성공적으로 저장되었습니다.', contractId },
+      { success: true, message: '계약 저장 완료', contractId },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('Final API Handler Error:', error);
-    return Response.json(
-      { 
-        success: false, 
-        error: error.message || '알 수 없는 서버 에러', 
-        stack: error.stack 
-      }, 
-      { status: 500 }
-    );
+    console.error('API Error:', error);
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 }
