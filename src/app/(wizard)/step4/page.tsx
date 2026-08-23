@@ -118,23 +118,22 @@ export default function Step4Page() {
         })
       });
 
+      const responseText = await res.text();
       let data: any = {};
       try {
-        data = await res.json();
-      } catch (e) {
-        const text = await res.text();
-        throw new Error(text || '서버 응답 파싱 실패');
+        data = JSON.parse(responseText);
+      } catch {
+        data = { success: false, error: responseText };
       }
 
       if (res.ok && data.success) {
-        alert('계약이 성공적으로 완료되었습니다!');
+        alert('계약서가 성공적으로 저장되었습니다!');
         setCompletedContract({ id: data.contractId, pdfUrl: data.pdfUrl || '' });
       } else {
-        alert(`저장 실패: ${data.error || '알 수 없는 오류'}`);
+        alert(`저장 실패 (${res.status}): ${data.error || responseText || '서버 오류'}`);
       }
     } catch (err: any) {
-      console.error(err);
-      alert(`네트워크 오류: ${err.message}`);
+      alert(`네트워크 요청 오류: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
