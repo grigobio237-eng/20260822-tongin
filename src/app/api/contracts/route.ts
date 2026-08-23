@@ -1,12 +1,15 @@
+import { getRequestContext } from '@cloudflare/next-on-pages';
+
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const db = (process.env as any).DB;
-    if (!db) {
+    const { env } = getRequestContext() as unknown as { env: { DB: any } };
+    
+    if (!env || !env.DB) {
       return Response.json(
-        { success: false, error: 'D1 데이터베이스 바인딩(DB)을 찾을 수 없습니다.' },
+        { success: false, error: 'D1 DB 바인딩이 연결되지 않았습니다.' },
         { status: 500 }
       );
     }
@@ -21,7 +24,7 @@ export async function POST(req: Request) {
     const arrivalAddress = customer.arrivalAddress || '도착지 미입력';
 
     const sql = `
-      INSERT INTO contracts (
+      INSERT OR REPLACE INTO contracts (
         id, customer_name, customer_phone, contract_date, packing_date, moving_date,
         departure_address, departure_floor, departure_conditions,
         arrival_address, arrival_floor, arrival_conditions, arrival_status,
@@ -32,7 +35,7 @@ export async function POST(req: Request) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const result = await db.prepare(sql).bind(
+    const result = await env.DB.prepare(sql).bind(
       contractId,
       String(customer.name || '미입력'),
       String(customer.phone || '010-0000-0000'),
@@ -65,7 +68,7 @@ export async function POST(req: Request) {
     ).run();
 
     if (!result.success) {
-      throw new Error(result.error || 'D1 쿼리 실행 실패');
+      throw new Error(result.error || 'D1 실행 실패');
     }
 
     return Response.json(
@@ -73,9 +76,9 @@ export async function POST(req: Request) {
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('API Error:', error);
+    console.error('Contracts API Error:', error);
     return Response.json(
-      { success: false, error: error.message || '서버 오류' },
+      { success: false, error: error.message || '서버 내부 오류' },
       { status: 500 }
     );
   }
