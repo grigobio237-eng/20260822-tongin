@@ -1,28 +1,28 @@
-import { getRequestContext } from '@cloudflare/next-on-pages';
-
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  try {
-    const { env } = getRequestContext() as any;
-    return Response.json({
+export async function GET(req: Request) {
+  // Cloudflare Pages 표준 전역 바인딩 참조
+  const db = (process.env as any).DB || (globalThis as any).DB;
+  return new Response(
+    JSON.stringify({
       status: 'online',
-      hasDB: !!env?.DB,
-      time: new Date().toISOString()
-    });
-  } catch (e: any) {
-    return Response.json({ status: 'error', message: e.message }, { status: 500 });
-  }
+      hasDB: !!db,
+      timestamp: Date.now()
+    }),
+    { status: 200, headers: { 'Content-Type': 'application/json' } }
+  );
 }
 
 export async function POST(req: Request) {
   try {
-    const ctx = getRequestContext() as any;
-    const db = ctx?.env?.DB;
+    const db = (process.env as any).DB || (globalThis as any).DB;
 
     if (!db) {
-      return Response.json({ success: false, error: 'D1 DB 바인딩이 누락되었습니다.' }, { status: 500 });
+      return new Response(
+        JSON.stringify({ success: false, error: 'Cloudflare D1 DB 바인딩이 없습니다.' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     const body = (await req.json()) as any;
@@ -78,8 +78,18 @@ export async function POST(req: Request) {
       now
     ).run();
 
-    return Response.json({ success: true, message: '저장 완료', contractId }, { status: 200 });
+    if (!result.success) {
+      throw new Error(result.error || 'D1 쿼리 실행 실패');
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, message: '저장 완료', contractId }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
   } catch (err: any) {
-    return Response.json({ success: false, error: err.message, stack: err.stack }, { status: 500 });
+    return new Response(
+      JSON.stringify({ success: false, error: err.message || '서버 오류' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }
