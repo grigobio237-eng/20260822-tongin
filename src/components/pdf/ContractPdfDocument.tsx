@@ -151,7 +151,7 @@ export const ContractPdfDocument = ({ data, signatureUrl }: { data: any, signatu
       <View style={{ marginTop: 15 }}>
         <Text style={{ fontSize: 12, fontWeight: 'bold', marginBottom: 5 }}>종합 및 공간별 특이사항</Text>
         <View style={{ border: '1px solid #ddd', padding: 10 }}>
-          {data.sttMemo && <Text style={{ marginBottom: 5, color: '#d97706' }}>[종합] {data.sttMemo}</Text>}
+          {!!data.sttMemo && <Text style={{ marginBottom: 5, color: '#d97706' }}>[종합] {data.sttMemo}</Text>}
           {Object.entries(data.roomItems || {}).map(([room, roomData]: any) => {
             if (!roomData.note) return null;
             return <Text key={room} style={{ marginBottom: 3 }}>[{room}] {roomData.note}</Text>;
