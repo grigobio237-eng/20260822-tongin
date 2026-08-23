@@ -1,31 +1,29 @@
-export const runtime = 'edge';
-export const dynamic = 'force-dynamic';
+interface Env {
+  DB: D1Database;
+}
 
-export async function GET(req: Request) {
-  // Cloudflare Pages 표준 전역 바인딩 참조
-  const db = (process.env as any).DB || (globalThis as any).DB;
+export const onRequestGet: PagesFunction<Env> = async (context) => {
   return new Response(
     JSON.stringify({
       status: 'online',
-      hasDB: !!db,
-      timestamp: Date.now()
+      hasDB: !!context.env.DB,
+      time: new Date().toISOString()
     }),
     { status: 200, headers: { 'Content-Type': 'application/json' } }
   );
-}
+};
 
-export async function POST(req: Request) {
+export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
-    const db = (process.env as any).DB || (globalThis as any).DB;
-
+    const db = context.env.DB;
     if (!db) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Cloudflare D1 DB 바인딩이 없습니다.' }),
+        JSON.stringify({ success: false, error: 'D1 DB 바인딩이 연결되지 않았습니다.' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const body = (await req.json()) as any;
+    const body = (await context.request.json()) as any;
     const customer = body.customerInfo || {};
     const resources = body.resources || {};
     const contractId = body.id || `CT_${Date.now()}`;
@@ -48,7 +46,7 @@ export async function POST(req: Request) {
 
     const result = await db.prepare(sql).bind(
       contractId,
-      String(customer.name || '고객'),
+      String(customer.name || '미입력'),
       String(customer.phone || '010-0000-0000'),
       String(customer.contractDate || '2026-08-23'),
       String(customer.packingDate || '2026-08-23'),
@@ -92,4 +90,4 @@ export async function POST(req: Request) {
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-}
+};
