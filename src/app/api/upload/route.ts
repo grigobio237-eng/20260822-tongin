@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     let nextPublicR2Url = '';
 
     try {
-      const { env } = getRequestContext() as unknown as { env: CloudflareEnv };
+      const { env } = getRequestContext() as unknown as { env: any };
       bucket = env.BUCKET;
       nextPublicR2Url = env.NEXT_PUBLIC_R2_URL || '';
     } catch (e) {

@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     let d1: any = null;
 
     try {
-      const { env } = getRequestContext() as unknown as { env: CloudflareEnv };
+      const { env } = getRequestContext() as unknown as { env: any };
       bucket = env.BUCKET;
       d1 = env.DB;
     } catch (e) {
