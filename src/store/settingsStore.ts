@@ -73,11 +73,11 @@ export const useSettingsStore = create<SettingsState>()(
           });
           
           if (!res.ok) {
-            throw new Error('Failed to update DB');
+            console.warn('DB update failed, but local settings were saved.');
           }
         } catch (error) {
-          console.error(error);
-          alert('설정을 저장하는 데 실패했습니다. 다시 시도해주세요.');
+          console.error('Network error during settings update:', error);
+          // alert 제거: 로컬스토리지에는 저장되었으므로 사용자를 방해하지 않음
         } finally {
           set({ isLoading: false });
         }
