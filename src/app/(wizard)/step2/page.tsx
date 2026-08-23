@@ -119,6 +119,58 @@ export default function Step2Page() {
             </div>
           );
         })}
+
+        {/* 기타 항목 2개 추가 */}
+        {[1, 2].map(num => {
+          const customKey = `기타 ${num}`;
+          const itemState = roomItems[activeTab].items[customKey];
+          const qty = itemState?.quantity || 0;
+          
+          return (
+            <div key={customKey} className="flex items-center justify-between p-3 border rounded-lg hover:border-blue-200 transition-colors">
+              <div className="flex-1 mr-4">
+                <input 
+                  type="text"
+                  placeholder={`기타 물품 ${num}`}
+                  className="w-full text-sm font-semibold text-gray-800 border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none bg-transparent mb-2 pb-1 transition-colors"
+                  value={itemState?.variantName || ''}
+                  onChange={(e) => changeItemVariant(activeTab, customKey, e.target.value, itemState?.unitCbm || 0.1)}
+                />
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="number"
+                    step="0.1"
+                    min="0.1"
+                    className="w-20 text-xs text-blue-600 bg-blue-50 px-2 py-1.5 rounded-md text-center focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold"
+                    value={itemState?.unitCbm || ''}
+                    placeholder="0.1"
+                    onChange={(e) => changeItemVariant(activeTab, customKey, itemState?.variantName || `기타 ${num}`, parseFloat(e.target.value) || 0)}
+                  />
+                  <span className="text-xs text-gray-500 font-medium">CBM</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 bg-gray-50 p-1 rounded-lg border shrink-0">
+                <button
+                  onClick={() => updateRoomItemQuantity(activeTab, customKey, Math.max(0, qty - 1))}
+                  className="w-8 h-8 flex items-center justify-center rounded-md bg-white shadow-sm text-gray-600 active:scale-95"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="w-6 text-center font-bold text-lg">{qty}</span>
+                <button
+                  onClick={() => {
+                    if (!itemState?.variantName) changeItemVariant(activeTab, customKey, `기타 ${num}`, itemState?.unitCbm || 0.1);
+                    updateRoomItemQuantity(activeTab, customKey, qty + 1);
+                  }}
+                  className="w-8 h-8 flex items-center justify-center rounded-md bg-blue-50 text-blue-600 shadow-sm active:scale-95"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Room specific Notes and Images */}
