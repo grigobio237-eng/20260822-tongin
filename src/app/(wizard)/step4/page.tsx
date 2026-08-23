@@ -115,7 +115,7 @@ export default function Step4Page() {
       });
 
       if (!res.ok) throw new Error('계약 저장 실패');
-      const result = await res.json();
+      const result = (await res.json()) as { contractId: string; pdfUrl: string };
       
       setCompletedContract({ id: result.contractId, pdfUrl: result.pdfUrl });
     } catch (err) {

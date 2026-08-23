@@ -217,9 +217,11 @@ export default function Step2Page() {
                       const formData = new FormData();
                       formData.append('file', blob);
                       const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                      if(res.ok) {
-                        const { url } = await res.json();
-                        useWizardStore.getState().addRoomImage(activeTab, url);
+                      if (res.ok) {
+                        const data = (await res.json()) as { url: string };
+                        if (data?.url) {
+                          useWizardStore.getState().addRoomImage(activeTab, data.url);
+                        }
                       }
                     } catch (e) {
                       console.error("Upload failed", e);

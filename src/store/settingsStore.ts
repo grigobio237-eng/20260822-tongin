@@ -46,7 +46,7 @@ export const useSettingsStore = create<SettingsState>()(
         try {
           const res = await fetch('/api/settings');
           if (res.ok) {
-            const data = await res.json();
+            const data = (await res.json()) as Partial<SettingsState>;
             set({
               vehiclePrices: data.vehiclePrices || get().vehiclePrices,
               workerPrices: data.workerPrices || get().workerPrices,
