@@ -97,7 +97,6 @@ export default function Step4Page() {
     
     setIsSubmitting(true);
     try {
-      // 2. API Call (JSON)
       const res = await fetch('/api/contracts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -119,13 +118,16 @@ export default function Step4Page() {
         })
       });
 
-      if (!res.ok) throw new Error('계약 저장 실패');
-      const result = (await res.json()) as { contractId: string; pdfUrl: string };
-      
-      setCompletedContract({ id: result.contractId, pdfUrl: result.pdfUrl });
-    } catch (err) {
+      const data = (await res.json()) as any;
+      if (res.ok && data.success) {
+        alert('계약이 완료되었습니다!');
+        setCompletedContract({ id: data.contractId, pdfUrl: data.pdfUrl || '' });
+      } else {
+        alert(`저장 실패: ${data.error}`);
+      }
+    } catch (err: any) {
       console.error(err);
-      alert('처리 중 오류가 발생했습니다.');
+      alert(`네트워크 오류: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
