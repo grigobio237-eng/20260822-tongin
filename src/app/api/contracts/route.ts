@@ -1,16 +1,15 @@
+import { getRequestContext } from '@cloudflare/next-on-pages';
+
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    // Cloudflare Pages nodejs_compat 환경의 전역 DB 바인딩 획득
-    const db = (process.env as any).DB;
+    const ctx = getRequestContext() as { env?: any };
+    const db = ctx?.env?.DB || (process.env as any)?.DB;
 
     if (!db) {
-      return Response.json(
-        { success: false, error: 'D1 DB 바인딩(DB)을 찾을 수 없습니다.' },
-        { status: 500 }
-      );
+      return Response.json({ success: false, error: 'D1 DB 바인딩을 찾을 수 없습니다.' }, { status: 500 });
     }
 
     const body = (await req.json()) as any;
@@ -34,7 +33,7 @@ export async function POST(req: Request) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const result = await db.prepare(sql).bind(
+    await db.prepare(sql).bind(
       contractId,
       String(customer.name || '미입력'),
       String(customer.phone || '010-0000-0000'),
@@ -71,10 +70,7 @@ export async function POST(req: Request) {
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('Contracts API Error:', error);
-    return Response.json(
-      { success: false, error: error.message || '서버 에러' },
-      { status: 500 }
-    );
+    console.error('API Error:', error);
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
 }
