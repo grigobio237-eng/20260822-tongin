@@ -1,6 +1,23 @@
-export const onRequestPost: PagesFunction<{ DB: D1Database }> = async (context) => {
+import { getRequestContext } from '@cloudflare/next-on-pages';
+
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
+export async function POST(req: Request) {
   try {
-    const db = context.env.DB;
+    let db: any = null;
+
+    try {
+      const ctx = getRequestContext();
+      if ((ctx?.env as any)?.DB) db = (ctx.env as any).DB;
+    } catch (e) {
+      console.warn('getRequestContext error, attempting process.env fallback');
+    }
+
+    if (!db && (process.env as any)?.DB) {
+      db = (process.env as any).DB;
+    }
+
     if (!db) {
       return new Response(
         JSON.stringify({ success: false, error: 'D1 DB 바인딩이 연결되지 않았습니다.' }),
@@ -8,7 +25,7 @@ export const onRequestPost: PagesFunction<{ DB: D1Database }> = async (context) 
       );
     }
 
-    const body = (await context.request.json()) as any;
+    const body = (await req.json()) as any;
     const customer = body.customerInfo || {};
     const resources = body.resources || {};
     const contractId = body.id || `CT_${Date.now()}`;
@@ -62,11 +79,11 @@ export const onRequestPost: PagesFunction<{ DB: D1Database }> = async (context) 
     ).run();
 
     if (!result.success) {
-      throw new Error(result.error || 'D1 쿼리 실행 실패');
+      throw new Error(result.error || 'D1 실행 오류');
     }
 
     return new Response(
-      JSON.stringify({ success: true, message: '계약서가 성공적으로 저장되었습니다.', contractId }),
+      JSON.stringify({ success: true, message: '계약서 저장 성공', contractId }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
@@ -75,4 +92,4 @@ export const onRequestPost: PagesFunction<{ DB: D1Database }> = async (context) 
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-};
+}
