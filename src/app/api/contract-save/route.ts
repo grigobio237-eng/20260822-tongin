@@ -3,13 +3,26 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
+export async function GET() {
+  try {
+    const { env } = getRequestContext() as any;
+    return Response.json({
+      status: 'online',
+      hasDB: !!env?.DB,
+      time: new Date().toISOString()
+    });
+  } catch (e: any) {
+    return Response.json({ status: 'error', message: e.message }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const ctx = getRequestContext() as any;
     const db = ctx?.env?.DB;
 
     if (!db) {
-      return new Response('D1 DB 바인딩 누락: env.DB가 존재하지 않습니다.', { status: 200 });
+      return Response.json({ success: false, error: 'D1 DB 바인딩이 누락되었습니다.' }, { status: 500 });
     }
 
     const body = (await req.json()) as any;
@@ -18,7 +31,9 @@ export async function POST(req: Request) {
     const contractId = body.id || `CT_${Date.now()}`;
     const now = Math.floor(Date.now() / 1000);
 
-    // D1 SQL 실행 (모든 필드를 기본 타입으로 안전 변환)
+    const departureAddress = customer.departureAddress || '출발지 미입력';
+    const arrivalAddress = customer.arrivalAddress || '도착지 미입력';
+
     const sql = `
       INSERT OR REPLACE INTO contracts (
         id, customer_name, customer_phone, contract_date, packing_date, moving_date,
@@ -33,15 +48,15 @@ export async function POST(req: Request) {
 
     const result = await db.prepare(sql).bind(
       contractId,
-      String(customer.name || '미입력'),
+      String(customer.name || '고객'),
       String(customer.phone || '010-0000-0000'),
       String(customer.contractDate || '2026-08-23'),
       String(customer.packingDate || '2026-08-23'),
       String(customer.movingDate || '2026-08-23'),
-      String(customer.departureAddress || '출발지 미입력'),
+      departureAddress,
       Number(customer.departureFloor) || 1,
       null,
-      String(customer.arrivalAddress || '도착지 미입력'),
+      arrivalAddress,
       Number(customer.arrivalFloor) || 1,
       null,
       String(customer.arrivalStatus || '당일이사'),
@@ -63,16 +78,8 @@ export async function POST(req: Request) {
       now
     ).run();
 
-    if (!result.success) {
-      return new Response(`D1 실행 실패: ${result.error}`, { status: 200 });
-    }
-
-    return new Response(
-      JSON.stringify({ success: true, message: '저장 완료', contractId }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
+    return Response.json({ success: true, message: '저장 완료', contractId }, { status: 200 });
   } catch (err: any) {
-    // 500 대신 200으로 실제 에러 스택을 브라우저에 바로 노출
-    return new Response(`서버 런타임 예외 발생: ${err.message}\n${err.stack}`, { status: 200 });
+    return Response.json({ success: false, error: err.message, stack: err.stack }, { status: 500 });
   }
 }
