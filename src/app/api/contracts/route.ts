@@ -1,18 +1,19 @@
-interface Env {
-  DB: D1Database;
-}
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
+export async function POST(req: Request) {
   try {
-    const db = context.env.DB;
+    // Cloudflare Pages nodejs_compat 환경의 전역 DB 바인딩 획득
+    const db = (process.env as any).DB;
+
     if (!db) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'D1 DB 바인딩이 없습니다.' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      return Response.json(
+        { success: false, error: 'D1 DB 바인딩(DB)을 찾을 수 없습니다.' },
+        { status: 500 }
       );
     }
 
-    const body: any = await context.request.json();
+    const body = (await req.json()) as any;
     const customer = body.customerInfo || {};
     const resources = body.resources || {};
     const contractId = body.id || `CT_${Date.now()}`;
@@ -65,18 +66,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       now
     ).run();
 
-    if (!result.success) {
-      throw new Error(result.error || 'D1 실행 오류');
-    }
-
-    return new Response(
-      JSON.stringify({ success: true, message: '저장 완료', contractId }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    return Response.json(
+      { success: true, message: '계약이 성공적으로 저장되었습니다.', contractId },
+      { status: 200 }
     );
-  } catch (err: any) {
-    return new Response(
-      JSON.stringify({ success: false, error: err.message, stack: err.stack }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+  } catch (error: any) {
+    console.error('Contracts API Error:', error);
+    return Response.json(
+      { success: false, error: error.message || '서버 에러' },
+      { status: 500 }
     );
   }
-};
+}
