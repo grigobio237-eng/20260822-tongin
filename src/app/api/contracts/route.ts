@@ -1,81 +1,112 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { getRequestContext } from '@cloudflare/next-on-pages';
+import { drizzle } from 'drizzle-orm/d1';
+import * as schema from '@/db/schema';
 
 export const runtime = 'edge';
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
+    const ctx = getRequestContext() as { env?: any };
+    const env = ctx?.env;
+
+    if (!env || !env.DB) {
+      return Response.json(
+        { success: false, error: 'Cloudflare D1 바인딩(DB)이 연결되지 않았습니다.' },
+        { status: 500 }
+      );
+    }
+
+    const db = drizzle(env.DB, { schema });
+
+    // FormData 파싱
     const formData = await req.formData();
     const dataString = formData.get('data') as string;
-    const signatureFile = formData.get('signature') as File | null;
-    const pdfFile = formData.get('pdf') as File | null;
-    
     if (!dataString) {
-      return NextResponse.json({ error: 'Missing contract data' }, { status: 400 });
+      return Response.json({ success: false, error: '계약 데이터(data)가 누락되었습니다.' }, { status: 400 });
     }
 
-    const data = JSON.parse(dataString);
-    const contractId = crypto.randomUUID();
-    
-    let bucket: any = null;
-    let d1: any = null;
+    const payload = JSON.parse(dataString);
+    const contractId = payload.id || `CT_${Date.now()}`;
 
-    try {
-      const { env } = getRequestContext() as unknown as { env: any };
-      bucket = env.BUCKET;
-      d1 = env.DB;
-    } catch (e) {
-      console.warn('Failed to get Cloudflare bindings:', e);
-    }
-
-    let signatureUrl = '';
+    // PDF 및 서명 파일 처리 (R2 업로드)
     let pdfUrl = '';
+    let signatureUrl = '';
 
-    // Upload files to R2
-    if (bucket) {
-      if (signatureFile) {
-        const sigBuffer = await signatureFile.arrayBuffer();
-        const sigKey = `contracts/${contractId}/signature.png`;
-        await (bucket as any).put(sigKey, sigBuffer, { httpMetadata: { contentType: 'image/png' } });
-        signatureUrl = `/${sigKey}`;
-      }
+    const pdfFile = formData.get('pdf') as File | null;
+    const signatureFile = formData.get('signature') as File | null;
 
-      if (pdfFile) {
-        const pdfBuffer = await pdfFile.arrayBuffer();
+    if (env.BUCKET) {
+      if (pdfFile && typeof pdfFile.arrayBuffer === 'function') {
         const pdfKey = `contracts/${contractId}/contract.pdf`;
-        await (bucket as any).put(pdfKey, pdfBuffer, { httpMetadata: { contentType: 'application/pdf' } });
-        pdfUrl = `/${pdfKey}`;
+        await env.BUCKET.put(pdfKey, await pdfFile.arrayBuffer(), {
+          httpMetadata: { contentType: 'application/pdf' },
+        });
+        pdfUrl = `https://20260822-tongin.pages.dev/api/files/${pdfKey}`;
       }
-    } else {
-      console.warn('R2 Bucket binding not found');
-      signatureUrl = `/mock/signature.png`;
-      pdfUrl = `/mock/contract.pdf`;
+
+      if (signatureFile && typeof signatureFile.arrayBuffer === 'function') {
+        const sigKey = `contracts/${contractId}/signature.png`;
+        await env.BUCKET.put(sigKey, await signatureFile.arrayBuffer(), {
+          httpMetadata: { contentType: 'image/png' },
+        });
+        signatureUrl = `https://20260822-tongin.pages.dev/api/files/${sigKey}`;
+      }
     }
 
-    // Insert to D1 Database
-    if (d1) {
-      console.log('Would insert into D1:', contractId, data);
-    } else {
-      console.warn('D1 Database binding not found');
-    }
+    const customer = payload.customerInfo || {};
+    const resources = payload.resources || {};
 
-    // Return success
-    return NextResponse.json({
-      success: true,
-      contractId,
-      pdfUrl,
-      signatureUrl
+    // 1. D1 contracts 마스터 저장
+    await db.insert(schema.contracts).values({
+      id: contractId,
+      customerName: customer.name || '미입력',
+      customerPhone: customer.phone || '010-0000-0000',
+      contractDate: customer.contractDate || new Date().toISOString().split('T')[0],
+      packingDate: customer.packingDate || new Date().toISOString().split('T')[0],
+      movingDate: customer.movingDate || new Date().toISOString().split('T')[0],
+      departureAddress: customer.departureAddress || '',
+      departureFloor: Number(customer.departureFloor) || 1,
+      departureConditions: JSON.stringify(customer.departureConditions || []),
+      arrivalAddress: customer.arrivalAddress || '',
+      arrivalFloor: Number(customer.arrivalFloor) || 1,
+      arrivalConditions: JSON.stringify(customer.arrivalConditions || []),
+      arrivalStatus: customer.arrivalStatus || '당일이사',
+      serviceType: customer.serviceType || '포장이사',
+      totalCbm: Number(payload.totalCbm) || 0,
+      vehicleCount: JSON.stringify(resources.vehicles || {}),
+      workerCountMale: Number(resources.workerMale) || 0,
+      workerCountFemale: Number(resources.workerFemale) || 0,
+      movingCost: Number(payload.totalCost) - Number(payload.optionCost || 0),
+      optionCost: Number(payload.optionCost) || 0,
+      totalCost: Number(payload.totalCost) || 0,
+      deposit: Number(payload.deposit) || 0,
+      balance: Number(payload.balance) || 0,
+      sttMemo: payload.sttMemo || '',
+      signatureUrl: signatureUrl,
+      pdfUrl: pdfUrl,
+      status: 'CONFIRMED',
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
+    return Response.json(
+      { 
+        success: true, 
+        message: '계약이 성공적으로 체결 및 저장되었습니다.',
+        contractId,
+        pdfUrl
+      }, 
+      { status: 200 }
+    );
   } catch (error: any) {
-    console.error('Contract API Error:', error);
-    // 500 에러 대신 200을 리턴하여 사용자 플로우(모의 계약 성공)가 막히지 않도록 처리
-    return NextResponse.json({ 
-      success: true, 
-      contractId: 'mock-contract-id', 
-      pdfUrl: '/mock/contract.pdf',
-      signatureUrl: '/mock/signature.png',
-      message: error.message 
-    }, { status: 200 });
+    console.error('계약 저장 에러:', error);
+    return Response.json(
+      { 
+        success: false, 
+        error: error.message || '서버 처리 중 오류가 발생했습니다.',
+        stack: error.stack 
+      }, 
+      { status: 500 }
+    );
   }
 }
