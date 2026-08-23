@@ -11,52 +11,43 @@ export async function POST(req: Request) {
 
     if (!env || !env.DB) {
       return Response.json(
-        { success: false, error: 'Cloudflare D1 바인딩(DB)이 연결되지 않았습니다.' },
+        { success: false, error: 'D1 데이터베이스 바인딩을 찾을 수 없습니다.' },
         { status: 500 }
       );
     }
 
     const db = drizzle(env.DB, { schema });
+    const body = (await req.json()) as any;
 
-    // FormData 파싱
-    const formData = await req.formData();
-    const dataString = formData.get('data') as string;
-    if (!dataString) {
-      return Response.json({ success: false, error: '계약 데이터(data)가 누락되었습니다.' }, { status: 400 });
-    }
-
-    const payload = JSON.parse(dataString);
-    const contractId = payload.id || `CT_${Date.now()}`;
-
-    // PDF 및 서명 파일 처리 (R2 업로드)
+    const contractId = body.id || `CT_${Date.now()}`;
     let pdfUrl = '';
     let signatureUrl = '';
 
-    const pdfFile = formData.get('pdf') as File | null;
-    const signatureFile = formData.get('signature') as File | null;
-
+    // R2 버킷 저장 (Base64 -> Uint8Array 변환)
     if (env.BUCKET) {
-      if (pdfFile && typeof pdfFile.arrayBuffer === 'function') {
+      if (body.pdfBase64) {
         const pdfKey = `contracts/${contractId}/contract.pdf`;
-        await env.BUCKET.put(pdfKey, await pdfFile.arrayBuffer(), {
+        const pdfBytes = Uint8Array.from(atob(body.pdfBase64.replace(/^data:application\/pdf;base64,/, '')), c => c.charCodeAt(0));
+        await env.BUCKET.put(pdfKey, pdfBytes, {
           httpMetadata: { contentType: 'application/pdf' },
         });
-        pdfUrl = `https://20260822-tongin.pages.dev/api/files/${pdfKey}`;
+        pdfUrl = `/api/files/${pdfKey}`;
       }
 
-      if (signatureFile && typeof signatureFile.arrayBuffer === 'function') {
+      if (body.signatureBase64) {
         const sigKey = `contracts/${contractId}/signature.png`;
-        await env.BUCKET.put(sigKey, await signatureFile.arrayBuffer(), {
+        const sigBytes = Uint8Array.from(atob(body.signatureBase64.replace(/^data:image\/\w+;base64,/, '')), c => c.charCodeAt(0));
+        await env.BUCKET.put(sigKey, sigBytes, {
           httpMetadata: { contentType: 'image/png' },
         });
-        signatureUrl = `https://20260822-tongin.pages.dev/api/files/${sigKey}`;
+        signatureUrl = `/api/files/${sigKey}`;
       }
     }
 
-    const customer = payload.customerInfo || {};
-    const resources = payload.resources || {};
+    const customer = body.customerInfo || {};
+    const resources = body.resources || {};
 
-    // 1. D1 contracts 마스터 저장
+    // D1 contracts 테이블 저장
     await db.insert(schema.contracts).values({
       id: contractId,
       customerName: customer.name || '미입력',
@@ -72,40 +63,31 @@ export async function POST(req: Request) {
       arrivalConditions: JSON.stringify(customer.arrivalConditions || []),
       arrivalStatus: customer.arrivalStatus || '당일이사',
       serviceType: customer.serviceType || '포장이사',
-      totalCbm: Number(payload.totalCbm) || 0,
+      totalCbm: Number(body.totalCbm) || 0,
       vehicleCount: JSON.stringify(resources.vehicles || {}),
       workerCountMale: Number(resources.workerMale) || 0,
       workerCountFemale: Number(resources.workerFemale) || 0,
-      movingCost: Number(payload.totalCost) - Number(payload.optionCost || 0),
-      optionCost: Number(payload.optionCost) || 0,
-      totalCost: Number(payload.totalCost) || 0,
-      deposit: Number(payload.deposit) || 0,
-      balance: Number(payload.balance) || 0,
-      sttMemo: payload.sttMemo || '',
-      signatureUrl: signatureUrl,
-      pdfUrl: pdfUrl,
+      movingCost: Number(body.totalCost) - Number(body.optionCost || 0),
+      optionCost: Number(body.optionCost) || 0,
+      totalCost: Number(body.totalCost) || 0,
+      deposit: Number(body.deposit) || 0,
+      balance: Number(body.balance) || 0,
+      sttMemo: body.sttMemo || '',
+      signatureUrl,
+      pdfUrl,
       status: 'CONFIRMED',
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
     return Response.json(
-      { 
-        success: true, 
-        message: '계약이 성공적으로 체결 및 저장되었습니다.',
-        contractId,
-        pdfUrl
-      }, 
+      { success: true, message: '계약 저장 완료', contractId, pdfUrl },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('계약 저장 에러:', error);
+    console.error('API Error:', error);
     return Response.json(
-      { 
-        success: false, 
-        error: error.message || '서버 처리 중 오류가 발생했습니다.',
-        stack: error.stack 
-      }, 
+      { success: false, error: error.message || '서버 오류', stack: error.stack },
       { status: 500 }
     );
   }

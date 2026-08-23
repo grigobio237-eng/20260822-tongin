@@ -82,6 +82,15 @@ export default function Step4Page() {
     return new Blob([u8arr], { type: mime });
   };
 
+  const blobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
   const handleSubmit = async () => {
     if (!agreed) return alert('약관 및 주의사항에 동의해주세요.');
     if (!signatureData) return alert('전자서명이 필요합니다.');
@@ -92,26 +101,30 @@ export default function Step4Page() {
       const pdfBlob = await pdf(
         <ContractPdfDocument data={store} signatureUrl={signatureData} />
       ).toBlob();
+      const pdfBase64 = await blobToBase64(pdfBlob);
 
-      // 2. Prepare FormData
-      const formData = new FormData();
-      formData.append('data', JSON.stringify({
-        customerInfo,
-        options,
-        totalCost,
-        deposit,
-        balance,
-        // ... include other necessary fields for DB
-      }));
-      
-      const sigBlob = dataURLtoBlob(signatureData);
-      formData.append('signature', sigBlob, 'signature.png');
-      formData.append('pdf', pdfBlob, 'contract.pdf');
-
-      // 3. API Call
+      // 2. API Call (JSON)
       const res = await fetch('/api/contracts', {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerInfo,
+          options,
+          totalCost,
+          deposit,
+          balance,
+          signatureBase64: signatureData,
+          pdfBase64: pdfBase64,
+          // include other necessary fields for DB
+          totalCbm: store.totalCbm,
+          resources: {
+            vehicles: store.resources?.vehicles || {},
+            workerMale: store.resources?.workerMale || 0,
+            workerFemale: store.resources?.workerFemale || 0
+          },
+          sttMemo: store.sttMemo,
+          optionCost: optionsCost
+        })
       });
 
       if (!res.ok) throw new Error('계약 저장 실패');
