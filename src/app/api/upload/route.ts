@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
 
@@ -12,8 +13,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // @ts-ignore - Cloudflare Pages environment binding
-    const bucket = process.env.BUCKET;
+    let bucket: any = null;
+    let nextPublicR2Url = '';
+
+    try {
+      const { env } = getRequestContext();
+      bucket = env.BUCKET;
+      nextPublicR2Url = (env as any).NEXT_PUBLIC_R2_URL || '';
+    } catch (e) {
+      console.warn('Failed to get Cloudflare bindings:', e);
+    }
     
     if (!bucket) {
       // 로컬 환경 등 바인딩이 없을 때 에러 방지용 모의 응답
@@ -36,8 +45,8 @@ export async function POST(req: NextRequest) {
     });
 
     // Cloudflare Pages / Custom Domain URL
-    const publicUrl = process.env.NEXT_PUBLIC_R2_URL 
-      ? `${process.env.NEXT_PUBLIC_R2_URL}/${objectKey}`
+    const publicUrl = nextPublicR2Url 
+      ? `${nextPublicR2Url}/${objectKey}`
       : `/${objectKey}`; // fallback for demonstration
 
     return NextResponse.json({ url: publicUrl, key: objectKey });

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getRequestContext } from '@cloudflare/next-on-pages';
 
 export const runtime = 'edge';
-
-// import { drizzle } from 'drizzle-orm/d1';
-// import { contracts, contractItems, contractOptions } from '@/db/schema';
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,9 +17,16 @@ export async function POST(req: NextRequest) {
     const data = JSON.parse(dataString);
     const contractId = crypto.randomUUID();
     
-    // Cloudflare 환경 방어 코드
-    const bucket = typeof process !== 'undefined' && process.env ? process.env.BUCKET : null;
-    const d1 = typeof process !== 'undefined' && process.env ? process.env.DB : null;
+    let bucket: any = null;
+    let d1: any = null;
+
+    try {
+      const { env } = getRequestContext();
+      bucket = env.BUCKET;
+      d1 = env.DB;
+    } catch (e) {
+      console.warn('Failed to get Cloudflare bindings:', e);
+    }
 
     let signatureUrl = '';
     let pdfUrl = '';
