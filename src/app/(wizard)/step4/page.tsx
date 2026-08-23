@@ -93,11 +93,31 @@ export default function Step4Page() {
         <ContractPdfDocument data={store} signatureUrl={signatureData} />
       ).toBlob();
 
-      // 서버 환경 이슈(500 에러) 우회를 위해 API 호출 생략
-      // 로컬 Blob URL 생성하여 바로 PDF를 띄워볼 수 있도록 처리
-      const localPdfUrl = URL.createObjectURL(pdfBlob);
+      // 2. Prepare FormData
+      const formData = new FormData();
+      formData.append('data', JSON.stringify({
+        customerInfo,
+        options,
+        totalCost,
+        deposit,
+        balance,
+        // ... include other necessary fields for DB
+      }));
       
-      setCompletedContract({ id: 'local-contract', pdfUrl: localPdfUrl });
+      const sigBlob = dataURLtoBlob(signatureData);
+      formData.append('signature', sigBlob, 'signature.png');
+      formData.append('pdf', pdfBlob, 'contract.pdf');
+
+      // 3. API Call
+      const res = await fetch('/api/contracts', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) throw new Error('계약 저장 실패');
+      const result = await res.json();
+      
+      setCompletedContract({ id: result.contractId, pdfUrl: result.pdfUrl });
     } catch (err) {
       console.error(err);
       alert('처리 중 오류가 발생했습니다.');

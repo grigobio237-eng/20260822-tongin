@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 // import { drizzle } from 'drizzle-orm/d1';
 // import { contracts, contractItems, contractOptions } from '@/db/schema';
 
-export const runtime = 'edge';
-
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
