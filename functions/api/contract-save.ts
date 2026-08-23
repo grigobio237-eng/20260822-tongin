@@ -1,26 +1,14 @@
-export const runtime = 'edge';
-export const dynamic = 'force-dynamic';
-
-export async function POST(req: Request) {
+export const onRequestPost: PagesFunction<{ DB: D1Database }> = async (context) => {
   try {
-    // Cloudflare Edge 컨텍스트 안전 추출
-    let db: any = (globalThis as any).__env__?.DB || (process.env as any)?.DB;
-    
-    if (!db) {
-      try {
-        const { getRequestContext } = await import('@cloudflare/next-on-pages');
-        db = (getRequestContext()?.env as any)?.DB;
-      } catch (e) {}
-    }
-
+    const db = context.env.DB;
     if (!db) {
       return new Response(
-        JSON.stringify({ success: false, error: 'D1 DB 바인딩을 가져올 수 없습니다.' }),
+        JSON.stringify({ success: false, error: 'D1 DB 바인딩이 연결되지 않았습니다.' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const body = (await req.json()) as any;
+    const body = (await context.request.json()) as any;
     const customer = body.customerInfo || {};
     const resources = body.resources || {};
     const contractId = body.id || `CT_${Date.now()}`;
@@ -41,7 +29,7 @@ export async function POST(req: Request) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    await db.prepare(sql).bind(
+    const result = await db.prepare(sql).bind(
       contractId,
       String(customer.name || '미입력'),
       String(customer.phone || '010-0000-0000'),
@@ -73,14 +61,18 @@ export async function POST(req: Request) {
       now
     ).run();
 
+    if (!result.success) {
+      throw new Error(result.error || 'D1 쿼리 실행 실패');
+    }
+
     return new Response(
-      JSON.stringify({ success: true, message: '계약 저장 성공', contractId }),
+      JSON.stringify({ success: true, message: '계약서가 성공적으로 저장되었습니다.', contractId }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
     return new Response(
-      JSON.stringify({ success: false, error: err.message || '알 수 없는 서버 에러' }),
+      JSON.stringify({ success: false, error: err.message || '서버 처리 오류' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-}
+};

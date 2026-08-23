@@ -97,7 +97,7 @@ export default function Step4Page() {
     
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/contracts', {
+      const res = await fetch('/api/contract-save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
