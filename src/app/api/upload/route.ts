@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
     let nextPublicR2Url = '';
 
     try {
-      const { env } = getRequestContext();
+      const { env } = getRequestContext() as unknown as { env: CloudflareEnv };
       bucket = env.BUCKET;
-      nextPublicR2Url = (env as any).NEXT_PUBLIC_R2_URL || '';
+      nextPublicR2Url = env.NEXT_PUBLIC_R2_URL || '';
     } catch (e) {
       console.warn('Failed to get Cloudflare bindings:', e);
     }
