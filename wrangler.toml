@@ -1,7 +1,9 @@
 name = "20260822-tongin"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
-main = ".open-next/worker.js"
+
+# OpenNext Cloudflare Pages 빌드 출력 디렉터리
+pages_build_output_dir = ".open-next/assets"
 
 # Cloudflare D1 바인딩 설정
 [[d1_databases]]
@@ -16,6 +18,3 @@ bucket_name = "tongin-bucket"
 
 [vars]
 NEXT_PUBLIC_API_URL = "https://20260822-tongin.pages.dev"
-
-[assets]
-directory = ".open-next/assets"
