@@ -1,25 +1,30 @@
-export const onRequestGet = async (context: any) => {
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: Request) {
+  // Cloudflare Pages 환경 변수(DB)에 안전하게 접근
+  const db = (process.env as any).DB || (globalThis as any).DB;
   return new Response(
     JSON.stringify({
       status: 'online',
-      hasDB: !!context.env.DB,
-      time: new Date().toISOString()
+      hasDB: !!db,
+      timestamp: Date.now()
     }),
     { status: 200, headers: { 'Content-Type': 'application/json' } }
   );
-};
+}
 
-export const onRequestPost = async (context: any) => {
+export async function POST(req: Request) {
   try {
-    const db = context.env.DB;
+    const db = (process.env as any).DB || (globalThis as any).DB;
     if (!db) {
       return new Response(
-        JSON.stringify({ success: false, error: 'D1 DB 바인딩이 연결되지 않았습니다.' }),
+        JSON.stringify({ success: false, error: 'Cloudflare D1 DB 바인딩이 없습니다.' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const body = (await context.request.json()) as any;
+    const body = (await req.json()) as any;
     const customer = body.customerInfo || {};
     const resources = body.resources || {};
     const contractId = body.id || `CT_${Date.now()}`;
@@ -86,4 +91,4 @@ export const onRequestPost = async (context: any) => {
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-};
+}
