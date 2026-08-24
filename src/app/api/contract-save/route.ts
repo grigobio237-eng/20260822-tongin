@@ -1,25 +1,34 @@
-export const runtime = 'edge';
+// edge 런타임 제거 - nodejs_compat 모드로 동작
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
-  // Cloudflare Pages 환경 변수(DB)에 안전하게 접근
-  const db = (process.env as any).DB || (globalThis as any).DB;
-  return new Response(
-    JSON.stringify({
-      status: 'online',
-      hasDB: !!db,
-      timestamp: Date.now()
-    }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
-  );
+export async function GET() {
+  try {
+    // Cloudflare D1 바인딩 접근 (next-on-pages 방식)
+    // @ts-ignore
+    const db = process.env.DB;
+    return new Response(
+      JSON.stringify({
+        status: 'online',
+        hasDB: !!db,
+        timestamp: Date.now(),
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({ status: 'error', error: err.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 }
 
 export async function POST(req: Request) {
   try {
-    const db = (process.env as any).DB || (globalThis as any).DB;
+    // @ts-ignore
+    const db = process.env.DB;
     if (!db) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Cloudflare D1 DB 바인딩이 없습니다.' }),
+        JSON.stringify({ success: false, error: 'D1 DB 바인딩이 없습니다. Cloudflare Pages 환경에서만 동작합니다.' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -29,9 +38,6 @@ export async function POST(req: Request) {
     const resources = body.resources || {};
     const contractId = body.id || `CT_${Date.now()}`;
     const now = Math.floor(Date.now() / 1000);
-
-    const departureAddress = customer.departureAddress || '출발지 미입력';
-    const arrivalAddress = customer.arrivalAddress || '도착지 미입력';
 
     const sql = `
       INSERT OR REPLACE INTO contracts (
@@ -45,17 +51,18 @@ export async function POST(req: Request) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
+    // @ts-ignore
     const result = await db.prepare(sql).bind(
       contractId,
       String(customer.name || '미입력'),
       String(customer.phone || '010-0000-0000'),
-      String(customer.contractDate || '2026-08-23'),
-      String(customer.packingDate || '2026-08-23'),
-      String(customer.movingDate || '2026-08-23'),
-      departureAddress,
+      String(customer.contractDate || '2026-08-24'),
+      String(customer.packingDate || '2026-08-24'),
+      String(customer.movingDate || '2026-08-24'),
+      String(customer.departureAddress || '출발지 미입력'),
       Number(customer.departureFloor) || 1,
       null,
-      arrivalAddress,
+      String(customer.arrivalAddress || '도착지 미입력'),
       Number(customer.arrivalFloor) || 1,
       null,
       String(customer.arrivalStatus || '당일이사'),
@@ -78,7 +85,7 @@ export async function POST(req: Request) {
     ).run();
 
     if (!result.success) {
-      throw new Error(result.error || 'D1 쿼리 실행 실패');
+      throw new Error('D1 쿼리 실행 실패: ' + JSON.stringify(result));
     }
 
     return new Response(
