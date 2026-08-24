@@ -1,4 +1,5 @@
-// edge 런타임 제거 - nodejs_compat 모드로 동작
+// next-on-pages가 필수로 요구하는 edge 런타임 선언
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
