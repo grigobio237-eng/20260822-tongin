@@ -1,18 +1,12 @@
-// next-on-pages가 필수로 요구하는 edge 런타임 선언
-export const runtime = 'edge';
+// OpenNext (nodejs_compat) - edge runtime 선언 불필요
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Cloudflare D1 바인딩 접근 (next-on-pages 방식)
-    // @ts-ignore
-    const db = process.env.DB;
+    const env = (globalThis as any).__env__ || process.env;
+    const db = env.DB;
     return new Response(
-      JSON.stringify({
-        status: 'online',
-        hasDB: !!db,
-        timestamp: Date.now(),
-      }),
+      JSON.stringify({ status: 'online', hasDB: !!db, ts: Date.now() }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err: any) {
@@ -25,11 +19,12 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    // @ts-ignore
-    const db = process.env.DB;
+    const env = (globalThis as any).__env__ || process.env;
+    const db = env.DB;
+
     if (!db) {
       return new Response(
-        JSON.stringify({ success: false, error: 'D1 DB 바인딩이 없습니다. Cloudflare Pages 환경에서만 동작합니다.' }),
+        JSON.stringify({ success: false, error: 'D1 DB 바인딩이 없습니다.' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -52,8 +47,7 @@ export async function POST(req: Request) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    // @ts-ignore
-    const result = await db.prepare(sql).bind(
+    const result = await (db as any).prepare(sql).bind(
       contractId,
       String(customer.name || '미입력'),
       String(customer.phone || '010-0000-0000'),
@@ -86,7 +80,7 @@ export async function POST(req: Request) {
     ).run();
 
     if (!result.success) {
-      throw new Error('D1 쿼리 실행 실패: ' + JSON.stringify(result));
+      throw new Error('D1 쿼리 실패: ' + JSON.stringify(result));
     }
 
     return new Response(
