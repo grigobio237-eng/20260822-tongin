@@ -5,8 +5,9 @@ import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import SignaturePad from '@/components/wizard/SignaturePad';
-import { pdf } from '@react-pdf/renderer';
-import { ContractPdfDocument } from '@/components/pdf/ContractPdfDocument';
+// @react-pdf/renderer는 Node.js 전용 - Edge Worker 번들에서 제외 (동적 import 필요시 별도 처리)
+// import { pdf } from '@react-pdf/renderer';
+// import { ContractPdfDocument } from '@/components/pdf/ContractPdfDocument';
 import { Loader2, CheckCircle, FileText } from 'lucide-react';
 import clsx from 'clsx';
 
