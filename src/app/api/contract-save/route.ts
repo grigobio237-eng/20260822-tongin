@@ -1,9 +1,11 @@
-// OpenNext (nodejs_compat) - edge runtime 선언 불필요
+// OpenNext + Cloudflare Pages: D1은 getCloudflareContext()로 접근
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const env = (globalThis as any).__env__ || process.env;
+    const { env } = await getCloudflareContext({ async: true });
     const db = env.DB;
     return new Response(
       JSON.stringify({ status: 'online', hasDB: !!db, ts: Date.now() }),
@@ -19,7 +21,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const env = (globalThis as any).__env__ || process.env;
+    const { env } = await getCloudflareContext({ async: true });
     const db = env.DB;
 
     if (!db) {
@@ -51,9 +53,9 @@ export async function POST(req: Request) {
       contractId,
       String(customer.name || '미입력'),
       String(customer.phone || '010-0000-0000'),
-      String(customer.contractDate || '2026-08-24'),
-      String(customer.packingDate || '2026-08-24'),
-      String(customer.movingDate || '2026-08-24'),
+      String(customer.contractDate || '2026-08-25'),
+      String(customer.packingDate || '2026-08-25'),
+      String(customer.movingDate || '2026-08-25'),
       String(customer.departureAddress || '출발지 미입력'),
       Number(customer.departureFloor) || 1,
       null,
