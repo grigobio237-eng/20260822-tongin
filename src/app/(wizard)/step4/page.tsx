@@ -5,10 +5,9 @@ import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import SignaturePad from '@/components/wizard/SignaturePad';
-import { ContractPdfGenerator } from '@/components/pdf/ContractPdfGenerator';
+import { ContractPrintDocument, ContractPrintData } from '@/components/pdf/ContractPrintDocument';
 // @react-pdf/renderer는 Node.js 전용 - Edge Worker 번들에서 제외 (동적 import 필요시 별도 처리)
 // import { pdf } from '@react-pdf/renderer';
-// import { ContractPdfDocument } from '@/components/pdf/ContractPdfDocument';
 import { Loader2, CheckCircle, FileText } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -144,7 +143,60 @@ export default function Step4Page() {
     router.push('/');
   };
 
+  const exportToPdf = async (contractId: string, customerName: string) => {
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const element = document.getElementById('contract-print-root');
+      if (!element) return;
+
+      const opt = {
+        margin: 0,
+        filename: `통인익스프레스_계약서_${customerName}_${contractId}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+      };
+
+      await html2pdf().set(opt as any).from(element).save();
+    } catch (e) {
+      console.error('PDF 다운로드 실패:', e);
+      alert('PDF 생성 중 오류가 발생했습니다.');
+    }
+  };
+
   if (completedContract) {
+    const fullContractData: ContractPrintData = {
+      id: completedContract.id,
+      customerInfo: customerInfo as any,
+      rooms: Object.entries(store.roomItems || {}).map(([name, data]: [string, any]) => ({
+        id: name,
+        name: name,
+        items: Object.entries(data.items || {}).map(([itemName, quantity]: [string, any]) => ({
+          name: itemName,
+          quantity: quantity,
+          cbm: 0
+        })),
+        memo: data.note || '',
+        images: data.images || []
+      })),
+      options: calculatedOptions.map(opt => ({
+        name: opt.name,
+        quantity: 1,
+        unitPrice: opt.price,
+        totalPrice: opt.price
+      })),
+      resources: store.resources as any,
+      totalCbm: store.totalCbm,
+      movingCost: baseCost,
+      optionCost: optionsCost,
+      totalCost: totalCost,
+      deposit: deposit,
+      balance: balance,
+      signatureBase64: signatureData || undefined,
+      sttMemo: store.sttMemo
+    };
+
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center space-y-6">
         <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
@@ -154,13 +206,24 @@ export default function Step4Page() {
         <p className="text-gray-600">견적서 및 계약서 PDF가 안전하게 저장되었습니다.</p>
         
         <div className="flex flex-col gap-3 mt-8 w-full max-w-sm">
-          <ContractPdfGenerator totalCost={totalCost} deposit={deposit} balance={balance} />
+          <button 
+            onClick={() => exportToPdf(completedContract.id, customerInfo.name || '고객')}
+            className="flex justify-center items-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-md transition-colors"
+          >
+            <FileText size={20} />
+            PDF 계약서 다운로드
+          </button>
           <button 
             onClick={handleFinish}
             className="w-full bg-gray-800 text-white py-3 rounded-xl font-bold shadow-md"
           >
             새 견적서 작성하기
           </button>
+        </div>
+
+        {/* PDF 생성용 Hidden 렌더링 영역 */}
+        <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+          <ContractPrintDocument data={fullContractData} />
         </div>
       </div>
     );
