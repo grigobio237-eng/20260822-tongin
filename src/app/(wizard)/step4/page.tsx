@@ -424,9 +424,9 @@ export default function Step4Page() {
         </div>
       </section>
 
-      {/* 2. 약관 및 동의 */}
+      {/* 2. 약관 및 동의 (대면 계약 시) */}
       <section>
-        <h2 className="text-xl font-bold mb-4">고지사항 확인</h2>
+        <h2 className="text-xl font-bold mb-4">고지사항 확인 <span className="text-sm font-normal text-gray-500">(대면 계약 시)</span></h2>
         <div className="bg-yellow-50 rounded-xl border border-yellow-200 p-4 space-y-2">
           <p className="text-xs text-yellow-800 leading-relaxed">
             ▶ 현금·유가증권, 귀금속은 고객이 직접 관리하며 사업자는 책임지지 않습니다.<br/>
@@ -445,9 +445,9 @@ export default function Step4Page() {
         </div>
       </section>
 
-      {/* 3. 전자서명 */}
+      {/* 3. 전자서명 (대면 계약 시) */}
       <section>
-        <h2 className="text-xl font-bold mb-4">고객 전자서명</h2>
+        <h2 className="text-xl font-bold mb-4">고객 전자서명 <span className="text-sm font-normal text-gray-500">(비대면 시 생략 가능)</span></h2>
         <SignaturePad onSign={(dataUrl) => setSignatureData(dataUrl)} />
       </section>
 
@@ -463,14 +463,14 @@ export default function Step4Page() {
           </button>
           <button 
             onClick={handleSubmit}
-            disabled={isSubmitting || !agreed || !signatureData}
+            disabled={isSubmitting}
             className={clsx(
               "flex items-center justify-center gap-2 text-white px-6 py-3 rounded-xl font-bold shadow-md w-2/3 transition-colors",
-              isSubmitting || !agreed || !signatureData ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+              isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
             )}
           >
             {isSubmitting && <Loader2 size={20} className="animate-spin" />}
-            {isSubmitting ? '계약 처리 중...' : '계약 완료 및 PDF 생성'}
+            {isSubmitting ? '저장 중...' : '견적 저장 (고객 전송용 링크 생성)'}
           </button>
         </div>
       </div>
