@@ -23,4 +23,19 @@ for (const dir of dirs) {
   }
 }
 
+// 3. Generate _routes.json so Cloudflare Pages serves static assets directly
+import { writeFile } from 'fs/promises';
+const routes = {
+  version: 1,
+  include: ["/*"],
+  exclude: [
+    "/_next/static/*",
+    "/favicon.ico",
+    "/images/*",
+    "/manifest.json"
+  ]
+};
+await writeFile(`${dest}/_routes.json`, JSON.stringify(routes, null, 2));
+console.log('✓ Generated _routes.json for static assets');
+
 console.log('\n✅ Post-build complete: Cloudflare Pages worker is ready.\n');
