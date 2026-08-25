@@ -165,6 +165,13 @@ export default function Step4Page() {
     }
   };
 
+  const handleCopySignLink = () => {
+    if (!completedContract) return;
+    const signUrl = `${window.location.origin}/sign/${completedContract.id}`;
+    navigator.clipboard.writeText(signUrl);
+    alert(`고객 전용 검토 및 서명 링크가 복사되었습니다!\n\n${signUrl}`);
+  };
+
   if (completedContract) {
     const fullContractData: ContractPrintData = {
       id: completedContract.id,
@@ -206,6 +213,13 @@ export default function Step4Page() {
         <p className="text-gray-600">견적서 및 계약서 PDF가 안전하게 저장되었습니다.</p>
         
         <div className="flex flex-col gap-3 mt-8 w-full max-w-sm">
+          <button 
+            onClick={handleCopySignLink}
+            className="flex justify-center items-center gap-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold shadow-md transition-colors"
+          >
+            <FileText size={20} />
+            견적서 검토/서명 링크 복사
+          </button>
           <button 
             onClick={() => exportToPdf(completedContract.id, customerInfo.name || '고객')}
             className="flex justify-center items-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-md transition-colors"

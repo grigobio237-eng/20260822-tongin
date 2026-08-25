@@ -10,6 +10,7 @@
     "pages:build": "npx @opennextjs/cloudflare build --dangerouslyUseUnsupportedNextVersion && node scripts/post-build.mjs"
   },
   "dependencies": {
+    "@types/react-signature-canvas": "^1.0.7",
     "clsx": "^2.1.1",
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.14.0",
@@ -18,6 +19,7 @@
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
+    "react-signature-canvas": "^1.1.0-alpha.2",
     "tailwind-merge": "^2.3.0",
     "zustand": "^4.5.2"
   },
