@@ -172,10 +172,10 @@ export default function Step4Page() {
       rooms: Object.entries(store.roomItems || {}).map(([name, data]: [string, any]) => ({
         id: name,
         name: name,
-        items: Object.entries(data.items || {}).map(([itemName, quantity]: [string, any]) => ({
+        items: Object.entries(data.items || {}).map(([itemName, itemState]: [string, any]) => ({
           name: itemName,
-          quantity: quantity,
-          cbm: 0
+          quantity: itemState.quantity,
+          cbm: itemState.cbm || 0
         })),
         memo: data.note || '',
         images: data.images || []
