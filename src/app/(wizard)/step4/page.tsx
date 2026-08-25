@@ -5,6 +5,7 @@ import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import SignaturePad from '@/components/wizard/SignaturePad';
+import { ContractPdfGenerator } from '@/components/pdf/ContractPdfGenerator';
 // @react-pdf/renderer는 Node.js 전용 - Edge Worker 번들에서 제외 (동적 import 필요시 별도 처리)
 // import { pdf } from '@react-pdf/renderer';
 // import { ContractPdfDocument } from '@/components/pdf/ContractPdfDocument';
@@ -153,14 +154,7 @@ export default function Step4Page() {
         <p className="text-gray-600">견적서 및 계약서 PDF가 안전하게 저장되었습니다.</p>
         
         <div className="flex flex-col gap-3 mt-8 w-full max-w-sm">
-          <a 
-            href={completedContract.pdfUrl} 
-            target="_blank" rel="noreferrer"
-            className="flex items-center justify-center gap-2 w-full bg-blue-50 text-blue-700 py-3 rounded-xl font-bold border border-blue-200"
-          >
-            <FileText size={20} />
-            PDF 계약서 보기
-          </a>
+          <ContractPdfGenerator totalCost={totalCost} deposit={deposit} balance={balance} />
           <button 
             onClick={handleFinish}
             className="w-full bg-gray-800 text-white py-3 rounded-xl font-bold shadow-md"
