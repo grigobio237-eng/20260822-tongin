@@ -108,7 +108,6 @@ export default function Step4Page() {
       try {
         const json = JSON.parse(text);
         if (json.success) {
-          alert('계약이 성공적으로 완료되었습니다!');
           setCompletedContract({ id: json.contractId, pdfUrl: json.pdfUrl || '' });
         } else {
           alert(`저장 결과: ${text}`);
