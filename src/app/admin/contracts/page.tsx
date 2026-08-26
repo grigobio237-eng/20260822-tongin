@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FileText, CheckCircle, Clock } from 'lucide-react';
+import { FileText, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
 
 export default function AdminContractsPage() {
   const [contracts, setContracts] = useState<any[]>([]);
@@ -25,7 +25,12 @@ export default function AdminContractsPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 py-8">
-      <h1 className="text-2xl font-black text-slate-800 mb-6">견적 및 계약 관리 대시보드</h1>
+      <div className="flex items-center gap-4 mb-6">
+        <Link href="/step1" className="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
+          <ArrowLeft className="w-6 h-6 text-gray-700" />
+        </Link>
+        <h1 className="text-2xl font-black text-slate-800">견적 및 계약 관리 대시보드</h1>
+      </div>
       
       <div className="grid gap-4">
         {contracts.map(contract => {
