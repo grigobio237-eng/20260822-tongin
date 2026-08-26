@@ -1,10 +1,13 @@
-export const runtime = 'edge';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+
 export const dynamic = 'force-dynamic';
 
 // 1. R2 이미지 조회 (GET /api/upload?key=파일명)
 export async function GET(req: Request) {
   try {
-    const bucket = (process.env as any).BUCKET || (globalThis as any).BUCKET;
+    const { env } = await getCloudflareContext({ async: true });
+    const bucket = env.BUCKET;
+    
     if (!bucket) {
       return new Response('R2 BUCKET 바인딩이 누락되었습니다.', { status: 500 });
     }
@@ -35,7 +38,9 @@ export async function GET(req: Request) {
 // 2. R2 이미지 업로드 (POST /api/upload)
 export async function POST(req: Request) {
   try {
-    const bucket = (process.env as any).BUCKET || (globalThis as any).BUCKET;
+    const { env } = await getCloudflareContext({ async: true });
+    const bucket = env.BUCKET;
+    
     if (!bucket) {
       return Response.json({ success: false, error: 'R2 BUCKET 바인딩이 누락되었습니다.' }, { status: 500 });
     }
