@@ -216,6 +216,7 @@ export default function Step2Page() {
                       const { blob } = await compressToWebP(file);
                       const formData = new FormData();
                       formData.append('file', blob);
+                      formData.append('roomId', activeTab);
                       const res = await fetch('/api/upload', { method: 'POST', body: formData });
                       if (res.ok) {
                         const data = (await res.json()) as { url: string };
