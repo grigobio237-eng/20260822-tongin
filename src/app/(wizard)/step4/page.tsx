@@ -84,7 +84,7 @@ export default function Step4Page() {
             id: name,
             name: name,
             items: Object.entries(data.items || {}).map(([itemName, itemState]: [string, any]) => ({
-              name: itemName,
+              name: itemState.variantName ? `${itemName} (${itemState.variantName})` : itemName,
               quantity: itemState.quantity,
               cbm: itemState.cbm || 0
             })),
@@ -208,7 +208,7 @@ export default function Step4Page() {
         id: name,
         name: name,
         items: Object.entries(data.items || {}).map(([itemName, itemState]: [string, any]) => ({
-          name: itemName,
+          name: itemState.variantName ? `${itemName} (${itemState.variantName})` : itemName,
           quantity: itemState.quantity,
           cbm: itemState.cbm || 0
         })),

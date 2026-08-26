@@ -203,7 +203,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
                         {room.items.map((item, itemIdx) => (
                           <div key={itemIdx} className="flex justify-between border-b border-dotted border-slate-200 py-0.5">
                             <span className="text-slate-700">{item.name}</span>
-                            <span className="font-semibold text-slate-900">{item.quantity}개 {item.cbm ? `(${item.cbm} CBM)` : ''}</span>
+                            <span className="font-semibold text-slate-900">{item.quantity}개 {item.cbm ? `(${Math.round(item.cbm * 10) / 10} CBM)` : ''}</span>
                           </div>
                         ))}
                       </div>
