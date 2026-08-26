@@ -6,13 +6,14 @@ import { useSettingsStore } from '@/store/settingsStore';
 import { Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
+import NotificationBell from '@/components/layout/NotificationBell';
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
   const currentStep = useWizardStore(state => state.currentStep);
   const router = useRouter();
   
-  // NOTE: Cloudflare Pages Edge 런타임 500 에러를 방지하기 위해 
-  // 전역 layout 마운트 시 서버 API 호출을 임시 비활성화합니다.
+  // NOTE: Cloudflare Pages Edge 환경의 500 에러를 방지하기 위해 
+  // 전역 layout 마운트 시 서버 API 호출은 잠시 비활성화합니다.
   
   const steps = [
     { num: 1, label: '기본정보' },
@@ -49,13 +50,18 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
               </div>
             ))}
           </div>
-          <button 
-            onClick={() => router.push('/settings')}
-            className="absolute right-4 top-4 text-gray-400 hover:text-gray-700 p-2 bg-white rounded-full shadow-sm border"
-            aria-label="단가 설정"
-          >
-            <Settings size={20} />
-          </button>
+          
+          {/* Action Buttons (Right Top) */}
+          <div className="absolute right-4 top-4 flex items-center gap-2">
+            <NotificationBell />
+            <button 
+              onClick={() => router.push('/settings')}
+              className="text-gray-400 hover:text-gray-700 p-2 bg-white rounded-full shadow-sm border transition-colors"
+              aria-label="단가 설정"
+            >
+              <Settings size={20} />
+            </button>
+          </div>
         </div>
       </header>
 

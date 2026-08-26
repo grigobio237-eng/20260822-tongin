@@ -12,7 +12,11 @@ export default function AdminContractsPage() {
     fetch('/api/contract-list')
       .then(res => res.json())
       .then(json => {
-        if (json.success) setContracts(json.data);
+        if (json.success) {
+          setContracts(json.data);
+          const signedCount = json.data.filter((c: any) => c.signature_url).length;
+          localStorage.setItem('lastSeenSignedCount', signedCount.toString());
+        }
       })
       .finally(() => setLoading(false));
   }, []);
