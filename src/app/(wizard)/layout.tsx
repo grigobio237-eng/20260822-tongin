@@ -1,19 +1,17 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
-import { Settings } from 'lucide-react';
+import { Settings, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import NotificationBell from '@/components/layout/NotificationBell';
 
 export default function WizardLayout({ children }: { children: React.ReactNode }) {
   const currentStep = useWizardStore(state => state.currentStep);
+  const companyName = useSettingsStore(state => state.companyName);
   const router = useRouter();
-  
-  // NOTE: Cloudflare Pages Edge 환경의 500 에러를 방지하기 위해 
-  // 전역 layout 마운트 시 서버 API 호출은 잠시 비활성화합니다.
   
   const steps = [
     { num: 1, label: '기본정보' },
@@ -25,38 +23,52 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header / Step Indicator */}
-      <header className="bg-white border-b sticky top-0 z-10 relative">
-        <div className="max-w-4xl mx-auto px-4 py-4 relative">
-          <div className="flex items-center justify-between">
+      <header className="bg-white border-b sticky top-0 z-50 shadow-sm w-full">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          
+          {/* Left: Company Name (Dynamic) */}
+          <div className="hidden md:flex items-center w-1/4">
+            <span className="font-black text-xl text-blue-900 tracking-tight">
+              {companyName || '통인익스프레스'}
+            </span>
+          </div>
+
+          {/* Center: Steps with Arrows */}
+          <div className="flex-1 flex items-center justify-center">
             {steps.map((step, idx) => (
-              <div key={step.num} className="flex flex-col items-center flex-1">
-                <div 
-                  className={clsx(
-                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-1",
-                    currentStep >= step.num ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
-                  )}
-                >
-                  {step.num}
+              <React.Fragment key={step.num}>
+                <div className="flex flex-col items-center">
+                  <div 
+                    className={clsx(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-1 transition-colors",
+                      currentStep >= step.num ? "bg-blue-600 text-white shadow-md" : "bg-gray-200 text-gray-500"
+                    )}
+                  >
+                    {step.num}
+                  </div>
+                  <span className={clsx(
+                    "text-[11px] whitespace-nowrap transition-colors",
+                    currentStep >= step.num ? "text-blue-700 font-bold" : "text-gray-400 font-medium"
+                  )}>
+                    {step.label}
+                  </span>
                 </div>
-                <span className={clsx(
-                  "text-xs",
-                  currentStep >= step.num ? "text-blue-600 font-semibold" : "text-gray-400"
-                )}>
-                  {step.label}
-                </span>
+                
                 {idx < steps.length - 1 && (
-                  <div className="hidden sm:block absolute w-full h-0.5 bg-gray-200 -z-10 top-4 left-1/2" />
+                  <div className="px-2 sm:px-4 mb-4 text-gray-300">
+                    <ChevronRight size={18} />
+                  </div>
                 )}
-              </div>
+              </React.Fragment>
             ))}
           </div>
           
-          {/* Action Buttons (Right Top) */}
-          <div className="absolute right-4 top-4 flex items-center gap-2">
+          {/* Right: Action Buttons */}
+          <div className="flex items-center justify-end gap-2 w-1/4">
             <NotificationBell />
             <button 
               onClick={() => router.push('/settings')}
-              className="text-gray-400 hover:text-gray-700 p-2 bg-white rounded-full shadow-sm border transition-colors"
+              className="text-gray-500 hover:text-blue-600 p-2 bg-gray-50 hover:bg-blue-50 rounded-full border border-gray-200 transition-colors"
               aria-label="단가 설정"
             >
               <Settings size={20} />

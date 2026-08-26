@@ -16,6 +16,7 @@ export interface PartnerContact {
 }
 
 export interface SettingsState {
+  companyName: string; // 동적 회사명
   vehiclePrices: {
     fiveTon: number;
     twoHalfTon: number;
@@ -61,6 +62,7 @@ export const DEFAULT_LADDER_RATES: Record<string, LadderRateTier> = {
 };
 
 const defaultValues = {
+  companyName: '통인익스프레스',
   vehiclePrices: { fiveTon: 300000, twoHalfTon: 200000, oneTon: 150000 },
   workerPrices: { male: 200000, female: 150000 },
   optionPrices: initialOptionPrices,
@@ -84,6 +86,7 @@ export const useSettingsStore = create<SettingsState>()(
           if (res.ok) {
             const data = (await res.json()) as Partial<SettingsState>;
             set({
+              companyName: data.companyName || get().companyName,
               vehiclePrices: data.vehiclePrices || get().vehiclePrices,
               workerPrices: data.workerPrices || get().workerPrices,
               optionPrices: data.optionPrices || get().optionPrices,

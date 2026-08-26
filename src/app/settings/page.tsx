@@ -10,6 +10,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const store = useSettingsStore();
   
+  const [localCompanyName, setLocalCompanyName] = useState(store.companyName || '통인익스프레스');
   const [localVehiclePrices, setLocalVehiclePrices] = useState(store.vehiclePrices);
   const [localWorkerPrices, setLocalWorkerPrices] = useState(store.workerPrices);
   const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
@@ -17,6 +18,7 @@ export default function SettingsPage() {
   const [localPartnerContacts, setLocalPartnerContacts] = useState(store.partnerContacts);
 
   useEffect(() => {
+    setLocalCompanyName(store.companyName || '통인익스프레스');
     setLocalVehiclePrices(store.vehiclePrices);
     setLocalWorkerPrices(store.workerPrices);
     setLocalOptionPrices(store.optionPrices);
@@ -26,6 +28,7 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     await store.updateSettings({
+      companyName: localCompanyName,
       vehiclePrices: localVehiclePrices,
       workerPrices: localWorkerPrices,
       optionPrices: localOptionPrices,
@@ -74,6 +77,25 @@ export default function SettingsPage() {
         
         <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-8">
           
+          <section>
+            <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">기본 정보 설정</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold mb-2">회사명 (브랜드명)</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={localCompanyName} 
+                    onChange={(e) => setLocalCompanyName(e.target.value)} 
+                    className="w-full border rounded-lg p-3 font-bold text-gray-800"
+                    placeholder="예: 통인익스프레스" 
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">견적서 상단 및 고객 전송 메시지에 표시되는 이름입니다.</p>
+              </div>
+            </div>
+          </section>
+
           <section>
             <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">차량별 단가 설정</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
