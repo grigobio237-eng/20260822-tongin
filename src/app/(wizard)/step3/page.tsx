@@ -1,24 +1,43 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { OPTION_ITEMS } from '@/lib/constants/items';
 import { useSpeechToText } from '@/hooks/useSpeechToText';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff, Edit2 } from 'lucide-react';
 import clsx from 'clsx';
+
+const getLadderTierKey = (floorStr: string) => {
+  const floor = parseInt(floorStr, 10);
+  if (isNaN(floor) || floor <= 5) return 'tier_2_5';
+  if (floor <= 9) return 'tier_6_9';
+  if (floor <= 13) return 'tier_10_13';
+  if (floor <= 17) return 'tier_14_17';
+  if (floor <= 20) return 'tier_18_20';
+  if (floor <= 25) return 'tier_21_25';
+  return 'tier_26_plus';
+};
 
 export default function Step3Page() {
   const { 
     options, updateOption, 
     sttMemo, setSttMemo, 
     resources, updateResources, updateMaterial,
-    calculatedVehicles, setStep 
+    calculatedVehicles, setStep, customerInfo 
   } = useWizardStore();
   
   const optionPrices = useSettingsStore(state => state.optionPrices);
+  const ladderRates = useSettingsStore(state => state.ladderRates);
   const router = useRouter();
+
+  const [ladderTons, setLadderTons] = useState<{ [key: string]: 'oneTon' | 'fiveTon' | 'heavyTon' }>({
+    '사다리-출발지': 'fiveTon',
+    '사다리-도착지': 'fiveTon',
+  });
+
+  const [manualPrices, setManualPrices] = useState<{ [key: string]: number }>({});
 
   const handleSttResult = (text: string) => {
     setSttMemo(sttMemo ? `${sttMemo} ${text}` : text);
@@ -36,46 +55,121 @@ export default function Step3Page() {
     router.push('/step2');
   };
 
-  const handleOptionToggle = (optionName: string) => {
-    const isSelected = !!options[optionName];
-    const price = optionPrices[optionName] ?? 0;
-    updateOption(optionName, isSelected ? 0 : 1, price);
+  const getCalculatedLadderPrice = (optName: string, ton: 'oneTon' | 'fiveTon' | 'heavyTon') => {
+    if (!ladderRates) return optionPrices[optName] ?? 150000;
+    const type = optName === '사다리-출발지' ? 'departure' : 'arrival';
+    const floorStr = type === 'departure' ? customerInfo.departureFloor : customerInfo.arrivalFloor;
+    const tierKey = getLadderTierKey(floorStr);
+    return ladderRates[tierKey]?.[ton] ?? 150000;
+  };
+
+  const handleOptionToggle = (optName: string) => {
+    const isSelected = !!options[optName];
+    
+    if (isSelected) {
+      updateOption(optName, 0, 0);
+    } else {
+      let price = optionPrices[optName] ?? 0;
+      
+      if (optName === '사다리-출발지' || optName === '사다리-도착지') {
+        const ton = ladderTons[optName];
+        price = manualPrices[optName] ?? getCalculatedLadderPrice(optName, ton);
+      }
+      
+      updateOption(optName, 1, price);
+    }
+  };
+
+  const handleLadderTonChange = (optName: string, ton: 'oneTon' | 'fiveTon' | 'heavyTon') => {
+    setLadderTons(prev => ({ ...prev, [optName]: ton }));
+    if (options[optName]) {
+      // update price immediately if selected
+      const price = manualPrices[optName] ?? getCalculatedLadderPrice(optName, ton);
+      updateOption(optName, 1, price);
+    }
+  };
+
+  const handleManualPriceChange = (optName: string, priceStr: string) => {
+    const price = parseInt(priceStr, 10) || 0;
+    setManualPrices(prev => ({ ...prev, [optName]: price }));
+    if (options[optName]) {
+      updateOption(optName, 1, price);
+    }
   };
 
   const PACKING_MATERIALS = [
-    '장농', '냉장고', '이불BOX', '中BOX', '팟도大', '쇼파', '랩', '침대',
-    '분해장농', '김치냉장고大', '옷BOX', '小BOX', '팟도中', '세탁기', '에어캡',
-    '5단서랍장', '김치냉장고中', '아이스BOX', '종이BOX', '담보루', '피아노', '테이프'
+    '장롱', '냉장고', '이불BOX', '잔짐BOX', '책도구류', '소파', '침대', '바구니',
+    '분해장롱', '김치냉장고류', '옷BOX', '신발BOX', '주방도구류', '포장필름', '에어캡',
+    '5단서랍장', '김치냉장고류', '아이스BOX', '종이BOX', '골판지', '테이프', '기타'
   ];
 
   return (
     <div className="space-y-8 pb-24">
       {/* 1. 옵션 선택 */}
       <section>
-        <h2 className="text-xl font-bold mb-4">옵션 품목</h2>
+        <h2 className="text-xl font-bold mb-4">옵션 항목</h2>
         <div className="bg-white rounded-xl shadow-sm border p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {OPTION_ITEMS.map(opt => {
+            const isLadder = opt.name === '사다리-출발지' || opt.name === '사다리-도착지';
             const isSelected = !!options[opt.name];
-            const price = optionPrices[opt.name] ?? opt.defaultPrice;
+            
+            let displayPrice = optionPrices[opt.name] ?? opt.defaultPrice;
+            if (isLadder) {
+              displayPrice = manualPrices[opt.name] ?? getCalculatedLadderPrice(opt.name, ladderTons[opt.name]);
+            }
+            
             return (
-              <label 
+              <div 
                 key={opt.name} 
                 className={clsx(
-                  "flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors",
+                  "flex flex-col p-3 border rounded-lg transition-colors",
                   isSelected ? "bg-blue-50 border-blue-200" : "hover:bg-gray-50"
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <input 
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => handleOptionToggle(opt.name)}
-                    className="w-4 h-4 text-blue-600 rounded"
-                  />
-                  <span className="font-medium text-sm">{opt.name}</span>
+                <div className="flex items-center justify-between cursor-pointer" onClick={() => handleOptionToggle(opt.name)}>
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="checkbox"
+                      checked={isSelected}
+                      readOnly
+                      className="w-4 h-4 text-blue-600 rounded"
+                    />
+                    <span className="font-medium text-sm">{opt.name}</span>
+                  </div>
+                  {!isLadder && (
+                    <span className="text-sm text-gray-500 font-semibold">{displayPrice.toLocaleString()}원</span>
+                  )}
                 </div>
-                <span className="text-sm text-gray-500 font-semibold">{price.toLocaleString()}원</span>
-              </label>
+
+                {isLadder && isSelected && (
+                  <div className="mt-3 pt-3 border-t border-blue-100 flex flex-col gap-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">차량 톤수</span>
+                      <select 
+                        value={ladderTons[opt.name]}
+                        onChange={(e) => handleLadderTonChange(opt.name, e.target.value as any)}
+                        className="border rounded px-2 py-1 text-sm bg-white"
+                      >
+                        <option value="oneTon">1톤 (소형)</option>
+                        <option value="fiveTon">5톤 (기본)</option>
+                        <option value="heavyTon">6톤 이상</option>
+                      </select>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">금액 (수동조정)</span>
+                      <div className="flex items-center gap-1">
+                        <input 
+                          type="number" 
+                          value={manualPrices[opt.name] ?? getCalculatedLadderPrice(opt.name, ladderTons[opt.name])}
+                          onChange={(e) => handleManualPriceChange(opt.name, e.target.value)}
+                          className="w-24 border rounded px-2 py-1 text-sm text-right font-bold text-blue-700"
+                        />
+                        <span className="text-sm text-gray-500">원</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -83,7 +177,7 @@ export default function Step3Page() {
 
       {/* 2. 현장 메모 (STT) */}
       <section>
-        <h2 className="text-xl font-bold mb-4">고객 협의사항 / 메모</h2>
+        <h2 className="text-xl font-bold mb-4">고객 특이사항 / 메모</h2>
         <div className="bg-white rounded-xl shadow-sm border p-4 space-y-4">
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">마이크를 켜고 말씀하시면 텍스트로 변환됩니다.</span>
@@ -184,9 +278,9 @@ export default function Step3Page() {
           </button>
           <button 
             onClick={handleNext}
-            className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-md w-2/3"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-md w-2/3 transition-colors"
           >
-            다음 (정산 및 서명)
+            다음 (정산 및 저장)
           </button>
         </div>
       </div>

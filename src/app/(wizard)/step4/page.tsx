@@ -12,6 +12,7 @@ export default function Step4Page() {
   const store = useWizardStore();
   const settingsStore = useSettingsStore();
   const { customerInfo, options, reset, setStep } = store;
+  const { partnerContacts } = settingsStore;
   const router = useRouter();
   
   const [deposit, setDeposit] = useState(0);
@@ -149,12 +150,30 @@ export default function Step4Page() {
     }
   };
 
+  const getPartnerText = () => {
+    if (!settingsStore.partnerContacts) return '';
+    let text = '';
+    const cl = settingsStore.partnerContacts.cleaning;
+    const org = settingsStore.partnerContacts.organizing;
+    
+    if (cl?.companyName || cl?.phone) {
+      text += `\n\n[제휴 이사청소 업체]\n${cl.companyName} (${cl.phone})`;
+      if (cl.memo) text += `\n${cl.memo}`;
+    }
+    if (org?.companyName || org?.phone) {
+      text += `\n\n[제휴 정리수납 업체]\n${org.companyName} (${org.phone})`;
+      if (org.memo) text += `\n${org.memo}`;
+    }
+    return text;
+  };
+
   const handleCopySignLink = () => {
     if (!completedContract) return;
     const customerName = customerInfo?.name || '고객';
     const signUrl = `${window.location.origin}/sign/${completedContract.id}`;
     
-    const message = `[통인익스프레스]\n${customerName} 고객님, 요청하신 이사 견적서가 도착했습니다.\n\n아래 링크를 통해 세부 내역을 확인하시고 서명을 진행해 주세요.\n\n▶ 견적 확인 및 서명하기:\n${signUrl}`;
+    let message = `[통인익스프레스]\n${customerName} 고객님, 요청하신 이사 견적서가 도착했습니다.\n\n아래 링크를 통해 세부 내역을 확인하시고 서명을 진행해 주세요.\n\n▶ 견적 확인 및 서명하기:\n${signUrl}`;
+    message += getPartnerText();
     
     navigator.clipboard.writeText(message);
     alert(`견적 안내 문구와 링크가 클립보드에 복사되었습니다!\nPC 카카오톡이나 메신저에 바로 붙여넣기 하세요.`);
@@ -171,7 +190,8 @@ export default function Step4Page() {
       return;
     }
 
-    const message = `[통인익스프레스]\n${customerName} 고객님, 요청하신 이사 견적서가 도착했습니다.\n\n아래 링크를 통해 세부 내역을 확인하시고 서명을 진행해 주세요.\n\n▶ 견적 확인 및 서명하기:\n${signUrl}`;
+    let message = `[통인익스프레스]\n${customerName} 고객님, 요청하신 이사 견적서가 도착했습니다.\n\n아래 링크를 통해 세부 내역을 확인하시고 서명을 진행해 주세요.\n\n▶ 견적 확인 및 서명하기:\n${signUrl}`;
+    message += getPartnerText();
 
     // 기기별 SMS 프로토콜 호환성 처리 (iOS/Android)
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
