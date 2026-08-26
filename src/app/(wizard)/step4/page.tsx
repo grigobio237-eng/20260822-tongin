@@ -101,7 +101,23 @@ export default function Step4Page() {
         body: JSON.stringify({
           id: `CT_${Date.now()}`,
           customerInfo,
-          options,
+          options: calculatedOptions.map(opt => ({
+            name: opt.name,
+            quantity: 1,
+            unitPrice: opt.price,
+            totalPrice: opt.price
+          })),
+          rooms: Object.entries(store.roomItems || {}).map(([name, data]: [string, any]) => ({
+            id: name,
+            name: name,
+            items: Object.entries(data.items || {}).map(([itemName, itemState]: [string, any]) => ({
+              name: itemName,
+              quantity: itemState.quantity,
+              cbm: itemState.cbm || 0
+            })),
+            memo: data.note || '',
+            images: data.images || []
+          })),
           totalCost,
           deposit,
           balance,
