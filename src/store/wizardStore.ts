@@ -233,7 +233,11 @@ export const useWizardStore = create<WizardState>()(
         });
         
         totalCbm = Math.round(totalCbm * 10) / 10;
-        const calculated = calculateVehicles(totalCbm);
+        
+        // SettingsStore에서 설정된 CBM 한도 가져오기
+        const { useSettingsStore } = require('./settingsStore');
+        const limits = useSettingsStore.getState().vehicleCbmLimits;
+        const calculated = calculateVehicles(totalCbm, limits);
         
         set({ 
           totalCbm, 

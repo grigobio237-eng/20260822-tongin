@@ -4,20 +4,29 @@ export interface VehicleRecommendation {
   oneTon: number;
 }
 
+export interface VehicleCbmLimits {
+  fiveTon: number;
+  twoHalfTon: number;
+  oneTon: number;
+}
+
 /**
  * 총 CBM을 기반으로 권장 차량 대수를 계산합니다.
- * 5T = 15 CBM, 2.5T = 7.5 CBM, 1T = 3 CBM 기준으로 대략 산정
  */
-export function calculateVehicles(totalCbm: number): VehicleRecommendation {
+export function calculateVehicles(totalCbm: number, limits?: VehicleCbmLimits): VehicleRecommendation {
   let remainingCbm = totalCbm;
   
-  const fiveTon = Math.floor(remainingCbm / 15);
-  remainingCbm -= fiveTon * 15;
+  const fiveLimit = limits?.fiveTon || 15;
+  const twoHalfLimit = limits?.twoHalfTon || 7.5;
+  const oneLimit = limits?.oneTon || 3;
   
-  const twoHalfTon = Math.floor(remainingCbm / 7.5);
-  remainingCbm -= twoHalfTon * 7.5;
+  const fiveTon = Math.floor(remainingCbm / fiveLimit);
+  remainingCbm -= fiveTon * fiveLimit;
   
-  const oneTon = Math.ceil(remainingCbm / 3);
+  const twoHalfTon = Math.floor(remainingCbm / twoHalfLimit);
+  remainingCbm -= twoHalfTon * twoHalfLimit;
+  
+  const oneTon = Math.ceil(remainingCbm / oneLimit);
   
   return {
     fiveTon,

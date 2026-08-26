@@ -25,7 +25,7 @@ export default function Step3Page() {
     options, updateOption, 
     sttMemo, setSttMemo, 
     resources, updateResources, updateMaterial,
-    calculatedVehicles, setStep, customerInfo 
+    calculatedVehicles, setStep, customerInfo, totalCbm 
   } = useWizardStore();
   
   const optionPrices = useSettingsStore(state => state.optionPrices);
@@ -208,24 +208,50 @@ export default function Step3Page() {
       <section>
         <h2 className="text-xl font-bold mb-4">작업 인원 및 포장재료</h2>
         <div className="bg-white rounded-xl shadow-sm border p-4 space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-             <div>
-               <label className="block text-sm font-bold text-gray-700 mb-2">투입 차량 (CBM 기반 추천)</label>
-               <div className="flex gap-2">
-                 <div className="flex-1 border rounded p-2 text-center bg-gray-50">
-                    <span className="block text-xs text-gray-500">5T</span>
-                    <span className="font-bold">{calculatedVehicles.fiveTon}대</span>
-                 </div>
-                 <div className="flex-1 border rounded p-2 text-center bg-gray-50">
-                    <span className="block text-xs text-gray-500">2.5T</span>
-                    <span className="font-bold">{calculatedVehicles.twoHalfTon}대</span>
-                 </div>
-                 <div className="flex-1 border rounded p-2 text-center bg-gray-50">
-                    <span className="block text-xs text-gray-500">1T</span>
-                    <span className="font-bold">{calculatedVehicles.oneTon}대</span>
-                 </div>
-               </div>
-             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  투입 차량 <span className="font-normal text-gray-500 text-xs ml-1">(추천: {calculatedVehicles.fiveTon}대 / {calculatedVehicles.twoHalfTon}대 / {calculatedVehicles.oneTon}대 - 총 {totalCbm} CBM)</span>
+                </label>
+                <div className="flex gap-2">
+                  <div className="flex-1 border rounded p-1 text-center bg-white flex flex-col items-center">
+                     <span className="block text-[10px] text-gray-500 mb-1">5T</span>
+                     <input 
+                       type="number" 
+                       min="0"
+                       className="w-full text-center font-bold outline-none"
+                       value={resources.vehicles.fiveTon || 0}
+                       onChange={(e) => updateResources({ 
+                         vehicles: { ...resources.vehicles, fiveTon: Number(e.target.value) } 
+                       })}
+                     />
+                  </div>
+                  <div className="flex-1 border rounded p-1 text-center bg-white flex flex-col items-center">
+                     <span className="block text-[10px] text-gray-500 mb-1">2.5T</span>
+                     <input 
+                       type="number" 
+                       min="0"
+                       className="w-full text-center font-bold outline-none"
+                       value={resources.vehicles.twoHalfTon || 0}
+                       onChange={(e) => updateResources({ 
+                         vehicles: { ...resources.vehicles, twoHalfTon: Number(e.target.value) } 
+                       })}
+                     />
+                  </div>
+                  <div className="flex-1 border rounded p-1 text-center bg-white flex flex-col items-center">
+                     <span className="block text-[10px] text-gray-500 mb-1">1T</span>
+                     <input 
+                       type="number" 
+                       min="0"
+                       className="w-full text-center font-bold outline-none"
+                       value={resources.vehicles.oneTon || 0}
+                       onChange={(e) => updateResources({ 
+                         vehicles: { ...resources.vehicles, oneTon: Number(e.target.value) } 
+                       })}
+                     />
+                  </div>
+                </div>
+              </div>
              <div>
                <label className="block text-sm font-bold text-gray-700 mb-2">작업 인원</label>
                <div className="flex gap-2">

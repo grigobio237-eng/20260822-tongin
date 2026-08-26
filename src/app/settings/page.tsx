@@ -12,6 +12,7 @@ export default function SettingsPage() {
   
   const [localCompanyName, setLocalCompanyName] = useState(store.companyName || '통인익스프레스');
   const [localVehiclePrices, setLocalVehiclePrices] = useState(store.vehiclePrices);
+  const [localVehicleCbmLimits, setLocalVehicleCbmLimits] = useState(store.vehicleCbmLimits || { fiveTon: 15, twoHalfTon: 7.5, oneTon: 3 });
   const [localWorkerPrices, setLocalWorkerPrices] = useState(store.workerPrices);
   const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
   const [localLadderRates, setLocalLadderRates] = useState<Record<string, LadderRateTier>>(store.ladderRates || DEFAULT_LADDER_RATES);
@@ -20,6 +21,7 @@ export default function SettingsPage() {
   useEffect(() => {
     setLocalCompanyName(store.companyName || '통인익스프레스');
     setLocalVehiclePrices(store.vehiclePrices);
+    if (store.vehicleCbmLimits) setLocalVehicleCbmLimits(store.vehicleCbmLimits);
     setLocalWorkerPrices(store.workerPrices);
     setLocalOptionPrices(store.optionPrices);
     if (store.ladderRates) setLocalLadderRates(store.ladderRates);
@@ -30,6 +32,7 @@ export default function SettingsPage() {
     await store.updateSettings({
       companyName: localCompanyName,
       vehiclePrices: localVehiclePrices,
+      vehicleCbmLimits: localVehicleCbmLimits,
       workerPrices: localWorkerPrices,
       optionPrices: localOptionPrices,
       ladderRates: localLadderRates,
@@ -97,29 +100,63 @@ export default function SettingsPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">차량별 단가 설정</h2>
+            <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">차량 단가 및 적재량(CBM) 설정</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-sm font-semibold mb-2">5톤 차량 (기본)</label>
-                <div className="relative">
-                  <input type="number" value={localVehiclePrices.fiveTon} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, fiveTon: Number(e.target.value) })} className="w-full border rounded-lg p-3 text-right font-bold pr-10" />
-                  <span className="absolute right-4 top-3 text-gray-500">원</span>
+              
+              <div className="border rounded-xl p-4 bg-gray-50 space-y-4">
+                <h3 className="font-bold text-gray-800">5톤 차량 (기본)</h3>
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-gray-600">단가</label>
+                  <div className="relative">
+                    <input type="number" value={localVehiclePrices.fiveTon} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, fiveTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-8 text-sm" />
+                    <span className="absolute right-3 top-2 text-gray-500 text-sm">원</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-gray-600">최대 적재량</label>
+                  <div className="relative">
+                    <input type="number" value={localVehicleCbmLimits.fiveTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, fiveTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
+                    <span className="absolute right-3 top-2 text-gray-500 text-sm">CBM</span>
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">2.5톤 차량</label>
-                <div className="relative">
-                  <input type="number" value={localVehiclePrices.twoHalfTon} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, twoHalfTon: Number(e.target.value) })} className="w-full border rounded-lg p-3 text-right font-bold pr-10" />
-                  <span className="absolute right-4 top-3 text-gray-500">원</span>
+              
+              <div className="border rounded-xl p-4 bg-gray-50 space-y-4">
+                <h3 className="font-bold text-gray-800">2.5톤 차량</h3>
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-gray-600">단가</label>
+                  <div className="relative">
+                    <input type="number" value={localVehiclePrices.twoHalfTon} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, twoHalfTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-8 text-sm" />
+                    <span className="absolute right-3 top-2 text-gray-500 text-sm">원</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-gray-600">최대 적재량</label>
+                  <div className="relative">
+                    <input type="number" value={localVehicleCbmLimits.twoHalfTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, twoHalfTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
+                    <span className="absolute right-3 top-2 text-gray-500 text-sm">CBM</span>
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">1톤 차량</label>
-                <div className="relative">
-                  <input type="number" value={localVehiclePrices.oneTon} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, oneTon: Number(e.target.value) })} className="w-full border rounded-lg p-3 text-right font-bold pr-10" />
-                  <span className="absolute right-4 top-3 text-gray-500">원</span>
+
+              <div className="border rounded-xl p-4 bg-gray-50 space-y-4">
+                <h3 className="font-bold text-gray-800">1톤 차량</h3>
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-gray-600">단가</label>
+                  <div className="relative">
+                    <input type="number" value={localVehiclePrices.oneTon} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, oneTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-8 text-sm" />
+                    <span className="absolute right-3 top-2 text-gray-500 text-sm">원</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-gray-600">최대 적재량</label>
+                  <div className="relative">
+                    <input type="number" value={localVehicleCbmLimits.oneTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, oneTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
+                    <span className="absolute right-3 top-2 text-gray-500 text-sm">CBM</span>
+                  </div>
                 </div>
               </div>
+
             </div>
           </section>
 

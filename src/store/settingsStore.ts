@@ -22,6 +22,11 @@ export interface SettingsState {
     twoHalfTon: number;
     oneTon: number;
   };
+  vehicleCbmLimits: {
+    fiveTon: number;
+    twoHalfTon: number;
+    oneTon: number;
+  };
   workerPrices: {
     male: number;
     female: number;
@@ -64,6 +69,7 @@ export const DEFAULT_LADDER_RATES: Record<string, LadderRateTier> = {
 const defaultValues = {
   companyName: '통인익스프레스',
   vehiclePrices: { fiveTon: 300000, twoHalfTon: 200000, oneTon: 150000 },
+  vehicleCbmLimits: { fiveTon: 15, twoHalfTon: 7.5, oneTon: 3 },
   workerPrices: { male: 200000, female: 150000 },
   optionPrices: initialOptionPrices,
   ladderRates: DEFAULT_LADDER_RATES,
@@ -88,6 +94,7 @@ export const useSettingsStore = create<SettingsState>()(
             set({
               companyName: data.companyName || get().companyName,
               vehiclePrices: data.vehiclePrices || get().vehiclePrices,
+              vehicleCbmLimits: data.vehicleCbmLimits || get().vehicleCbmLimits,
               workerPrices: data.workerPrices || get().workerPrices,
               optionPrices: data.optionPrices || get().optionPrices,
               ladderRates: data.ladderRates || get().ladderRates,
