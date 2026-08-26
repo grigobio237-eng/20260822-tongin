@@ -93,9 +93,6 @@ export default function Step4Page() {
   };
 
   const handleSubmit = async () => {
-    if (!agreed) return alert('약관 및 주의사항에 동의해주세요.');
-    if (!signatureData) return alert('전자서명이 필요합니다.');
-    
     setIsSubmitting(true);
     try {
       const res = await fetch('/api/contract-save', {
