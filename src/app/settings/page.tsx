@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useSettingsStore, LadderRateTier, PartnerContact, DEFAULT_LADDER_RATES } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowLeft, Save } from 'lucide-react';
-import { OPTION_ITEMS } from '@/lib/constants/items';
+import { OPTION_ITEMS, PACKING_MATERIALS } from '@/lib/constants/items';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function SettingsPage() {
   const [localCompanyName, setLocalCompanyName] = useState(store.companyName || '통인익스프레스');
   const [localVehiclePrices, setLocalVehiclePrices] = useState(store.vehiclePrices);
   const [localVehicleCbmLimits, setLocalVehicleCbmLimits] = useState(store.vehicleCbmLimits || { fiveTon: 15, twoHalfTon: 7.5, oneTon: 3 });
+  const [localDefaultPackingMaterials, setLocalDefaultPackingMaterials] = useState(store.defaultPackingMaterials || { fiveTon: {}, twoHalfTon: {}, oneTon: {} });
   const [localWorkerPrices, setLocalWorkerPrices] = useState(store.workerPrices);
   const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
   const [localLadderRates, setLocalLadderRates] = useState<Record<string, LadderRateTier>>(store.ladderRates || DEFAULT_LADDER_RATES);
@@ -22,6 +23,7 @@ export default function SettingsPage() {
     setLocalCompanyName(store.companyName || '통인익스프레스');
     setLocalVehiclePrices(store.vehiclePrices);
     if (store.vehicleCbmLimits) setLocalVehicleCbmLimits(store.vehicleCbmLimits);
+    if (store.defaultPackingMaterials) setLocalDefaultPackingMaterials(store.defaultPackingMaterials);
     setLocalWorkerPrices(store.workerPrices);
     setLocalOptionPrices(store.optionPrices);
     if (store.ladderRates) setLocalLadderRates(store.ladderRates);
@@ -33,6 +35,7 @@ export default function SettingsPage() {
       companyName: localCompanyName,
       vehiclePrices: localVehiclePrices,
       vehicleCbmLimits: localVehicleCbmLimits,
+      defaultPackingMaterials: localDefaultPackingMaterials,
       workerPrices: localWorkerPrices,
       optionPrices: localOptionPrices,
       ladderRates: localLadderRates,
@@ -268,6 +271,46 @@ export default function SettingsPage() {
                       onChange={(e) => handleOptionChange(item.name, Number(e.target.value))}
                       className="w-full border rounded p-2 text-sm text-right pr-6"
                     />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">차량별 기본 포장재료 세팅</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              견적 시 투입 차량 대수에 비례하여 자동으로 합산될 포장재료의 기본값을 설정합니다.
+            </p>
+            <div className="space-y-6">
+              {[
+                { key: 'fiveTon', label: '5톤 차량 (1대당 기본 재료)' },
+                { key: 'twoHalfTon', label: '2.5톤 차량 (1대당 기본 재료)' },
+                { key: 'oneTon', label: '1톤 차량 (1대당 기본 재료)' }
+              ].map((vehicle) => (
+                <div key={vehicle.key} className="border rounded-xl p-4 bg-gray-50">
+                  <h3 className="font-bold text-gray-800 mb-3">{vehicle.label}</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                    {PACKING_MATERIALS.map(mat => (
+                      <div key={mat} className="flex flex-col">
+                        <span className="text-xs font-medium text-gray-600 truncate mb-1" title={mat}>{mat}</span>
+                        <input 
+                          type="number" min="0" placeholder="0"
+                          className="w-full text-center border rounded p-1.5 outline-none font-bold text-blue-600 text-sm" 
+                          value={localDefaultPackingMaterials[vehicle.key as keyof typeof localDefaultPackingMaterials][mat] || ''}
+                          onChange={e => {
+                            const val = Number(e.target.value);
+                            setLocalDefaultPackingMaterials({
+                              ...localDefaultPackingMaterials,
+                              [vehicle.key]: {
+                                ...localDefaultPackingMaterials[vehicle.key as keyof typeof localDefaultPackingMaterials],
+                                [mat]: val > 0 ? val : undefined
+                              }
+                            });
+                          }}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}

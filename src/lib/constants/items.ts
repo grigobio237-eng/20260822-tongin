@@ -1,4 +1,4 @@
-export type RoomCategory = '방 1' | '방 2' | '방 3' | '방 4' | '방 5' | '거실' | '주방' | '베란다';
+﻿export type RoomCategory = '방 1' | '방 2' | '방 3' | '방 4' | '방 5' | '거실' | '주방' | '베란다';
 
 export interface ItemVariant {
   name: string;
@@ -243,3 +243,9 @@ export const OPTION_ITEMS: OptionDef[] = [
   { name: '보관료', defaultPrice: 100000 },
   { name: '대기료 (1시간 이상 지연 시)', defaultPrice: 50000 },
 ];
+
+
+
+
+export const PACKING_MATERIALS = ['장롱', '냉장고', '이불BOX', '잔짐BOX', '책도구류', '소파', '침대', '바구니', '분해장롱', '김치냉장고류', '옷BOX', '신발BOX', '주방도구류', '포장필름', '에어캡', '5단서랍장', '아이스BOX', '종이BOX', '골판지', '테이프', 'TV박스 (인치)', '기타'];
+

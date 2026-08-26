@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
-import { OPTION_ITEMS } from '@/lib/constants/items';
+import { OPTION_ITEMS, PACKING_MATERIALS } from '@/lib/constants/items';
 import { useSpeechToText } from '@/hooks/useSpeechToText';
 import { Mic, MicOff, Edit2 } from 'lucide-react';
 import clsx from 'clsx';
@@ -276,20 +276,49 @@ export default function Step3Page() {
           </div>
           
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-3">포장재료</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {PACKING_MATERIALS.map(mat => (
-                <div key={mat} className="flex items-center justify-between border rounded p-2">
-                  <span className="text-sm font-medium">{mat}</span>
-                  <input type="number" min="0" placeholder="0"
-                    className="w-12 text-center border-b outline-none font-bold text-blue-600" 
-                    value={resources.materials[mat] || ''}
-                    onChange={e => updateMaterial(mat, Number(e.target.value))}
-                  />
-                </div>
-              ))}
+              <label className="block text-sm font-bold text-gray-700 mb-3">포장재료</label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {PACKING_MATERIALS.map(mat => {
+                  const val = resources.materials[mat] || 0;
+                  return (
+                    <div key={mat} className="flex flex-col gap-1 border rounded p-2 bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-gray-700 truncate" title={mat}>{mat}</span>
+                        <div className="flex items-center gap-1 bg-white border rounded">
+                          <button 
+                            className="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-gray-100"
+                            onClick={() => updateMaterial(mat, Math.max(0, val - 1))}
+                          >
+                            -
+                          </button>
+                          <input 
+                            type="number" min="0" placeholder="0"
+                            className="w-8 text-center outline-none font-bold text-blue-600 text-sm" 
+                            value={val || ''}
+                            onChange={e => updateMaterial(mat, Number(e.target.value))}
+                          />
+                          <button 
+                            className="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-gray-100"
+                            onClick={() => updateMaterial(mat, val + 1)}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                      {mat === 'TV박스 (인치)' && (
+                        <input 
+                          type="text" 
+                          placeholder="인치 입력 (예: 65, 75)"
+                          className="w-full text-xs p-1 border rounded mt-1"
+                          value={resources.tvBoxInches || ''}
+                          onChange={e => updateResources({ tvBoxInches: e.target.value })}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
         </div>
       </section>
 

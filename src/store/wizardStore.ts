@@ -46,6 +46,7 @@ export interface ResourceState {
   workerMale: number;
   workerFemale: number;
   materials: Record<string, number>;
+  tvBoxInches?: string;
 }
 
 interface WizardState {
@@ -94,7 +95,8 @@ const initialResources: ResourceState = {
   vehicles: { fiveTon: 0, twoHalfTon: 0, oneTon: 0 },
   workerMale: 3,
   workerFemale: 1,
-  materials: {}
+  materials: {},
+  tvBoxInches: ''
 };
 
 export const useWizardStore = create<WizardState>()(
@@ -207,9 +209,35 @@ export const useWizardStore = create<WizardState>()(
 
       setSttMemo: (memo) => set({ sttMemo: memo }),
       
-      updateResources: (info) => set((state) => ({
-        resources: { ...state.resources, ...info }
-      })),
+      updateResources: (info) => set((state) => {
+        let newMaterials = state.resources.materials;
+        
+        // 차량 수가 변경되었을 때 포장재료 기본값 자동 재계산
+        if (info.vehicles) {
+          const { useSettingsStore } = require('./settingsStore');
+          const defaultMats = useSettingsStore.getState().defaultPackingMaterials;
+          const autoMaterials: Record<string, number> = {};
+          
+          const addMats = (mats: Record<string, number>, count: number) => {
+            if (!mats || count <= 0) return;
+            Object.entries(mats).forEach(([key, val]) => {
+              if (val > 0) {
+                autoMaterials[key] = (autoMaterials[key] || 0) + (val * count);
+              }
+            });
+          };
+          
+          addMats(defaultMats.fiveTon, info.vehicles.fiveTon || 0);
+          addMats(defaultMats.twoHalfTon, info.vehicles.twoHalfTon || 0);
+          addMats(defaultMats.oneTon, info.vehicles.oneTon || 0);
+          
+          newMaterials = autoMaterials;
+        }
+
+        return {
+          resources: { ...state.resources, ...info, materials: newMaterials }
+        };
+      }),
 
       updateMaterial: (materialName, quantity) => set((state) => ({
         resources: { 
@@ -234,15 +262,36 @@ export const useWizardStore = create<WizardState>()(
         
         totalCbm = Math.round(totalCbm * 10) / 10;
         
-        // SettingsStore에서 설정된 CBM 한도 가져오기
         const { useSettingsStore } = require('./settingsStore');
-        const limits = useSettingsStore.getState().vehicleCbmLimits;
+        const settings = useSettingsStore.getState();
+        const limits = settings.vehicleCbmLimits;
         const calculated = calculateVehicles(totalCbm, limits);
+        
+        // 포장재료 기본값 자동 합산
+        const defaultMats = settings.defaultPackingMaterials;
+        const autoMaterials: Record<string, number> = {};
+        
+        const addMats = (mats: Record<string, number>, count: number) => {
+          if (!mats || count <= 0) return;
+          Object.entries(mats).forEach(([key, val]) => {
+            if (val > 0) {
+              autoMaterials[key] = (autoMaterials[key] || 0) + (val * count);
+            }
+          });
+        };
+        
+        addMats(defaultMats.fiveTon, calculated.fiveTon);
+        addMats(defaultMats.twoHalfTon, calculated.twoHalfTon);
+        addMats(defaultMats.oneTon, calculated.oneTon);
         
         set({ 
           totalCbm, 
           calculatedVehicles: calculated,
-          resources: { ...resources, vehicles: calculated } 
+          resources: { 
+            ...resources, 
+            vehicles: calculated,
+            materials: autoMaterials 
+          } 
         });
       },
 
