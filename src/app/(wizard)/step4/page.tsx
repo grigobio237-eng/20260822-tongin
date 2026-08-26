@@ -151,9 +151,13 @@ export default function Step4Page() {
 
   const handleCopySignLink = () => {
     if (!completedContract) return;
+    const customerName = customerInfo?.name || '고객';
     const signUrl = `${window.location.origin}/sign/${completedContract.id}`;
-    navigator.clipboard.writeText(signUrl);
-    alert(`고객 전용 검토 및 서명 링크가 복사되었습니다!\n\n${signUrl}`);
+    
+    const message = `[통인익스프레스]\n${customerName} 고객님, 요청하신 이사 견적서가 도착했습니다.\n\n아래 링크를 통해 세부 내역을 확인하시고 서명을 진행해 주세요.\n\n▶ 견적 확인 및 서명하기:\n${signUrl}`;
+    
+    navigator.clipboard.writeText(message);
+    alert(`견적 안내 문구와 링크가 클립보드에 복사되었습니다!\nPC 카카오톡이나 메신저에 바로 붙여넣기 하세요.`);
   };
 
   const handleSendSmsLink = () => {
@@ -228,7 +232,7 @@ export default function Step4Page() {
             className="flex justify-center items-center gap-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold shadow-md transition-colors"
           >
             <FileText size={20} />
-            견적서 검토/서명 링크 복사
+            문구와 함께 링크 복사 (PC 카톡용)
           </button>
           <button 
             onClick={() => exportToPdf(completedContract.id, customerInfo.name || '고객')}
