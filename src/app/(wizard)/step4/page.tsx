@@ -4,10 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
-import SignaturePad from '@/components/wizard/SignaturePad';
 import { ContractPrintDocument, ContractPrintData } from '@/components/pdf/ContractPrintDocument';
-// @react-pdf/renderer는 Node.js 전용 - Edge Worker 번들에서 제외 (동적 import 필요시 별도 처리)
-// import { pdf } from '@react-pdf/renderer';
 import { Loader2, CheckCircle, FileText } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -16,9 +13,6 @@ export default function Step4Page() {
   const settingsStore = useSettingsStore();
   const { customerInfo, options, reset, setStep } = store;
   const router = useRouter();
-  
-  const [agreed, setAgreed] = useState(false);
-  const [signatureData, setSignatureData] = useState<string | null>(null);
   
   const [deposit, setDeposit] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,11 +37,11 @@ export default function Step4Page() {
     if (name.includes('대기료')) {
       price = basePrice * opt.quantity * totalWorkers;
       displayName = `${name} (${totalWorkers}명)`;
-    } else if (name === '사다리·출발지') {
+    } else if (name === '사다리-출발지') {
       const count = customerInfo.departureLadderCount || 1;
       price = basePrice * opt.quantity * count;
       if (count > 1) displayName = `${name} (${count}대)`;
-    } else if (name === '사다리·도착지') {
+    } else if (name === '사다리-도착지') {
       const count = customerInfo.arrivalLadderCount || 1;
       price = basePrice * opt.quantity * count;
       if (count > 1) displayName = `${name} (${count}대)`;
@@ -68,28 +62,6 @@ export default function Step4Page() {
   const handlePrev = () => {
     setStep(3);
     router.push('/step3');
-  };
-
-  const dataURLtoBlob = (dataurl: string) => {
-    const arr = dataurl.split(',');
-    const mimeMatch = arr[0].match(/:(.*?);/);
-    const mime = mimeMatch ? mimeMatch[1] : 'image/png';
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], { type: mime });
-  };
-
-  const blobToBase64 = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
   };
 
   const handleSubmit = async () => {
@@ -213,7 +185,6 @@ export default function Step4Page() {
       totalCost: totalCost,
       deposit: deposit,
       balance: balance,
-      signatureBase64: signatureData || undefined,
       sttMemo: store.sttMemo
     };
 
@@ -222,8 +193,8 @@ export default function Step4Page() {
         <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
           <CheckCircle size={40} />
         </div>
-        <h2 className="text-2xl font-bold text-gray-800">계약이 체결되었습니다!</h2>
-        <p className="text-gray-600">견적서 및 계약서 PDF가 안전하게 저장되었습니다.</p>
+        <h2 className="text-2xl font-bold text-gray-800">견적서가 생성되었습니다!</h2>
+        <p className="text-gray-600">고객에게 보낼 견적서 링크가 안전하게 저장되었습니다.</p>
         
         <div className="flex flex-col gap-3 mt-8 w-full max-w-sm">
           <button 
@@ -238,7 +209,7 @@ export default function Step4Page() {
             className="flex justify-center items-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-md transition-colors"
           >
             <FileText size={20} />
-            PDF 계약서 다운로드
+            PDF 견적서 다운로드
           </button>
           <button 
             onClick={handleFinish}
@@ -435,33 +406,6 @@ export default function Step4Page() {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* 2. 약관 및 동의 (대면 계약 시) */}
-      <section>
-        <h2 className="text-xl font-bold mb-4">고지사항 확인 <span className="text-sm font-normal text-gray-500">(대면 계약 시)</span></h2>
-        <div className="bg-yellow-50 rounded-xl border border-yellow-200 p-4 space-y-2">
-          <p className="text-xs text-yellow-800 leading-relaxed">
-            ▶ 현금·유가증권, 귀금속은 고객이 직접 관리하며 사업자는 책임지지 않습니다.<br/>
-            ▶ 도배/잔금 및 대기시 대기료 별도, 에어컨 설치시 부·자재비 별도<br/>
-            ▶ 도착지환경에 따라 추가비용이 발생할 수 있습니다. (차량진입 불가시, 계단작업 및 이송작업시)
-          </p>
-          <label className="flex items-center gap-2 mt-4 pt-4 border-t border-yellow-200 cursor-pointer">
-            <input 
-              type="checkbox" 
-              className="w-5 h-5 rounded text-blue-600"
-              checked={agreed}
-              onChange={e => setAgreed(e.target.checked)}
-            />
-            <span className="font-bold text-sm">위 약관 및 중요 고지사항을 모두 확인하고 동의합니다.</span>
-          </label>
-        </div>
-      </section>
-
-      {/* 3. 전자서명 (대면 계약 시) */}
-      <section>
-        <h2 className="text-xl font-bold mb-4">고객 전자서명 <span className="text-sm font-normal text-gray-500">(비대면 시 생략 가능)</span></h2>
-        <SignaturePad onSign={(dataUrl) => setSignatureData(dataUrl)} />
       </section>
 
       {/* Footer Navigation */}
