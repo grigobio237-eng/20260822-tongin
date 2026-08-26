@@ -157,6 +157,26 @@ export default function Step4Page() {
     alert(`고객 전용 검토 및 서명 링크가 복사되었습니다!\n\n${signUrl}`);
   };
 
+  const handleSendSmsLink = () => {
+    if (!completedContract) return;
+    const customerPhone = customerInfo?.phone?.replace(/[^0-9]/g, '');
+    const customerName = customerInfo?.name || '고객';
+    const signUrl = `${window.location.origin}/sign/${completedContract.id}`;
+
+    if (!customerPhone) {
+      alert('고객 연락처가 입력되지 않았습니다.');
+      return;
+    }
+
+    const message = `[통인익스프레스]\n${customerName} 고객님, 요청하신 이사 견적서가 도착했습니다.\n\n아래 링크를 통해 세부 내역을 확인하시고 서명을 진행해 주세요.\n\n▶ 견적 확인 및 서명하기:\n${signUrl}`;
+
+    // 기기별 SMS 프로토콜 호환성 처리 (iOS/Android)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const smsScheme = isIOS ? `sms:${customerPhone}&body=${encodeURIComponent(message)}` : `sms:${customerPhone}?body=${encodeURIComponent(message)}`;
+
+    window.location.href = smsScheme;
+  };
+
   if (completedContract) {
     const fullContractData: ContractPrintData = {
       id: completedContract.id,
@@ -197,6 +217,13 @@ export default function Step4Page() {
         <p className="text-gray-600">고객에게 보낼 견적서 링크가 안전하게 저장되었습니다.</p>
         
         <div className="flex flex-col gap-3 mt-8 w-full max-w-sm">
+          <button 
+            onClick={handleSendSmsLink}
+            className="flex justify-center items-center gap-2 w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-bold shadow-md transition-colors"
+          >
+            <FileText size={20} />
+            고객 폰으로 SMS 링크 전송
+          </button>
           <button 
             onClick={handleCopySignLink}
             className="flex justify-center items-center gap-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold shadow-md transition-colors"
