@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { OPTION_ITEMS, PACKING_MATERIALS } from '@/lib/constants/items';
+import { calculateVehicles } from '@/lib/cbm';
 import { useSpeechToText } from '@/hooks/useSpeechToText';
 import { Mic, MicOff, Edit2 } from 'lucide-react';
 import clsx from 'clsx';
@@ -25,12 +26,15 @@ export default function Step3Page() {
     options, updateOption, 
     sttMemo, setSttMemo, 
     resources, updateResources, updateMaterial,
-    calculatedVehicles, setStep, customerInfo, totalCbm 
+    setStep, customerInfo, totalCbm 
   } = useWizardStore();
   
   const optionPrices = useSettingsStore(state => state.optionPrices);
   const ladderRates = useSettingsStore(state => state.ladderRates);
+  const vehicleLimits = useSettingsStore(state => state.vehicleCbmLimits);
   const router = useRouter();
+
+  const recommendedVehicles = useMemo(() => calculateVehicles(totalCbm, vehicleLimits), [totalCbm, vehicleLimits]);
 
   const [ladderTons, setLadderTons] = useState<{ [key: string]: 'oneTon' | 'fiveTon' | 'heavyTon' }>({
     '사다리-출발지': 'fiveTon',
@@ -210,8 +214,14 @@ export default function Step3Page() {
         <div className="bg-white rounded-xl shadow-sm border p-4 space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  투입 차량 <span className="font-normal text-gray-500 text-xs ml-1">(추천: {calculatedVehicles.fiveTon}대 / {calculatedVehicles.twoHalfTon}대 / {calculatedVehicles.oneTon}대 - 총 {totalCbm} CBM)</span>
+                <label className="flex items-center text-sm font-bold text-gray-700 mb-2">
+                  투입 차량 <span className="font-normal text-gray-500 text-xs ml-1">(추천: {recommendedVehicles.fiveTon}대 / {recommendedVehicles.twoHalfTon}대 / {recommendedVehicles.oneTon}대 - 총 {totalCbm} CBM)</span>
+                  <button 
+                    onClick={() => updateResources({ vehicles: recommendedVehicles })}
+                    className="ml-2 bg-blue-50 text-blue-600 text-xs px-2 py-0.5 rounded border border-blue-200 hover:bg-blue-100 transition-colors"
+                  >
+                    추천 적용
+                  </button>
                 </label>
                 <div className="flex gap-2">
                   <div className="flex-1 border rounded p-1 text-center bg-white flex flex-col items-center">
