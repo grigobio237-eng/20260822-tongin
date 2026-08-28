@@ -10,6 +10,7 @@ import { Check, ChevronDown, Plus, Minus, X } from 'lucide-react';
 interface ModalState {
   room: RoomCategory;
   item: MasterItem;
+  instanceId?: string;
 }
 
 export default function Step2Page() {
@@ -22,11 +23,13 @@ export default function Step2Page() {
   const roomItems = useWizardStore((state) => state.roomItems);
   const updateRoomItemQuantity = useWizardStore((state) => state.updateRoomItemQuantity);
   const changeItemVariant = useWizardStore((state) => state.changeItemVariant);
+  const addRoomItemInstance = useWizardStore((state) => state.addRoomItemInstance);
+  const removeRoomItemInstance = useWizardStore((state) => state.removeRoomItemInstance);
   const totalCbm = useWizardStore((state) => state.totalCbm);
   const calculatedVehicles = useWizardStore((state) => state.calculatedVehicles);
 
-  const handleOpenModal = (room: RoomCategory, item: MasterItem) => {
-    setModalState({ room, item });
+  const handleOpenModal = (room: RoomCategory, item: MasterItem, instanceId?: string) => {
+    setModalState({ room, item, instanceId });
     setCustomCbmInput('');
   };
 
@@ -36,7 +39,7 @@ export default function Step2Page() {
 
   const handleVariantSelect = (variantName: string, cbm: number) => {
     if (modalState) {
-      changeItemVariant(modalState.room, modalState.item.name, variantName, cbm);
+      changeItemVariant(modalState.room, modalState.item.name, modalState.instanceId || '', variantName, cbm);
       handleCloseModal();
     }
   };
@@ -44,7 +47,7 @@ export default function Step2Page() {
   const handleCustomCbmSave = () => {
     const parsed = parseFloat(customCbmInput);
     if (modalState && !isNaN(parsed) && parsed > 0) {
-      changeItemVariant(modalState.room, modalState.item.name, '직접 입력', parsed);
+      changeItemVariant(modalState.room, modalState.item.name, modalState.instanceId || '', '직접 입력', parsed);
       handleCloseModal();
     }
   };
@@ -84,45 +87,95 @@ export default function Step2Page() {
       {/* Items Grid */}
       <div className="bg-white rounded-xl shadow-sm border p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         {ROOM_CATEGORIES[activeTab].map((item) => {
-          const itemState = roomItems[activeTab]?.items?.[item.name];
-          const qty = itemState?.quantity || 0;
+          const instances = roomItems[activeTab]?.items?.[item.name] || [];
           
-          // 표시할 기본 variant 찾기
-          let displayVariant = itemState?.variantName;
-          let displayCbm = itemState?.unitCbm;
-          
-          if (!displayVariant) {
-            const def = item.variants.find(v => v.isDefault) || item.variants[1] || item.variants[0];
-            displayVariant = def.name;
-            displayCbm = def.cbm;
-          }
-
           return (
-            <div key={item.name} className="flex items-center justify-between p-3 border rounded-lg hover:border-blue-200 transition-colors">
-              <div className="flex-1">
+            <div key={item.name} className="flex flex-col p-3 border rounded-lg hover:border-blue-200 transition-colors">
+              <div className="flex items-center justify-between mb-2">
                 <p className="font-semibold text-gray-800">{item.name}</p>
-                <button 
-                  onClick={() => handleOpenModal(activeTab, item)}
-                  className="mt-1 flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors"
+                <button
+                  onClick={() => addRoomItemInstance(activeTab, item.name)}
+                  className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded hover:bg-blue-100 font-medium flex items-center"
                 >
-                  {displayVariant} ({displayCbm} CBM) <ChevronDown className="w-3 h-3 ml-1" />
+                  <Plus className="w-3 h-3 mr-1" /> 추가
                 </button>
               </div>
-              
-              <div className="flex items-center gap-3 ml-4 bg-gray-50 p-1 rounded-lg border">
-                <button
-                  onClick={() => updateRoomItemQuantity(activeTab, item.name, Math.max(0, qty - 1))}
-                  className="w-8 h-8 flex items-center justify-center rounded-md bg-white shadow-sm text-gray-600 active:scale-95"
-                >
-                  <Minus className="w-4 h-4" />
-                </button>
-                <span className="w-6 text-center font-bold text-lg">{qty}</span>
-                <button
-                  onClick={() => updateRoomItemQuantity(activeTab, item.name, qty + 1)}
-                  className="w-8 h-8 flex items-center justify-center rounded-md bg-blue-50 text-blue-600 shadow-sm active:scale-95"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
+
+              <div className="space-y-2">
+                {instances.length === 0 ? (
+                  // 빈 껍데기 렌더링 (추가하지 않았을 때)
+                  (() => {
+                    const def = item.variants.find(v => v.isDefault) || item.variants[1] || item.variants[0];
+                    return (
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <button 
+                            onClick={() => handleOpenModal(activeTab, item, '')}
+                            className="flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors text-left"
+                          >
+                            {def.name} ({def.cbm} CBM) <ChevronDown className="w-3 h-3 ml-1 shrink-0" />
+                          </button>
+                        </div>
+                        
+                        <div className="flex items-center gap-3 ml-2 bg-gray-50 p-1 rounded-lg border shrink-0">
+                          <button
+                            onClick={() => updateRoomItemQuantity(activeTab, item.name, '', 0)}
+                            className="w-8 h-8 flex items-center justify-center rounded-md bg-white shadow-sm text-gray-600 active:scale-95 opacity-50 cursor-not-allowed"
+                            disabled
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="w-6 text-center font-bold text-lg">0</span>
+                          <button
+                            onClick={() => updateRoomItemQuantity(activeTab, item.name, '', 1)}
+                            className="w-8 h-8 flex items-center justify-center rounded-md bg-blue-50 text-blue-600 shadow-sm active:scale-95"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })()
+                ) : (
+                  instances.map((inst, idx) => (
+                    <div key={inst.id} className="flex items-center justify-between border-t border-dashed pt-2 first:border-0 first:pt-0">
+                      <div className="flex-1">
+                        <button 
+                          onClick={() => handleOpenModal(activeTab, item, inst.id)}
+                          className="flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors text-left"
+                        >
+                          {inst.variantName} ({inst.unitCbm} CBM) <ChevronDown className="w-3 h-3 ml-1 shrink-0" />
+                        </button>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 ml-2">
+                        <div className="flex items-center gap-3 bg-gray-50 p-1 rounded-lg border">
+                          <button
+                            onClick={() => updateRoomItemQuantity(activeTab, item.name, inst.id, Math.max(0, inst.quantity - 1))}
+                            className="w-8 h-8 flex items-center justify-center rounded-md bg-white shadow-sm text-gray-600 active:scale-95"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="w-6 text-center font-bold text-lg">{inst.quantity}</span>
+                          <button
+                            onClick={() => updateRoomItemQuantity(activeTab, item.name, inst.id, inst.quantity + 1)}
+                            className="w-8 h-8 flex items-center justify-center rounded-md bg-blue-50 text-blue-600 shadow-sm active:scale-95"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {instances.length > 1 && (
+                          <button
+                            onClick={() => removeRoomItemInstance(activeTab, item.name, inst.id)}
+                            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           );
@@ -131,7 +184,8 @@ export default function Step2Page() {
         {/* 기타 항목 2개 추가 */}
         {[1, 2].map(num => {
           const customKey = `기타 ${num}`;
-          const itemState = roomItems[activeTab].items[customKey];
+          const instances = roomItems[activeTab].items[customKey] || [];
+          const itemState = instances[0];
           const qty = itemState?.quantity || 0;
           
           return (
@@ -142,7 +196,7 @@ export default function Step2Page() {
                   placeholder={`기타 물품 ${num}`}
                   className="w-full text-sm font-semibold text-gray-800 border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none bg-transparent mb-2 pb-1 transition-colors"
                   value={itemState?.variantName || ''}
-                  onChange={(e) => changeItemVariant(activeTab, customKey, e.target.value, itemState?.unitCbm || 0.1)}
+                  onChange={(e) => changeItemVariant(activeTab, customKey, itemState?.id || '', e.target.value, itemState?.unitCbm || 0.1)}
                 />
                 <div className="flex items-center gap-2">
                   <input 
@@ -152,7 +206,7 @@ export default function Step2Page() {
                     className="w-20 text-xs text-blue-600 bg-blue-50 px-2 py-1.5 rounded-md text-center focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold"
                     value={itemState?.unitCbm || ''}
                     placeholder="0.1"
-                    onChange={(e) => changeItemVariant(activeTab, customKey, itemState?.variantName || `기타 ${num}`, parseFloat(e.target.value) || 0)}
+                    onChange={(e) => changeItemVariant(activeTab, customKey, itemState?.id || '', itemState?.variantName || `기타 ${num}`, parseFloat(e.target.value) || 0)}
                   />
                   <span className="text-xs text-gray-500 font-medium">CBM</span>
                 </div>
@@ -160,7 +214,7 @@ export default function Step2Page() {
               
               <div className="flex items-center gap-3 bg-gray-50 p-1 rounded-lg border shrink-0">
                 <button
-                  onClick={() => updateRoomItemQuantity(activeTab, customKey, Math.max(0, qty - 1))}
+                  onClick={() => updateRoomItemQuantity(activeTab, customKey, itemState?.id || '', Math.max(0, qty - 1))}
                   className="w-8 h-8 flex items-center justify-center rounded-md bg-white shadow-sm text-gray-600 active:scale-95"
                 >
                   <Minus className="w-4 h-4" />
@@ -168,8 +222,11 @@ export default function Step2Page() {
                 <span className="w-6 text-center font-bold text-lg">{qty}</span>
                 <button
                   onClick={() => {
-                    if (!itemState?.variantName) changeItemVariant(activeTab, customKey, `기타 ${num}`, itemState?.unitCbm || 0.1);
-                    updateRoomItemQuantity(activeTab, customKey, qty + 1);
+                    if (!itemState?.variantName) changeItemVariant(activeTab, customKey, '', `기타 ${num}`, 0.1);
+                    // Wait, changeItemVariant with empty id creates it! 
+                    // But we don't have the id yet, it's generated. We can't immediately update quantity using that id.
+                    // Let's just use updateRoomItemQuantity which handles empty id!
+                    updateRoomItemQuantity(activeTab, customKey, itemState?.id || '', qty + 1);
                   }}
                   className="w-8 h-8 flex items-center justify-center rounded-md bg-blue-50 text-blue-600 shadow-sm active:scale-95"
                 >

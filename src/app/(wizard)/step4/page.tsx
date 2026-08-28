@@ -83,11 +83,13 @@ export default function Step4Page() {
           rooms: Object.entries(store.roomItems || {}).map(([name, data]: [string, any]) => ({
             id: name,
             name: name,
-            items: Object.entries(data.items || {}).map(([itemName, itemState]: [string, any]) => ({
-              name: itemState.variantName ? `${itemName} (${itemState.variantName})` : itemName,
-              quantity: itemState.quantity,
-              cbm: itemState.cbm || 0
-            })),
+            items: Object.entries(data.items || {}).flatMap(([itemName, instances]: [string, any]) => 
+              (Array.isArray(instances) ? instances : [instances]).map((itemState: any) => ({
+                name: itemState.variantName ? `${itemName} (${itemState.variantName})` : itemName,
+                quantity: itemState.quantity,
+                cbm: itemState.cbm || 0
+              }))
+            ),
             memo: data.note || '',
             images: data.images || []
           })),
@@ -207,11 +209,13 @@ export default function Step4Page() {
       rooms: Object.entries(store.roomItems || {}).map(([name, data]: [string, any]) => ({
         id: name,
         name: name,
-        items: Object.entries(data.items || {}).map(([itemName, itemState]: [string, any]) => ({
-          name: itemState.variantName ? `${itemName} (${itemState.variantName})` : itemName,
-          quantity: itemState.quantity,
-          cbm: itemState.cbm || 0
-        })),
+        items: Object.entries(data.items || {}).flatMap(([itemName, instances]: [string, any]) => 
+          (Array.isArray(instances) ? instances : [instances]).map((itemState: any) => ({
+            name: itemState.variantName ? `${itemName} (${itemState.variantName})` : itemName,
+            quantity: itemState.quantity,
+            cbm: itemState.cbm || 0
+          }))
+        ),
         memo: data.note || '',
         images: data.images || []
       })),

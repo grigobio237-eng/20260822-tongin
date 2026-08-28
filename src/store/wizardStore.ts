@@ -20,15 +20,16 @@ export interface CustomerInfo {
   arrivalStatus: string;
 }
 
-export interface RoomItemState {
+export interface RoomItemInstance {
+  id: string;
   quantity: number;
-  variantName: string; // "10자 (3통, 기본)" 등
-  unitCbm: number;     // 4.5
-  cbm: number;         // quantity * unitCbm
+  variantName: string;
+  unitCbm: number;
+  cbm: number;
 }
 
 export interface RoomData {
-  items: Record<string, RoomItemState>;
+  items: Record<string, RoomItemInstance[]>;
   note: string;
   images: string[];
 }
@@ -49,7 +50,7 @@ export interface ResourceState {
   tvBoxInches?: string;
 }
 
-interface WizardState {
+export interface WizardState {
   currentStep: number;
   customerInfo: CustomerInfo;
   roomItems: AllRoomsState; // RoomData 객체로 유지
@@ -58,20 +59,26 @@ interface WizardState {
   
   options: OptionsState;
   sttMemo: string;          // Step 3 종합 협의사항
-  resources: ResourceState;
-  surcharge: { noEvilSpirits: boolean, endOfMonth: boolean };
-  discount: number;
   
+  resources: ResourceState;
+  surcharge: { noEvilSpirits: boolean; endOfMonth: boolean };
+  discount: number;
+
   setStep: (step: number) => void;
   updateCustomerInfo: (info: Partial<CustomerInfo>) => void;
-  updateRoomItemQuantity: (room: RoomCategory, itemName: string, quantity: number) => void;
-  changeItemVariant: (room: RoomCategory, itemName: string, variantName: string, customCbm: number) => void;
+  
+  // 배열 기반 액션들
+  addRoomItemInstance: (room: RoomCategory, itemName: string) => void;
+  removeRoomItemInstance: (room: RoomCategory, itemName: string, id: string) => void;
+  updateRoomItemQuantity: (room: RoomCategory, itemName: string, id: string, quantity: number) => void;
+  changeItemVariant: (room: RoomCategory, itemName: string, id: string, variantName: string, customCbm: number) => void;
+  
   updateRoomNote: (room: RoomCategory, note: string) => void;
   addRoomImage: (room: RoomCategory, url: string) => void;
   removeRoomImage: (room: RoomCategory, url: string) => void;
-  
   updateOption: (optionName: string, quantity: number, price: number) => void;
   setSttMemo: (memo: string) => void;
+  
   updateResources: (info: Partial<ResourceState>) => void;
   updateMaterial: (materialName: string, quantity: number) => void;
   updateSurcharge: (key: 'noEvilSpirits' | 'endOfMonth', value: boolean) => void;
@@ -119,52 +126,143 @@ export const useWizardStore = create<WizardState>()(
         customerInfo: { ...state.customerInfo, ...info } 
       })),
       
-      updateRoomItemQuantity: (room, itemName, quantity) => {
+      addRoomItemInstance: (room, itemName) => {
         set((state) => {
           const newRoomItems = { ...state.roomItems };
-          let currentItem = newRoomItems[room].items[itemName];
+          const currentInstances = newRoomItems[room].items[itemName] || [];
           
-          if (!currentItem) {
-            const masterItem = ROOM_CATEGORIES[room].find(i => i.name === itemName);
-            if (!masterItem) return state;
+          const masterItem = ROOM_CATEGORIES[room]?.find(i => i.name === itemName) || ROOM_CATEGORIES['방 1']?.find(i => i.name === itemName);
+          
+          let defaultVariantName = itemName;
+          let defaultUnitCbm = 0.1;
+
+          if (masterItem) {
             const defaultVariant = masterItem.variants.find(v => v.isDefault) || masterItem.variants[1] || masterItem.variants[0];
-            
-            currentItem = {
-              quantity: 0,
-              variantName: defaultVariant.name,
-              unitCbm: defaultVariant.cbm,
-              cbm: 0,
-            };
+            defaultVariantName = defaultVariant.name;
+            defaultUnitCbm = defaultVariant.cbm;
           }
+          
+          const newInstance: RoomItemInstance = {
+            id: Math.random().toString(36).substring(2, 9),
+            quantity: 1,
+            variantName: defaultVariantName,
+            unitCbm: defaultUnitCbm,
+            cbm: defaultUnitCbm,
+          };
           
           newRoomItems[room].items = {
             ...newRoomItems[room].items,
-            [itemName]: {
-              ...currentItem,
-              quantity,
-              cbm: quantity * currentItem.unitCbm
-            }
+            [itemName]: [...currentInstances, newInstance]
           };
+          return { roomItems: newRoomItems };
+        });
+        get().recalculateCbm();
+      },
+
+      removeRoomItemInstance: (room, itemName, id) => {
+        set((state) => {
+          const newRoomItems = { ...state.roomItems };
+          const currentInstances = newRoomItems[room].items[itemName] || [];
+          
+          const filtered = currentInstances.filter(inst => inst.id !== id);
+          
+          if (filtered.length === 0) {
+            const { [itemName]: removed, ...rest } = newRoomItems[room].items;
+            newRoomItems[room].items = rest;
+          } else {
+            newRoomItems[room].items = {
+              ...newRoomItems[room].items,
+              [itemName]: filtered
+            };
+          }
+          return { roomItems: newRoomItems };
+        });
+        get().recalculateCbm();
+      },
+
+      updateRoomItemQuantity: (room, itemName, id, quantity) => {
+        set((state) => {
+          const newRoomItems = { ...state.roomItems };
+          const currentInstances = newRoomItems[room].items[itemName] || [];
+          
+          if (currentInstances.length === 0) {
+             const masterItem = ROOM_CATEGORIES[room]?.find(i => i.name === itemName) || ROOM_CATEGORIES['방 1']?.find(i => i.name === itemName);
+             
+             let defaultVariantName = itemName;
+             let defaultUnitCbm = 0.1;
+
+             if (masterItem) {
+               const defaultVariant = masterItem.variants.find(v => v.isDefault) || masterItem.variants[1] || masterItem.variants[0];
+               defaultVariantName = defaultVariant.name;
+               defaultUnitCbm = defaultVariant.cbm;
+             }
+             
+             const newInstance: RoomItemInstance = {
+               id: Math.random().toString(36).substring(2, 9),
+               quantity,
+               variantName: defaultVariantName,
+               unitCbm: defaultUnitCbm,
+               cbm: quantity * defaultUnitCbm,
+             };
+             newRoomItems[room].items = {
+               ...newRoomItems[room].items,
+               [itemName]: [newInstance]
+             };
+          } else {
+             const index = currentInstances.findIndex(inst => inst.id === id);
+             if (index !== -1) {
+               const updatedInstance = { ...currentInstances[index] };
+               updatedInstance.quantity = quantity;
+               updatedInstance.cbm = quantity * updatedInstance.unitCbm;
+               
+               const newInstances = [...currentInstances];
+               newInstances[index] = updatedInstance;
+               
+               newRoomItems[room].items = {
+                 ...newRoomItems[room].items,
+                 [itemName]: newInstances
+               };
+             }
+          }
           
           return { roomItems: newRoomItems };
         });
         get().recalculateCbm();
       },
 
-      changeItemVariant: (room, itemName, variantName, customCbm) => {
+      changeItemVariant: (room, itemName, id, variantName, customCbm) => {
         set((state) => {
           const newRoomItems = { ...state.roomItems };
-          let currentItem = newRoomItems[room].items[itemName] || { quantity: 0 };
+          const currentInstances = newRoomItems[room].items[itemName] || [];
           
-          newRoomItems[room].items = {
-            ...newRoomItems[room].items,
-            [itemName]: {
-              ...currentItem,
-              variantName,
-              unitCbm: customCbm,
-              cbm: currentItem.quantity * customCbm
-            }
-          };
+          const index = currentInstances.findIndex(inst => inst.id === id);
+          if (index !== -1) {
+            const updatedInstance = { ...currentInstances[index] };
+            updatedInstance.variantName = variantName;
+            updatedInstance.unitCbm = customCbm;
+            updatedInstance.cbm = updatedInstance.quantity * customCbm;
+            
+            const newInstances = [...currentInstances];
+            newInstances[index] = updatedInstance;
+            
+            newRoomItems[room].items = {
+              ...newRoomItems[room].items,
+              [itemName]: newInstances
+            };
+          } else if (id === '') {
+            // Create a new empty instance with quantity 0
+            const newInstance: RoomItemInstance = {
+               id: Math.random().toString(36).substring(2, 9),
+               quantity: 0,
+               variantName,
+               unitCbm: customCbm,
+               cbm: 0,
+            };
+            newRoomItems[room].items = {
+              ...newRoomItems[room].items,
+              [itemName]: [newInstance]
+            };
+          }
           
           return { roomItems: newRoomItems };
         });
@@ -212,7 +310,6 @@ export const useWizardStore = create<WizardState>()(
       updateResources: (info) => set((state) => {
         let newMaterials = state.resources.materials;
         
-        // 차량 수가 변경되었을 때 포장재료 기본값 자동 재계산
         if (info.vehicles) {
           const { useSettingsStore } = require('./settingsStore');
           const defaultMats = useSettingsStore.getState().defaultPackingMaterials;
@@ -257,7 +354,9 @@ export const useWizardStore = create<WizardState>()(
         let totalCbm = 0;
         
         Object.values(roomItems).forEach(roomData => {
-          Object.values(roomData.items).forEach(item => { totalCbm += item.cbm; });
+          Object.values(roomData.items).forEach(instances => { 
+            instances.forEach(item => { totalCbm += item.cbm; });
+          });
         });
         
         totalCbm = Math.round(totalCbm * 10) / 10;
@@ -267,7 +366,6 @@ export const useWizardStore = create<WizardState>()(
         const limits = settings.vehicleCbmLimits;
         const calculated = calculateVehicles(totalCbm, limits);
         
-        // 포장재료 기본값 자동 합산
         const defaultMats = settings.defaultPackingMaterials;
         const autoMaterials: Record<string, number> = {};
         
@@ -309,7 +407,7 @@ export const useWizardStore = create<WizardState>()(
       })
     }),
     {
-      name: 'tongin-wizard-storage-v2', // 로컬스토리지 충돌 방지용 키 변경
+      name: 'tongin-wizard-storage-v3',
       storage: createJSONStorage(() => localStorage),
     }
   )
