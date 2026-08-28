@@ -80,7 +80,7 @@ export default function Step2Page() {
       <div className="flex justify-between items-center px-1">
         <h3 className="font-bold text-gray-800">{activeTab} 물품 목록</h3>
         <div className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
-          소계: {Object.values(roomItems[activeTab]?.items || {}).reduce((acc, item) => acc + (item.cbm || 0), 0).toFixed(1)} CBM
+          소계: {Object.values(roomItems[activeTab]?.items || {}).flat().reduce((acc, inst) => acc + (inst.cbm || 0), 0).toFixed(1)} CBM
         </div>
       </div>
 
@@ -367,7 +367,7 @@ export default function Step2Page() {
             
             <div className="p-4 overflow-y-auto space-y-3">
               {modalState.item.variants.map((v) => {
-                const currentVariantName = roomItems[modalState.room]?.items?.[modalState.item.name]?.variantName;
+                const currentVariantName = roomItems[modalState.room]?.items?.[modalState.item.name]?.find(inst => inst.id === modalState.instanceId)?.variantName;
                 const isSelected = currentVariantName === v.name || (!currentVariantName && v.isDefault);
                 
                 return (
