@@ -141,9 +141,30 @@ export default function Step3Page() {
                     <span className="font-medium text-sm">{opt.name}</span>
                   </div>
                   {!isLadder && (
-                    <span className="text-sm text-gray-500 font-semibold">{displayPrice.toLocaleString()}원</span>
+                    <span className="text-sm text-gray-500 font-semibold">
+                      {displayPrice.toLocaleString()}원{opt.isPerDay ? ' / 1일' : ''}
+                    </span>
                   )}
                 </div>
+
+                {opt.isPerDay && isSelected && (
+                  <div className="mt-3 pt-3 border-t border-blue-100 flex justify-between items-center">
+                    <span className="text-xs text-gray-500">보관일수 (일)</span>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="number"
+                        min="1"
+                        value={options[opt.name]?.quantity || 1}
+                        onChange={(e) => {
+                          const days = parseInt(e.target.value, 10) || 1;
+                          updateOption(opt.name, days, displayPrice);
+                        }}
+                        className="w-16 border rounded px-2 py-1 text-sm text-center focus:outline-blue-500"
+                      />
+                      <span className="text-xs font-semibold text-blue-700">총 {(displayPrice * (options[opt.name]?.quantity || 1)).toLocaleString()}원</span>
+                    </div>
+                  </div>
+                )}
 
                 {isLadder && isSelected && (
                   <div className="mt-3 pt-3 border-t border-blue-100 flex flex-col gap-2">
@@ -352,3 +373,4 @@ export default function Step3Page() {
     </div>
   );
 }
+

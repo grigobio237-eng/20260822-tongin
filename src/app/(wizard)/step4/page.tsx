@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
@@ -35,7 +35,9 @@ export default function Step4Page() {
     let price = basePrice * opt.quantity;
     let displayName = name;
     
-    if (name.includes('대기료')) {
+    if (name.includes(' (1일)')) {
+        displayName = name.replace(' (1일)', ' (' + opt.quantity + '일)');
+      } else if (name.includes('대기료')) {
       price = basePrice * opt.quantity * totalWorkers;
       displayName = `${name} (${totalWorkers}명)`;
     } else if (name === '사다리-출발지') {
@@ -488,3 +490,5 @@ export default function Step4Page() {
     </div>
   );
 }
+
+
