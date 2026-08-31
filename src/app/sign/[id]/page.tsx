@@ -103,24 +103,38 @@ export default function CustomerSignPage() {
 
   return (
     <div className="w-full min-h-screen bg-slate-100 pb-12 flex flex-col items-center">
+      <style>{`
+        @media (max-width: 1280px) {
+          .mobile-preview-wrapper {
+            zoom: 0.45;
+          }
+        }
+        @media (min-width: 768px) and (max-width: 1279px) {
+          .mobile-preview-wrapper {
+            zoom: 0.7;
+          }
+        }
+      `}</style>
       {/* 헤더 */}
       <div className="bg-blue-900 text-white p-4 text-center shadow w-full">
         <h1 className="text-xl font-black">통인익스프레스 견적서 검토</h1>
-        <p className="text-sm text-blue-200">내역을 확인하시고 하단에서 서명을 진행해 주세요</p>
+        <p className="text-sm text-blue-200">내역을 확인하시고 서명을 진행해 주세요</p>
       </div>
 
       <div className="w-full mt-4 flex flex-col xl:flex-row gap-6 max-w-7xl px-4">
         {/* 왼쪽: 계약서 미리보기 (가로 스크롤 가능) */}
         <div className="flex-1 w-full bg-gray-300 rounded-xl overflow-hidden shadow-inner border border-gray-400">
-          <div className="w-full h-[600px] xl:h-[800px] overflow-auto p-4 flex flex-col gap-8 items-center bg-gray-200">
+          <div className="w-full overflow-x-auto p-4 flex flex-col gap-8 items-center bg-gray-200">
             {parsedData ? (
-              <ContractPrintDocument data={parsedData} />
+              <div className="mobile-preview-wrapper">
+                <ContractPrintDocument data={parsedData} />
+              </div>
             ) : (
               <p className="text-red-500 font-bold p-10">데이터를 불러오는 데 실패했습니다.</p>
             )}
           </div>
           <div className="bg-gray-800 text-gray-300 text-center py-2 text-xs">
-            ▲ 화면을 스와이프하거나 스크롤하여 계약서 전체 내용을 확인하세요.
+            화면을 스와이프하거나 스크롤하여 계약서 전체 내용을 확인하세요.
           </div>
         </div>
 
