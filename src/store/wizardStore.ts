@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { RoomCategory, ROOM_CATEGORIES, OPTION_ITEMS } from '../lib/constants/items';
 import { calculateVehicles, VehicleRecommendation } from '../lib/cbm';
@@ -39,6 +39,8 @@ export type AllRoomsState = Record<RoomCategory, RoomData>;
 export interface OptionState {
   quantity: number;
   totalPrice: number;
+  startDate?: string;
+  endDate?: string;
 }
 export type OptionsState = Record<string, OptionState>;
 
@@ -76,7 +78,7 @@ export interface WizardState {
   updateRoomNote: (room: RoomCategory, note: string) => void;
   addRoomImage: (room: RoomCategory, url: string) => void;
   removeRoomImage: (room: RoomCategory, url: string) => void;
-  updateOption: (optionName: string, quantity: number, price: number) => void;
+  updateOption: (optionName: string, quantity: number, price: number, startDate?: string, endDate?: string) => void;
   setSttMemo: (memo: string) => void;
   
   updateResources: (info: Partial<ResourceState>) => void;
@@ -290,7 +292,7 @@ export const useWizardStore = create<WizardState>()(
         }
       })),
 
-      updateOption: (optionName, quantity, price) => {
+      updateOption: (optionName, quantity, price, startDate, endDate) => {
         set((state) => {
           const newOptions = { ...state.options };
           if (quantity <= 0) {
@@ -298,7 +300,9 @@ export const useWizardStore = create<WizardState>()(
           } else {
             newOptions[optionName] = {
               quantity,
-              totalPrice: quantity * price
+              totalPrice: quantity * price,
+              startDate,
+              endDate
             };
           }
           return { options: newOptions };
@@ -412,3 +416,4 @@ export const useWizardStore = create<WizardState>()(
     }
   )
 );
+

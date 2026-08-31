@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
@@ -67,20 +67,35 @@ export default function Step3Page() {
     return ladderRates[tierKey]?.[ton] ?? 150000;
   };
 
-  const handleOptionToggle = (optName: string) => {
+  const handleOptionToggle = (opt: any) => {
+    const optName = opt.name;
     const isSelected = !!options[optName];
     
     if (isSelected) {
       updateOption(optName, 0, 0);
     } else {
-      let price = optionPrices[optName] ?? 0;
+      let price = optionPrices[optName] ?? opt.defaultPrice ?? 0;
       
-      if (optName === '사다리-출발지' || optName === '사다리-도착지') {
+      if (optName === '사다리·출발지' || optName === '사다리·도착지') {
         const ton = ladderTons[optName];
         price = manualPrices[optName] ?? getCalculatedLadderPrice(optName, ton);
       }
       
-      updateOption(optName, 1, price);
+      let initialDays = 1;
+      let startDate = '';
+      let endDate = '';
+      
+      if (opt.isPerDay) {
+         startDate = customerInfo.packingDate || '';
+         endDate = customerInfo.movingDate || '';
+         if (startDate && endDate) {
+           const diffTime = new Date(endDate).getTime() - new Date(startDate).getTime();
+           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+           if (diffDays >= 0) initialDays = Math.max(1, diffDays);
+         }
+      }
+      
+      updateOption(optName, initialDays, price, startDate, endDate);
     }
   };
 
@@ -130,7 +145,7 @@ export default function Step3Page() {
                   isSelected ? "bg-blue-50 border-blue-200" : "hover:bg-gray-50"
                 )}
               >
-                <div className="flex items-center justify-between cursor-pointer" onClick={() => handleOptionToggle(opt.name)}>
+                <div className="flex items-center justify-between cursor-pointer" onClick={() => handleOptionToggle(opt)}>
                   <div className="flex items-center gap-3">
                     <input 
                       type="checkbox"
@@ -148,20 +163,62 @@ export default function Step3Page() {
                 </div>
 
                 {opt.isPerDay && isSelected && (
-                  <div className="mt-3 pt-3 border-t border-blue-100 flex justify-between items-center">
-                    <span className="text-xs text-gray-500">보관일수 (일)</span>
-                    <div className="flex items-center gap-2">
-                      <input 
-                        type="number"
-                        min="1"
-                        value={options[opt.name]?.quantity || 1}
-                        onChange={(e) => {
-                          const days = parseInt(e.target.value, 10) || 1;
-                          updateOption(opt.name, days, displayPrice);
-                        }}
-                        className="w-16 border rounded px-2 py-1 text-sm text-center focus:outline-blue-500"
-                      />
-                      <span className="text-xs font-semibold text-blue-700">총 {(displayPrice * (options[opt.name]?.quantity || 1)).toLocaleString()}원</span>
+                  <div className="mt-3 pt-3 border-t border-blue-100 flex flex-col gap-3">
+                    <div className="flex flex-col xl:flex-row gap-2 justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500 w-12">시작일</span>
+                        <input
+                          type="date"
+                          value={options[opt.name]?.startDate || ''}
+                          onChange={(e) => {
+                            const newStart = e.target.value;
+                            const currentEnd = options[opt.name]?.endDate;
+                            let days = options[opt.name]?.quantity || 1;
+                            if (newStart && currentEnd) {
+                              const diffTime = new Date(currentEnd).getTime() - new Date(newStart).getTime();
+                              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                              if (diffDays >= 0) days = Math.max(1, diffDays);
+                            }
+                            updateOption(opt.name, days, displayPrice, newStart, currentEnd);
+                          }}
+                          className="flex-1 border rounded px-2 py-1 text-sm focus:outline-blue-500"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500 w-12">종료일</span>
+                        <input
+                          type="date"
+                          value={options[opt.name]?.endDate || ''}
+                          onChange={(e) => {
+                            const newEnd = e.target.value;
+                            const currentStart = options[opt.name]?.startDate;
+                            let days = options[opt.name]?.quantity || 1;
+                            if (currentStart && newEnd) {
+                              const diffTime = new Date(newEnd).getTime() - new Date(currentStart).getTime();
+                              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                              if (diffDays >= 0) days = Math.max(1, diffDays);
+                            }
+                            updateOption(opt.name, days, displayPrice, currentStart, newEnd);
+                          }}
+                          className="flex-1 border rounded px-2 py-1 text-sm focus:outline-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center bg-blue-50 p-2 rounded">
+                      <span className="text-xs text-gray-500">보관일수(일)</span>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="number"
+                          min="1"
+                          value={options[opt.name]?.quantity || 1}
+                          onChange={(e) => {
+                            const days = parseInt(e.target.value, 10) || 1;
+                            updateOption(opt.name, days, displayPrice, options[opt.name]?.startDate, options[opt.name]?.endDate);
+                          }}
+                          className="w-16 border rounded px-2 py-1 text-sm text-center focus:outline-blue-500"
+                        />
+                        <span className="text-xs font-semibold text-blue-700 w-24 text-right">총 {(displayPrice * (options[opt.name]?.quantity || 1)).toLocaleString()}원</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -373,4 +430,5 @@ export default function Step3Page() {
     </div>
   );
 }
+
 
