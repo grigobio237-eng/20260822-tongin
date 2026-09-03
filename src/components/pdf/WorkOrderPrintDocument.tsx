@@ -81,7 +81,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
             </table>
           </div>
           <div>
-            <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">3. 수금 현황 및 재료</h4>
+            <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">3. 수금 현황</h4>
             <table className="w-full border-collapse border border-slate-300">
               <tbody>
                 <tr>
@@ -91,14 +91,6 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
                 <tr>
                   <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold text-red-700">현장수금액 (잔금)</th>
                   <td className="border border-slate-300 p-1.5 text-red-700 font-bold text-right">{balance?.toLocaleString()}원</td>
-                </tr>
-                <tr>
-                  <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">포장 재료</th>
-                  <td className="border border-slate-300 p-1.5">
-                    {materials && Object.keys(materials).length > 0
-                      ? Object.entries(materials).filter(([k,v])=>v>0).map(([k,v])=>`${k}:${v}`).join(', ')
-                      : '기본 재료'}
-                  </td>
                 </tr>
               </tbody>
             </table>
@@ -153,6 +145,26 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
                 )}
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* 6. 포장 재료 준비 목록 */}
+        <div>
+          <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">6. 포장 재료 준비 목록</h4>
+          <div className="border border-slate-300 p-2 min-h-[50px] bg-gray-50 rounded">
+            {materials && Object.keys(materials).length > 0 ? (
+              <div className="flex gap-2 flex-wrap">
+                {Object.entries(materials)
+                  .filter(([k, v]) => v > 0)
+                  .map(([k, v]) => (
+                    <span key={k} className="bg-white border border-slate-300 rounded px-2 py-1 text-[11px] font-bold shadow-sm">
+                      {k}: <span className="text-blue-700">{v}</span>
+                    </span>
+                  ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-[11px]">기본 재료만 준비</p>
+            )}
           </div>
         </div>
 
