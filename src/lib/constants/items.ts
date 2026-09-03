@@ -1,4 +1,4 @@
-﻿export type RoomCategory = '방 1' | '방 2' | '방 3' | '방 4' | '방 5' | '거실' | '주방' | '베란다';
+export type RoomCategory = '방 1' | '방 2' | '방 3' | '방 4' | '방 5' | '거실' | '주방' | '베란다';
 
 export interface ItemVariant {
   name: string;
@@ -36,7 +36,8 @@ export const ROOM_ITEMS: MasterItem[] = [
       { name: '대형 (4칸 이상)', cbm: 3.5 },
     ]
   },
-  { name: '옷/이불', variants: createStandardVariants(0.1, 0.2, 0.4) },
+  { name: '옷', variants: createStandardVariants(0.1, 0.2, 0.4) },
+  { name: '이불', variants: createStandardVariants(0.1, 0.2, 0.4) },
   {
     name: '화장대',
     variants: [
