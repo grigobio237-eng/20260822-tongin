@@ -3,7 +3,7 @@
 import React from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
-import { Settings, ChevronRight } from 'lucide-react';
+import { Settings, ChevronRight, CalendarDays } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import NotificationBell from '@/components/layout/NotificationBell';
@@ -72,11 +72,18 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
           
           {/* Right: Action Buttons */}
           <div className="flex items-center justify-end gap-2 w-1/4">
+            <button 
+              onClick={() => router.push('/schedule')}
+              className="text-gray-500 hover:text-blue-600 p-2 bg-gray-50 hover:bg-blue-50 rounded-full border border-gray-200 transition-colors"
+              aria-label="일정 관리"
+            >
+              <CalendarDays size={20} />
+            </button>
             <NotificationBell />
             <button 
               onClick={() => router.push('/settings')}
               className="text-gray-500 hover:text-blue-600 p-2 bg-gray-50 hover:bg-blue-50 rounded-full border border-gray-200 transition-colors"
-              aria-label="단가 설정"
+              aria-label="환경 설정"
             >
               <Settings size={20} />
             </button>

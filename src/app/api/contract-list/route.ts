@@ -9,7 +9,7 @@ export async function GET() {
     if (!db) throw new Error('DB not found');
 
     const result = await (db as any).prepare(`
-      SELECT id, customer_name, customer_phone, moving_date, total_cost, status, signature_url, created_at 
+      SELECT id, customer_name, customer_phone, packing_date, moving_date, total_cost, status, signature_url, created_at 
       FROM contracts 
       ORDER BY created_at DESC
     `).all();
