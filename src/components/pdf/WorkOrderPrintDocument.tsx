@@ -168,7 +168,31 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
           </div>
         </div>
 
-        <div className="text-center text-[10px] text-gray-500 border-t pt-2 mt-4">
+        {/* 7. 고객 확인 서명란 */}
+        <div className="mt-2 border-2 border-slate-300 p-4 rounded bg-slate-50 flex justify-between items-center">
+          <div className="flex-1">
+            <p className="font-bold text-slate-800 text-[12px] mb-1">■ 고객 작업 완료 확인</p>
+            <p className="text-[11px] text-gray-700">
+              위 명시된 이사 물품 목록 및 상태를 이상 없이 확인하였으며,<br />
+              모든 작업이 성공적으로 완료되었음을 확인합니다.
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-2 w-64">
+            <div className="flex justify-between w-full text-[11px]">
+              <span className="text-gray-600">작업 완료일(운송일):</span>
+              <span className="font-bold text-slate-800">{c?.movingDate || '-'}</span>
+            </div>
+            <div className="flex justify-between items-end w-full">
+              <span className="text-gray-600 text-[11px]">고객 성명:</span>
+              <div className="flex items-end gap-2 border-b border-slate-400 pb-1 w-48 justify-end">
+                <span className="font-bold text-slate-800 text-[13px]">{c?.name || ''}</span>
+                <span className="text-gray-500 text-[11px]">(서명/인)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center text-[10px] text-gray-500 border-t pt-2 mt-2">
           본 작업지시서는 현장 작업자용으로 고객에게 배포하지 마십시오. / 통인익스프레스
         </div>
       </div>
