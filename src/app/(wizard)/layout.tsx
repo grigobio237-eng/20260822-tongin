@@ -37,10 +37,17 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
           <div className="flex-1 flex items-center justify-center">
             {steps.map((step, idx) => (
               <React.Fragment key={step.num}>
-                <div className="flex flex-col items-center">
+                <button 
+                  type="button"
+                  onClick={() => {
+                    useWizardStore.getState().setStep(step.num);
+                    router.push(`/step${step.num}`);
+                  }}
+                  className="flex flex-col items-center focus:outline-none"
+                >
                   <div 
                     className={clsx(
-                      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-1 transition-colors",
+                      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-1 transition-colors hover:ring-2 hover:ring-blue-300 cursor-pointer",
                       currentStep >= step.num ? "bg-blue-600 text-white shadow-md" : "bg-gray-200 text-gray-500"
                     )}
                   >
@@ -52,7 +59,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                   )}>
                     {step.label}
                   </span>
-                </div>
+                </button>
                 
                 {idx < steps.length - 1 && (
                   <div className="px-2 sm:px-4 mb-4 text-gray-300">

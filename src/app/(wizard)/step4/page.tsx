@@ -301,12 +301,20 @@ export default function Step4Page() {
             <FileText size={20} />
             작업지시서 PDF 다운로드
           </button>
-          <button 
-            onClick={handleFinish}
-            className="w-full bg-gray-800 text-white py-3 rounded-xl font-bold shadow-md"
-          >
-            새 견적서 작성하기
-          </button>
+          <div className="flex gap-2 w-full">
+            <button 
+              onClick={() => setCompletedContract(null)}
+              className="flex-1 bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-bold shadow-sm hover:bg-gray-50 transition-colors"
+            >
+              내용 수정하기
+            </button>
+            <button 
+              onClick={handleFinish}
+              className="flex-1 bg-gray-800 text-white py-3 rounded-xl font-bold shadow-md hover:bg-gray-900 transition-colors"
+            >
+              새 견적서 작성
+            </button>
+          </div>
         </div>
 
         {/* PDF 생성용 Hidden 렌더링 영역 */}
