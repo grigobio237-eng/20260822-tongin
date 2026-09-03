@@ -39,8 +39,8 @@ export default function SchedulePage() {
       const res = await fetch('/api/contract-list');
       const json = await res.json();
       if (json.success) {
-        // Filter contracted ones (we can check status or just anything that has packing_date)
-        const valid = json.data.filter((c: any) => c.status === 'signed' && c.packing_date);
+        // 서명이 완료되어 signature_url이 존재하는 진짜 계약 성사 건만 필터링
+        const valid = json.data.filter((c: any) => c.status === 'CONFIRMED' && c.signature_url && c.packing_date);
         setContracts(valid);
       }
     } catch (e) {
