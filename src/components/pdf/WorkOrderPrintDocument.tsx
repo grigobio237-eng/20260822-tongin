@@ -27,7 +27,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
         </div>
 
         {/* 1. 작업 개요 (주소 및 일정) */}
-        <div>
+        <div className="break-inside-avoid">
           <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">1. 작업 개요</h4>
           <table className="w-full border-collapse border border-slate-300">
             <tbody>
@@ -48,7 +48,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
         </div>
 
         {/* 2. 작업 조건 및 자원 */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 break-inside-avoid">
           <div>
             <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">2. 작업 조건</h4>
             <table className="w-full border-collapse border border-slate-300">
@@ -98,7 +98,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
         </div>
 
         {/* 4. 고객 특이사항 및 협의사항 */}
-        <div>
+        <div className="break-inside-avoid">
           <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">4. 고객 특이사항 및 추가 옵션</h4>
           <div className="border border-slate-300 p-2 min-h-[50px] bg-yellow-50/50">
             <p className="font-bold mb-1">■ 현장 특이사항 (메모)</p>
@@ -121,7 +121,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
           <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">5. 공간별 상세 물품 목록 및 주의사항</h4>
           <div className="grid grid-cols-2 gap-4">
             {rooms?.map(room => (
-              <div key={room.name} className="border border-slate-300 p-2 rounded">
+              <div key={room.name} className="border border-slate-300 p-2 rounded break-inside-avoid">
                 <div className="flex justify-between items-end border-b border-slate-200 pb-1 mb-1">
                   <h5 className="font-bold text-slate-800 text-sm">{room.name}</h5>
                 </div>
@@ -149,7 +149,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
         </div>
 
         {/* 6. 포장 재료 준비 목록 */}
-        <div>
+        <div className="break-inside-avoid">
           <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">6. 포장 재료 준비 목록</h4>
           <div className="border border-slate-300 p-2 min-h-[50px] bg-gray-50 rounded">
             {materials && Object.keys(materials).length > 0 ? (
@@ -169,7 +169,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
         </div>
 
         {/* 7. 고객 확인 서명란 */}
-        <div className="mt-2 border-2 border-slate-300 p-4 rounded bg-slate-50 flex justify-between items-center">
+        <div className="mt-2 border-2 border-slate-300 p-4 rounded bg-slate-50 flex justify-between items-center break-inside-avoid">
           <div className="flex-1">
             <p className="font-bold text-slate-800 text-[12px] mb-1">■ 고객 작업 완료 확인</p>
             <p className="text-[11px] text-gray-700">
