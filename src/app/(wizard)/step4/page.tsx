@@ -5,6 +5,7 @@ import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { ContractPrintDocument, ContractPrintData } from '@/components/pdf/ContractPrintDocument';
+import { WorkOrderPrintDocument } from '@/components/pdf/WorkOrderPrintDocument';
 import { Loader2, CheckCircle, FileText } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -158,6 +159,28 @@ export default function Step4Page() {
     }
   };
 
+  const exportWorkOrderToPdf = async (contractId: string, customerName: string) => {
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const element = document.getElementById('workorder-print-root');
+      if (!element) return;
+
+      const opt = {
+        margin: 0,
+        filename: `통인익스프레스_작업지시서_${customerName}_${contractId}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+      };
+
+      await html2pdf().set(opt as any).from(element).save();
+    } catch (e) {
+      console.error('작업지시서 PDF 다운로드 실패:', e);
+      alert('PDF 생성 중 오류가 발생했습니다.');
+    }
+  };
+
   const getPartnerText = () => {
     if (!settingsStore.partnerContacts) return '';
     let text = '';
@@ -272,6 +295,13 @@ export default function Step4Page() {
             PDF 견적서 다운로드
           </button>
           <button 
+            onClick={() => exportWorkOrderToPdf(completedContract.id, customerInfo.name || '고객')}
+            className="flex justify-center items-center gap-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold shadow-md transition-colors"
+          >
+            <FileText size={20} />
+            작업지시서 PDF 다운로드
+          </button>
+          <button 
             onClick={handleFinish}
             className="w-full bg-gray-800 text-white py-3 rounded-xl font-bold shadow-md"
           >
@@ -282,6 +312,7 @@ export default function Step4Page() {
         {/* PDF 생성용 Hidden 렌더링 영역 */}
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
           <ContractPrintDocument data={fullContractData} />
+          <WorkOrderPrintDocument data={{...fullContractData, materials: store.resources.materials}} />
         </div>
       </div>
     );
@@ -494,6 +525,7 @@ export default function Step4Page() {
     </div>
   );
 }
+
 
 
 
