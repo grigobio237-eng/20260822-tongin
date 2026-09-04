@@ -1,60 +1,27 @@
-export const KAKAO_REST_API_KEY = '6a651ef097749982f3257be5855b3d56';
-
-export async function getCoordinates(address: string): Promise<{ x: string; y: string } | null> {
-  if (!address) return null;
-  
-  try {
-    const res = await fetch(`https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(address)}`, {
-      headers: {
-        Authorization: `KakaoAK ${KAKAO_REST_API_KEY}`
-      }
-    });
-    
-    if (!res.ok) throw new Error('Failed to fetch coordinates');
-    
-    const data = await res.json();
-    if (data.documents && data.documents.length > 0) {
-      // x: 경도(longitude), y: 위도(latitude)
-      return {
-        x: data.documents[0].x,
-        y: data.documents[0].y
-      };
-    }
-    return null;
-  } catch (error) {
-    console.error('Geocoding error:', error);
-    return null;
-  }
-}
+// This file now acts as a client wrapper to call our internal Next.js API route
+// This prevents CORS issues (403 Forbidden) when making direct client-to-Kakao requests.
 
 export async function getRouteInfo(originAddress: string, destAddress: string) {
-  const origin = await getCoordinates(originAddress);
-  const dest = await getCoordinates(destAddress);
-
-  if (!origin || !dest) {
-    throw new Error('주소를 좌표로 변환할 수 없습니다. 주소를 정확히 입력해주세요.');
+  if (!originAddress || !destAddress) {
+    throw new Error('주소를 정확히 입력해주세요.');
   }
 
   try {
-    // car_type=2 화물차 (트럭) 기준 탐색
-    const res = await fetch(`https://apis-navi.kakaomobility.com/v1/directions?origin=${origin.x},${origin.y}&destination=${dest.x},${dest.y}&car_type=2`, {
+    const res = await fetch('/api/kakao-route', {
+      method: 'POST',
       headers: {
-        Authorization: `KakaoAK ${KAKAO_REST_API_KEY}`
-      }
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ originAddress, destAddress })
     });
     
-    if (!res.ok) throw new Error('Failed to fetch route');
+    const json = await res.json();
     
-    const data = await res.json();
-    if (data.routes && data.routes.length > 0) {
-      const summary = data.routes[0].summary;
-      return {
-        distanceKm: (summary.distance / 1000).toFixed(1), // 미터를 km로
-        durationMin: Math.ceil(summary.duration / 60).toString(), // 초를 분으로
-        tollFare: summary.fare.toll,
-      };
+    if (!json.success) {
+      throw new Error(json.error || '경로를 찾을 수 없습니다.');
     }
-    throw new Error('경로를 찾을 수 없습니다.');
+    
+    return json.data;
   } catch (error) {
     console.error('Route error:', error);
     throw error;
