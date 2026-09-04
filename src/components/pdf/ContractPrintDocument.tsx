@@ -269,6 +269,16 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
             </div>
           )}
 
+          {/* 고객 특이사항 (전체 메모) */}
+          {data.sttMemo && (
+            <div className="mb-4">
+              <h4 className="font-bold text-slate-800 text-[11px] mb-1">■ 고객 요청 및 특이사항 메모</h4>
+              <div className="border border-slate-300 p-2 min-h-[40px] bg-yellow-50/50 text-[10px] text-gray-800 whitespace-pre-wrap">
+                {data.sttMemo}
+              </div>
+            </div>
+          )}
+
           {/* 사진 갤러리 (최대 6장 2열 배치) */}
           <div>
             <h4 className="font-bold text-slate-800 text-[11px] mb-1.5">■ 현장 가구 상태 및 특이사항 사진</h4>
