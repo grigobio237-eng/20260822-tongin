@@ -136,10 +136,8 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
           </div>
         </div>
 
-        <div className="html2pdf__page-break"></div>
-
         {/* 6. 공간별 상세 이사 물품 목록과 주의사항 */}
-        <div className="flex-1" style={{ pageBreakBefore: 'always' }}>
+        <div className="flex-1 w-full" style={{ pageBreakBefore: 'always' }}>
           <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2 pb-[2px]">6. 공간별 상세 물품 목록 및 주의사항</h4>
           <div className="flex flex-row flex-wrap gap-4">
             {rooms?.filter(r => r.items.length > 0 || r.memo).map(room => (
