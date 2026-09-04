@@ -11,7 +11,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
   const totalWorkers = (r?.workerMale || 0) + (r?.workerFemale || 0);
   
   return (
-    <div id="workorder-print-root" className="bg-white text-slate-800 font-sans text-[11px] leading-tight select-none">
+    <div id="workorder-print-root" className="bg-white text-slate-800 font-sans text-[11px] leading-[1.4] select-none">
       <div className="w-[210mm] min-h-[296mm] p-[12mm] mx-auto box-border flex flex-col gap-4">
         {/* 헤더 */}
         <div className="flex justify-between items-end border-b-2 border-blue-900 pb-2">
@@ -28,7 +28,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
 
         {/* 1. 작업 개요 (주소 및 일정) */}
         <div className="break-inside-avoid">
-          <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">1. 작업 개요</h4>
+          <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2 pb-[2px]">1. 작업 개요</h4>
           <table className="w-full border-collapse border border-slate-300">
             <tbody>
               <tr>
@@ -50,7 +50,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
         {/* 2. 작업 조건 및 자원 */}
         <div className="grid grid-cols-2 gap-4 break-inside-avoid">
           <div>
-            <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">2. 작업 조건</h4>
+            <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2 pb-[2px]">2. 작업 조건</h4>
             <table className="w-full border-collapse border border-slate-300">
               <tbody>
                 <tr>
@@ -81,7 +81,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
             </table>
           </div>
           <div>
-            <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">3. 수금 현황</h4>
+            <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2 pb-[2px]">3. 수금 현황</h4>
             <table className="w-full border-collapse border border-slate-300">
               <tbody>
                 <tr>
@@ -99,7 +99,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
 
         {/* 4. 고객 특이사항 및 협의사항 */}
         <div className="break-inside-avoid">
-          <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">4. 고객 특이사항 및 추가 옵션</h4>
+          <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2 pb-[2px]">4. 고객 특이사항 및 추가 옵션</h4>
           <div className="border border-slate-300 p-2 min-h-[50px] bg-yellow-50/50">
             <p className="font-bold mb-1">■ 현장 특이사항 (메모)</p>
             <p className="text-gray-700 whitespace-pre-wrap">{sttMemo || '입력된 특이사항이 없습니다.'}</p>
@@ -116,19 +116,39 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
           </div>
         </div>
 
-        {/* 5. 공간별 상세 이사 물품 목록과 주의사항 */}
+        {/* 5. 포장 재료 준비 목록 */}
+        <div className="break-inside-avoid">
+          <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2 pb-[2px]">5. 포장 재료 준비 목록</h4>
+          <div className="border border-slate-300 p-2 min-h-[50px] bg-gray-50 rounded">
+            {materials && Object.keys(materials).length > 0 ? (
+              <div className="flex gap-2 flex-wrap">
+                {Object.entries(materials)
+                  .filter(([k, v]) => v > 0)
+                  .map(([k, v]) => (
+                    <span key={k} className="bg-white border border-slate-300 rounded px-2 py-1 text-[11px] font-bold shadow-sm">
+                      {k}: <span className="text-blue-700">{v}</span>
+                    </span>
+                  ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-[11px]">기본 재료만 준비</p>
+            )}
+          </div>
+        </div>
+
+        {/* 6. 공간별 상세 이사 물품 목록과 주의사항 */}
         <div className="flex-1 html2pdf__page-break">
-          <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">5. 공간별 상세 물품 목록 및 주의사항</h4>
-          <div className="grid grid-cols-2 gap-4">
+          <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2 pb-[2px]">6. 공간별 상세 물품 목록 및 주의사항</h4>
+          <div className="flex flex-row flex-wrap gap-4">
             {rooms?.map(room => (
-              <div key={room.name} className="border border-slate-300 p-2 rounded break-inside-avoid">
+              <div key={room.name} className="border border-slate-300 p-2 rounded break-inside-avoid w-[calc(50%-0.5rem)] flex-none bg-white shadow-sm">
                 <div className="flex justify-between items-end border-b border-slate-200 pb-1 mb-1">
                   <h5 className="font-bold text-slate-800 text-sm">{room.name}</h5>
                 </div>
                 <div className="space-y-1">
                   {room.items.length > 0 ? (
                     room.items.map((item, i) => (
-                      <div key={i} className="flex justify-between text-[10px]">
+                      <div key={i} className="flex justify-between text-[10px] py-[1px]">
                         <span className="truncate flex-1">{item.name}</span>
                         <span className="font-bold w-12 text-right">{item.quantity}개</span>
                       </div>
@@ -145,26 +165,6 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
                 )}
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* 6. 포장 재료 준비 목록 */}
-        <div className="break-inside-avoid">
-          <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">6. 포장 재료 준비 목록</h4>
-          <div className="border border-slate-300 p-2 min-h-[50px] bg-gray-50 rounded">
-            {materials && Object.keys(materials).length > 0 ? (
-              <div className="flex gap-2 flex-wrap">
-                {Object.entries(materials)
-                  .filter(([k, v]) => v > 0)
-                  .map(([k, v]) => (
-                    <span key={k} className="bg-white border border-slate-300 rounded px-2 py-1 text-[11px] font-bold shadow-sm">
-                      {k}: <span className="text-blue-700">{v}</span>
-                    </span>
-                  ))}
-              </div>
-            ) : (
-              <p className="text-gray-500 text-[11px]">기본 재료만 준비</p>
-            )}
           </div>
         </div>
 

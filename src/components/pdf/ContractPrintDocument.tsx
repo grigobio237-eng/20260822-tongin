@@ -44,7 +44,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
   const { customerInfo: c, resources: r } = data;
 
   return (
-    <div id="contract-print-root" className="bg-white text-slate-800 font-sans text-[11px] leading-tight select-none">
+    <div id="contract-print-root" className="bg-white text-slate-800 font-sans text-[11px] leading-[1.4] select-none">
       
       {/* ================= PAGE 1: 계약 총괄 요약 / 정산 / 서명 ================= */}
       <div className="w-[210mm] h-[296mm] p-[12mm] mx-auto box-border flex flex-col justify-between" style={{ pageBreakAfter: 'always' }}>
@@ -201,7 +201,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
                     <div className="p-2">
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
                         {room.items.map((item, itemIdx) => (
-                          <div key={itemIdx} className="flex justify-between border-b border-dotted border-slate-200 py-0.5">
+                          <div key={itemIdx} className="flex justify-between border-b border-dotted border-slate-200 py-[2px]">
                             <span className="text-slate-700">{item.name}</span>
                             <span className="font-semibold text-slate-900">{item.quantity}개 {item.cbm ? `(${Math.round(item.cbm * 10) / 10} CBM)` : ''}</span>
                           </div>
