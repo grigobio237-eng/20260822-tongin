@@ -141,7 +141,7 @@ export default function SchedulePage() {
     setPdfLoading(true);
     try {
       const html2pdf = (await import('html2pdf.js')).default;
-      const element = document.getElementById('schedule-workorder-root');
+      const element = document.getElementById('workorder-print-root');
       if (!element) throw new Error('DOM element not found');
 
       const opt = {
@@ -310,7 +310,7 @@ export default function SchedulePage() {
 
           {/* Hidden PDF Render Target */}
           {detailData && (
-            <div id="schedule-workorder-root" style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
               <WorkOrderPrintDocument data={{...detailData, materials: detailData.resources?.materials}} />
             </div>
           )}
