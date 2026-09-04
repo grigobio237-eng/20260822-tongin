@@ -394,7 +394,12 @@ export default function Step3Page() {
           <div>
               <label className="block text-sm font-bold text-gray-700 mb-3">포장재료</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {PACKING_MATERIALS.map(mat => {
+                {PACKING_MATERIALS.filter(mat => {
+                  if (mat.startsWith('TV(')) {
+                    return (resources.materials[mat] || 0) > 0;
+                  }
+                  return true;
+                }).map(mat => {
                   const val = resources.materials[mat] || 0;
                   return (
                     <div key={mat} className="flex flex-col gap-1 border rounded p-2 bg-gray-50">
