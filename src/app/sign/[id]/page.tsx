@@ -29,6 +29,26 @@ export default function CustomerSignPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (!loading && !isSigned && sigPad.current) {
+      const canvas = sigPad.current.getCanvas();
+      if (canvas) {
+        const preventScroll = (e: TouchEvent) => {
+          if (e.cancelable) {
+            e.preventDefault();
+          }
+        };
+        canvas.addEventListener('touchstart', preventScroll, { passive: false });
+        canvas.addEventListener('touchmove', preventScroll, { passive: false });
+        
+        return () => {
+          canvas.removeEventListener('touchstart', preventScroll);
+          canvas.removeEventListener('touchmove', preventScroll);
+        };
+      }
+    }
+  }, [loading, isSigned]);
+
   const handleSubmitSignature = async () => {
     if (!agreed) {
       alert('약관 및 고지사항에 동의해 주세요.');
@@ -169,8 +189,8 @@ export default function CustomerSignPage() {
               </div>
             ) : (
               <div>
-                <div className="border border-dashed border-gray-300 rounded-lg bg-slate-50 overflow-hidden mb-3">
-                  <SignatureCanvas canvasProps={{ className: 'w-full h-48 touch-none' }} backgroundColor="rgb(248, 250, 252)" ref={sigPad} />
+                <div className="border border-dashed border-gray-300 rounded-lg bg-slate-50 overflow-hidden mb-3 touch-none">
+                  <SignatureCanvas canvasProps={{ className: 'w-full h-48 touch-none', style: { touchAction: 'none' } }} backgroundColor="rgb(248, 250, 252)" ref={sigPad} />
                 </div>
                 <button
                   type="button"
