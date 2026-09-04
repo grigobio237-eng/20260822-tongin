@@ -1,12 +1,37 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useRouter } from 'next/navigation';
+import { getRouteInfo } from '@/lib/kakaoApi';
+import { MapPin, Loader2 } from 'lucide-react';
 
 export default function Step1Page() {
   const { customerInfo, updateCustomerInfo, setStep } = useWizardStore();
   const router = useRouter();
+  
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [routeError, setRouteError] = useState('');
+
+  const calculateRoute = async () => {
+    if (!customerInfo.departureAddress || !customerInfo.arrivalAddress) {
+      setRouteError('출발지와 도착지 주소를 모두 입력해주세요.');
+      return;
+    }
+    setIsCalculating(true);
+    setRouteError('');
+    try {
+      const route = await getRouteInfo(customerInfo.departureAddress, customerInfo.arrivalAddress);
+      updateCustomerInfo({
+        distanceKm: route.distanceKm,
+        durationMin: route.durationMin
+      });
+    } catch (e: any) {
+      setRouteError(e.message || '거리 계산 중 오류가 발생했습니다.');
+    } finally {
+      setIsCalculating(false);
+    }
+  };
 
   const handleNext = () => {
     setStep(2);
@@ -229,6 +254,47 @@ export default function Step1Page() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* 거리 계산 UI */}
+      <div className="mt-6 bg-white rounded-xl shadow-sm border p-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="font-bold flex items-center gap-2 text-gray-800">
+              <MapPin size={18} className="text-blue-500" />
+              이동 거리 및 소요 시간 계산
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              카카오내비 화물차(트럭) 경로 기준으로 정확한 이동 거리를 계산합니다.
+            </p>
+          </div>
+          <button
+            onClick={calculateRoute}
+            disabled={isCalculating}
+            className="whitespace-nowrap px-4 py-2 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors flex items-center gap-2 disabled:opacity-50"
+          >
+            {isCalculating ? <Loader2 size={16} className="animate-spin" /> : null}
+            {isCalculating ? '계산 중...' : '거리 계산하기'}
+          </button>
+        </div>
+        
+        {routeError && (
+          <p className="mt-3 text-sm text-red-500 bg-red-50 p-2 rounded">{routeError}</p>
+        )}
+
+        {customerInfo.distanceKm && !routeError && (
+          <div className="mt-4 flex gap-4 bg-gray-50 p-3 rounded-lg border">
+            <div>
+              <span className="block text-xs text-gray-500">예상 이동 거리</span>
+              <span className="font-bold text-lg text-blue-600">{customerInfo.distanceKm} km</span>
+            </div>
+            <div className="w-px bg-gray-200 my-1"></div>
+            <div>
+              <span className="block text-xs text-gray-500">예상 소요 시간</span>
+              <span className="font-bold text-lg text-gray-800">{customerInfo.durationMin} 분</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mt-8 flex justify-end">

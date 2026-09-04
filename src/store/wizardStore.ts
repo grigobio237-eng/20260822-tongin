@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { RoomCategory, ROOM_CATEGORIES, OPTION_ITEMS } from '../lib/constants/items';
 import { calculateVehicles, VehicleRecommendation } from '../lib/cbm';
@@ -18,6 +18,8 @@ export interface CustomerInfo {
   arrivalConditions: string[];
   arrivalLadderCount?: number;
   arrivalStatus: string;
+  distanceKm?: string;
+  durationMin?: string;
 }
 
 export interface RoomItemInstance {
