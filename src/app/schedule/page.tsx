@@ -89,8 +89,39 @@ export default function SchedulePage() {
     try {
       const res = await fetch(`/api/contract-get?id=${id}`);
       const json = await res.json();
-      if (json.success) {
-        setDetailData(json.data);
+      if (json.success && json.data) {
+        const contract = json.data;
+        const parsedData = {
+          id: contract.id,
+          customerInfo: {
+            name: contract.customer_name,
+            phone: contract.customer_phone,
+            contractDate: contract.contract_date,
+            packingDate: contract.packing_date,
+            movingDate: contract.moving_date,
+            departureAddress: contract.departure_address,
+            departureFloor: contract.departure_floor,
+            arrivalAddress: contract.arrival_address,
+            arrivalFloor: contract.arrival_floor,
+            serviceType: contract.service_type,
+            arrivalStatus: contract.arrival_status
+          },
+          rooms: contract.rooms_json ? JSON.parse(contract.rooms_json) : [],
+          options: contract.options_json ? JSON.parse(contract.options_json) : [],
+          resources: {
+            workerMale: contract.worker_count_male,
+            workerFemale: contract.worker_count_female
+          },
+          totalCbm: contract.total_cbm,
+          movingCost: contract.moving_cost,
+          optionCost: contract.option_cost,
+          totalCost: contract.total_cost,
+          deposit: contract.deposit,
+          balance: contract.balance,
+          sttMemo: contract.stt_memo,
+          signatureBase64: contract.signature_url || undefined,
+        };
+        setDetailData(parsedData);
       }
     } catch (e) {
       console.error(e);
