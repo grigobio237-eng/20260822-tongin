@@ -117,7 +117,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
         </div>
 
         {/* 5. 공간별 상세 이사 물품 목록과 주의사항 */}
-        <div className="flex-1">
+        <div className="flex-1 html2pdf__page-break">
           <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2">5. 공간별 상세 물품 목록 및 주의사항</h4>
           <div className="grid grid-cols-2 gap-4">
             {rooms?.map(room => (
