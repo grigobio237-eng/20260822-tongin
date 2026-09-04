@@ -12,7 +12,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
   
   return (
     <div id="workorder-print-root" className="bg-white text-slate-800 font-sans text-[11px] leading-[1.4] select-none">
-      <div className="w-[210mm] min-h-[296mm] p-[12mm] mx-auto box-border flex flex-col gap-4">
+      <div className="w-[210mm] min-h-[273mm] px-[12mm] mx-auto box-border flex flex-col gap-4">
         {/* 헤더 */}
         <div className="flex justify-between items-end border-b-2 border-blue-900 pb-2">
           <div>

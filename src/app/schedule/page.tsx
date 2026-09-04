@@ -145,7 +145,7 @@ export default function SchedulePage() {
       if (!element) throw new Error('DOM element not found');
 
       const opt = {
-        margin: 0,
+        margin: [12, 0, 12, 0],
         filename: `통인익스프레스_작업지시서_${detailData.customerInfo.name}_${detailData.id}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, logging: false },

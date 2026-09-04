@@ -144,7 +144,7 @@ export default function Step4Page() {
       if (!element) return;
 
       const opt = {
-        margin: 0,
+        margin: [12, 0, 12, 0],
         filename: `통인익스프레스_계약서_${customerName}_${contractId}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, logging: false },
@@ -166,7 +166,7 @@ export default function Step4Page() {
       if (!element) return;
 
       const opt = {
-        margin: 0,
+        margin: [12, 0, 12, 0],
         filename: `통인익스프레스_작업지시서_${customerName}_${contractId}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, logging: false },

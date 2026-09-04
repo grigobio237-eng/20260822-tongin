@@ -47,7 +47,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
     <div id="contract-print-root" className="bg-white text-slate-800 font-sans text-[11px] leading-[1.4] select-none">
       
       {/* ================= PAGE 1: 계약 총괄 요약 / 정산 / 서명 ================= */}
-      <div className="w-[210mm] h-[296mm] p-[12mm] mx-auto box-border flex flex-col justify-between" style={{ pageBreakAfter: 'always' }}>
+      <div className="w-[210mm] min-h-[273mm] px-[12mm] mx-auto box-border flex flex-col justify-between" style={{ pageBreakAfter: 'always' }}>
         <div>
           {/* 헤더 */}
           <div className="flex justify-between items-end border-b-2 border-blue-900 pb-2 mb-3">
@@ -178,7 +178,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
       </div>
 
       {/* ================= PAGE 2: 공간별 상세 물품 목록 및 특이사항 ================= */}
-      <div className="w-[210mm] h-[296mm] p-[12mm] mx-auto box-border flex flex-col justify-between" style={{ pageBreakAfter: 'always' }}>
+      <div className="w-[210mm] min-h-[273mm] px-[12mm] mx-auto box-border flex flex-col justify-between" style={{ pageBreakAfter: 'always' }}>
         <div>
           <div className="flex justify-between items-end border-b-2 border-blue-900 pb-2 mb-3">
             <div>
@@ -232,7 +232,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
       </div>
 
       {/* ================= PAGE 3: 선택 옵션 & 현장 사진 갤러리 ================= */}
-      <div className="w-[210mm] h-[296mm] p-[12mm] mx-auto box-border flex flex-col justify-between">
+      <div className="w-[210mm] min-h-[273mm] px-[12mm] mx-auto box-border flex flex-col justify-between">
         <div>
           <div className="flex justify-between items-end border-b-2 border-blue-900 pb-2 mb-3">
             <div>
