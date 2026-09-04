@@ -170,7 +170,7 @@ export default function CustomerSignPage() {
             ) : (
               <div>
                 <div className="border border-dashed border-gray-300 rounded-lg bg-slate-50 overflow-hidden mb-3">
-                  <SignatureCanvas canvasProps={{ className: 'w-full h-48' }} backgroundColor="rgb(248, 250, 252)" ref={sigPad} />
+                  <SignatureCanvas canvasProps={{ className: 'w-full h-48 touch-none' }} backgroundColor="rgb(248, 250, 252)" ref={sigPad} />
                 </div>
                 <button
                   type="button"
