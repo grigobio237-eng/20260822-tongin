@@ -6,7 +6,10 @@ async function getCoordinates(address: string) {
   const res = await fetch(`https://dapi.kakao.com/v2/local/search/address.json?query=${encodeURIComponent(address)}`, {
     headers: { Authorization: `KakaoAK ${KAKAO_REST_API_KEY}` }
   });
-  if (!res.ok) throw new Error('Failed to fetch coordinates');
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Kakao Geo API Error (${res.status}): ${errorText}`);
+  }
   const data = await res.json();
   if (data.documents && data.documents.length > 0) {
     return { x: data.documents[0].x, y: data.documents[0].y };
@@ -32,7 +35,10 @@ export async function POST(req: Request) {
       headers: { Authorization: `KakaoAK ${KAKAO_REST_API_KEY}` }
     });
     
-    if (!res.ok) throw new Error('Failed to fetch route from Kakao API');
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Kakao Navi API Error (${res.status}): ${errorText}`);
+    }
     
     const data = await res.json();
     if (data.routes && data.routes.length > 0) {
