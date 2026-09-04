@@ -310,7 +310,7 @@ export default function SchedulePage() {
 
           {/* Hidden PDF Render Target */}
           {detailData && (
-            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+            <div id="schedule-workorder-root" style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
               <WorkOrderPrintDocument data={{...detailData, materials: detailData.resources?.materials}} />
             </div>
           )}
