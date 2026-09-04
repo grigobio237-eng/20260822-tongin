@@ -189,8 +189,8 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
           </div>
 
           <div className="space-y-3">
-            {data.rooms && data.rooms.length > 0 ? (
-              data.rooms.map((room, idx) => (
+            {data.rooms && data.rooms.filter(r => r.items.length > 0 || r.memo).length > 0 ? (
+              data.rooms.filter(r => r.items.length > 0 || r.memo).map((room, idx) => (
                 <div key={room.id || idx} className="border border-slate-300 rounded overflow-hidden">
                   <div className="bg-slate-100 px-2.5 py-1 flex justify-between items-center border-b border-slate-200">
                     <span className="font-bold text-blue-900 text-[11px]">{room.name}</span>

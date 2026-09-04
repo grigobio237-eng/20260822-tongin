@@ -136,11 +136,13 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
           </div>
         </div>
 
+        <div className="html2pdf__page-break"></div>
+
         {/* 6. 공간별 상세 이사 물품 목록과 주의사항 */}
-        <div className="flex-1 html2pdf__page-break">
+        <div className="flex-1" style={{ pageBreakBefore: 'always' }}>
           <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2 pb-[2px]">6. 공간별 상세 물품 목록 및 주의사항</h4>
           <div className="flex flex-row flex-wrap gap-4">
-            {rooms?.map(room => (
+            {rooms?.filter(r => r.items.length > 0 || r.memo).map(room => (
               <div key={room.name} className="border border-slate-300 p-2 rounded break-inside-avoid w-[calc(50%-0.5rem)] flex-none bg-white shadow-sm">
                 <div className="flex justify-between items-end border-b border-slate-200 pb-1 mb-1">
                   <h5 className="font-bold text-slate-800 text-sm">{room.name}</h5>
@@ -149,7 +151,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
                   {room.items.length > 0 ? (
                     room.items.map((item, i) => (
                       <div key={i} className="flex justify-between text-[10px] py-[1px]">
-                        <span className="truncate flex-1">{item.name}</span>
+                        <span className="flex-1 pb-[2px]">{item.name}</span>
                         <span className="font-bold w-12 text-right">{item.quantity}개</span>
                       </div>
                     ))
