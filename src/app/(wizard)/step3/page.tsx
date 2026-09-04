@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useMemo } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
@@ -43,9 +43,10 @@ export default function Step3Page() {
 
   const [manualPrices, setManualPrices] = useState<{ [key: string]: number }>({});
 
-  const handleSttResult = (text: string) => {
-    setSttMemo(sttMemo ? `${sttMemo} ${text}` : text);
-  };
+  const handleSttResult = React.useCallback((text: string) => {
+    const currentMemo = useWizardStore.getState().sttMemo;
+    useWizardStore.getState().setSttMemo(currentMemo ? `${currentMemo} ${text}` : text);
+  }, []);
 
   const { isListening, startListening, stopListening } = useSpeechToText(handleSttResult);
 
