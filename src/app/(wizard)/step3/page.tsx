@@ -147,7 +147,8 @@ export default function Step3Page() {
     ) {
       updateResources({ materials: newMaterials });
     }
-  }, [roomItems, resources.materials, updateResources]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomItems, updateResources]);
 
   return (
     <div className="space-y-8 pb-24">

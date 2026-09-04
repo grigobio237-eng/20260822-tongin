@@ -335,6 +335,8 @@ export const useWizardStore = create<WizardState>()(
           addMats(defaultMats.oneTon, info.vehicles.oneTon || 0);
           
           newMaterials = autoMaterials;
+        } else if (info.materials) {
+          newMaterials = info.materials;
         }
 
         return {
