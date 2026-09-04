@@ -95,7 +95,8 @@ export default function CustomerSignPage() {
       totalCost: contract.total_cost,
       deposit: contract.deposit,
       balance: contract.balance,
-      signatureBase64: contract.signature_url
+      sttMemo: contract.stt_memo,
+      signatureBase64: contract.signature_url || undefined,
     };
   } catch (e) {
     console.error("데이터 파싱 에러", e);
