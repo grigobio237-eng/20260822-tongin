@@ -117,11 +117,7 @@ export default function Step3Page() {
     }
   };
 
-  const PACKING_MATERIALS = [
-    '장롱', '냉장고', '이불BOX', '잔짐BOX', '책도구류', '소파', '침대', '바구니',
-    '분해장롱', '김치냉장고류', '옷BOX', '신발BOX', '주방도구류', '포장필름', '에어캡',
-    '5단서랍장', '김치냉장고류', '아이스BOX', '종이BOX', '골판지', '테이프', '기타'
-  ];
+  
 
   return (
     <div className="space-y-8 pb-24">
