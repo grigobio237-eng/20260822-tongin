@@ -17,16 +17,21 @@ export default function Step4Page() {
   const router = useRouter();
   
   const [deposit, setDeposit] = useState(0);
+  const [includeVat, setIncludeVat] = useState(false);
+  const [editableBaseCost, setEditableBaseCost] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedContract, setCompletedContract] = useState<{ id: string, pdfUrl: string } | null>(null);
 
-  // Calculate base costs based on dynamic settings
-  const baseCost = 
+  const calculatedBaseCost = 
     (store.resources.vehicles.fiveTon * settingsStore.vehiclePrices.fiveTon) +
     (store.resources.vehicles.twoHalfTon * settingsStore.vehiclePrices.twoHalfTon) +
     (store.resources.vehicles.oneTon * settingsStore.vehiclePrices.oneTon) +
     (store.resources.workerMale * settingsStore.workerPrices.male) +
     (store.resources.workerFemale * settingsStore.workerPrices.female);
+
+  // editableBaseCost가 null이면 자동계산값, 아니면 수정된 값 사용
+  const baseCost = editableBaseCost !== null ? editableBaseCost : calculatedBaseCost;
+
 
   const totalWorkers = store.resources.workerMale + store.resources.workerFemale;
 
@@ -65,7 +70,11 @@ export default function Step4Page() {
   const surchargeAmount = subTotal * surchargeRatio;
   
   const totalCost = subTotal + surchargeAmount - (store.discount || 0);
-  const balance = totalCost - deposit;
+  const vatAmount = includeVat ? Math.round(totalCost * 0.1) : 0;
+  const finalTotal = totalCost + vatAmount;
+  const autoDeposit = Math.round(finalTotal * 0.1);
+  const balance = finalTotal - deposit;
+
 
   const handlePrev = () => {
     setStep(3);
@@ -448,9 +457,19 @@ export default function Step4Page() {
       <section>
         <h2 className="text-xl font-bold mb-4">비용 정산</h2>
         <div className="bg-white rounded-xl shadow-sm border p-5 space-y-4">
+          {/* 이사 기본비용 — 수정 가능 */}
           <div className="flex justify-between items-center py-2 border-b">
             <span className="text-gray-600">이사 기본비용</span>
-            <span className="font-semibold">{baseCost.toLocaleString()}원</span>
+            <div className="relative">
+              <input
+                type="number"
+                className="border rounded px-2 py-1 w-36 text-right font-semibold outline-none focus:ring-1 focus:ring-blue-500"
+                value={editableBaseCost !== null ? editableBaseCost : calculatedBaseCost}
+                onChange={(e) => setEditableBaseCost(Number(e.target.value))}
+                onFocus={(e) => { if (editableBaseCost === null) setEditableBaseCost(calculatedBaseCost); }}
+              />
+              <span className="absolute right-2 top-1.5 text-xs text-gray-400">원</span>
+            </div>
           </div>
           <div className="flex justify-between items-center py-2 border-b">
             <span className="text-gray-600">옵션 추가비용</span>
@@ -478,27 +497,65 @@ export default function Step4Page() {
               </div>
             </div>
           </div>
+
+          {/* 총계 */}
           <div className="flex justify-between items-center py-2 bg-gray-50 rounded px-3">
             <span className="font-bold text-gray-800">총계 (VAT 별도)</span>
             <span className="text-xl font-bold text-blue-600">{totalCost.toLocaleString()}원</span>
           </div>
-          
-          <div className="grid grid-cols-2 gap-4 mt-6">
+
+          {/* VAT 체크박스 */}
+          <div className="flex items-center justify-between py-2 border-t">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="w-4 h-4 text-blue-600"
+                checked={includeVat}
+                onChange={(e) => {
+                  setIncludeVat(e.target.checked);
+                  setDeposit(0); // VAT 변경 시 계약금 초기화
+                }}
+              />
+              <span className="text-sm font-medium text-gray-700">부가가치세(VAT 10%) 별도 적용</span>
+            </label>
+            {includeVat && (
+              <span className="text-sm font-semibold text-orange-600">+{vatAmount.toLocaleString()}원</span>
+            )}
+          </div>
+
+          {/* 최종 금액 (VAT 포함 시) */}
+          {includeVat && (
+            <div className="flex justify-between items-center py-2 bg-orange-50 rounded px-3 border border-orange-200">
+              <span className="font-bold text-orange-800">최종 금액 (VAT 포함)</span>
+              <span className="text-xl font-bold text-orange-600">{finalTotal.toLocaleString()}원</span>
+            </div>
+          )}
+
+          {/* 계약금 / 잔금 */}
+          <div className="grid grid-cols-2 gap-4 mt-2">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">계약금 입력</label>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                계약금 <span className="text-xs text-gray-400 font-normal">(10% 자동계산: {autoDeposit.toLocaleString()}원)</span>
+              </label>
               <div className="relative">
                 <input 
                   type="number"
                   className="w-full border rounded-lg p-3 pr-8 text-right font-bold focus:ring-2 focus:ring-blue-500 outline-none"
                   value={deposit || ''}
                   onChange={e => setDeposit(Number(e.target.value))}
-                  placeholder="0"
+                  placeholder={String(autoDeposit)}
                 />
                 <span className="absolute right-3 top-3.5 text-gray-500">원</span>
               </div>
+              <button
+                className="mt-1 text-xs text-blue-500 underline"
+                onClick={() => setDeposit(autoDeposit)}
+              >
+                10% 자동입력
+              </button>
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">잔금 (자동계산)</label>
+              <label className="block text-sm font-bold text-gray-700 mb-1">잔금 (자동계산)</label>
               <div className="w-full border bg-gray-50 rounded-lg p-3 text-right font-bold text-red-600">
                 {balance.toLocaleString()} 원
               </div>
@@ -507,7 +564,7 @@ export default function Step4Page() {
         </div>
       </section>
 
-      {/* Footer Navigation */}
+
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <div className="max-w-4xl mx-auto flex justify-between gap-4">
           <button 
