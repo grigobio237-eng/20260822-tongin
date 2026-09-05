@@ -1,27 +1,80 @@
 const fs = require('fs');
 let code = fs.readFileSync('src/store/wizardStore.ts', 'utf8');
 
-// In addRoomItemInstance
-code = code.replace(
-  "if (itemName === '¿Ê' || itemName === 'ÀÌºÒ' || itemName === '»ıÈ°¹°Ç°(ÀÜÁü·ù)') {",
-  "if (itemName === '¿Ê' || itemName === 'ÀÌºÒ' || itemName === '»ıÈ°¹°Ç°/ÀÜÁü·ù(Áß¹Ú½º¿ë)' || itemName === 'µµ¼­/¼ÒÇü¹°Ç°(¼Ò¹Ú½º¿ë)') {"
-);
+const target1 = `if (itemName === 'ì˜·' || itemName === 'ì´ë¶ˆ') {
+              const matCbm = materialSettings[defaultVariantName];
+              if (matCbm !== undefined) {
+                defaultUnitCbm = matCbm;
+              }
+            } else if (itemName === 'ìƒí™œë¬¼í’ˆ/ì”ì§ë¥˜(ì¤‘ë°•ìŠ¤ìš©)') {
+              const matCbm = materialSettings['ì¤‘ë°•ìŠ¤'];
+              if (matCbm !== undefined) {
+                defaultUnitCbm = matCbm;
+              }
+            } else if (itemName === 'ë„ì„œ/ì†Œí˜•ë¬¼í’ˆ(ì†Œë°•ìŠ¤ìš©)') {
+              const matCbm = materialSettings['ì†Œë°•ìŠ¤'];
+              if (matCbm !== undefined) {
+                defaultUnitCbm = matCbm;
+              }
+            }`;
+const replace1 = `if (itemName === 'ì˜·' || itemName === 'ì´ë¶ˆ') {
+              const matCbm = materialSettings[defaultVariantName];
+              if (matCbm !== undefined) {
+                defaultUnitCbm = matCbm;
+              }
+            } else if (itemName === 'ìƒí™œë¬¼í’ˆ/ì”ì§ë¥˜(ì¤‘ë°•ìŠ¤ìš©)' || itemName === 'ì‹ ë°œë¥˜(ì¤‘ë°•ìŠ¤ìš©)') {
+              const matCbm = materialSettings['ì¤‘ë°•ìŠ¤'];
+              if (matCbm !== undefined) {
+                defaultUnitCbm = matCbm;
+              }
+            } else if (itemName === 'ë„ì„œ/ì†Œí˜•ë¬¼í’ˆ(ì†Œë°•ìŠ¤ìš©)') {
+              const matCbm = materialSettings['ì†Œë°•ìŠ¤'];
+              if (matCbm !== undefined) {
+                defaultUnitCbm = matCbm;
+              }
+            } else if (itemName === 'ê¸°íƒ€ë¬¼í’ˆ1' || itemName === 'ê¸°íƒ€ë¬¼í’ˆ2') {
+              const matCbm = materialSettings[defaultVariantName];
+              if (matCbm !== undefined) {
+                defaultUnitCbm = matCbm;
+              }
+            }`;
 
-code = code.replace(
-  "if (itemName === '»ıÈ°¹°Ç°(ÀÜÁü·ù)') defaultUnitCbm = materialSettings['Áß¹Ú½º'] || 0;",
-  "if (itemName === '»ıÈ°¹°Ç°/ÀÜÁü·ù(Áß¹Ú½º¿ë)') defaultUnitCbm = materialSettings['Áß¹Ú½º'] || 0;\n            if (itemName === 'µµ¼­/¼ÒÇü¹°Ç°(¼Ò¹Ú½º¿ë)') defaultUnitCbm = materialSettings['¼Ò¹Ú½º'] || 0;"
-);
+code = code.replace(target1, replace1);
 
-// In recalculateCbm
-code = code.replace(
-  "} else if (itemName === '»ıÈ°¹°Ç°(ÀÜÁü·ù)') {",
-  "} else if (itemName === '»ıÈ°¹°Ç°/ÀÜÁü·ù(Áß¹Ú½º¿ë)') {"
-);
+const target2 = `if (itemName === 'ì˜·' || itemName === 'ì´ë¶ˆ') {
+              const matCbm = materialSettings[inst.variantName];
+              if (matCbm !== undefined) {
+                newInst.unitCbm = matCbm;
+              }
+            } else if (itemName === 'ìƒí™œë¬¼í’ˆ/ì”ì§ë¥˜(ì¤‘ë°•ìŠ¤ìš©)') {
+              const matCbm = materialSettings['ì¤‘ë°•ìŠ¤'];
+              if (matCbm !== undefined) {
+                newInst.unitCbm = matCbm;
+              }
+            } else if (itemName === 'ë„ì„œ/ì†Œí˜•ë¬¼í’ˆ(ì†Œë°•ìŠ¤ìš©)') {
+              const matCbm = materialSettings['ì†Œë°•ìŠ¤'];
+              if (matCbm !== undefined) {
+                newInst.unitCbm = matCbm;
+              }
+            }`;
+const replace2 = `if (itemName === 'ì˜·' || itemName === 'ì´ë¶ˆ' || itemName === 'ê¸°íƒ€ë¬¼í’ˆ1' || itemName === 'ê¸°íƒ€ë¬¼í’ˆ2') {
+              const matCbm = materialSettings[inst.variantName];
+              if (matCbm !== undefined) {
+                newInst.unitCbm = matCbm;
+              }
+            } else if (itemName === 'ìƒí™œë¬¼í’ˆ/ì”ì§ë¥˜(ì¤‘ë°•ìŠ¤ìš©)' || itemName === 'ì‹ ë°œë¥˜(ì¤‘ë°•ìŠ¤ìš©)') {
+              const matCbm = materialSettings['ì¤‘ë°•ìŠ¤'];
+              if (matCbm !== undefined) {
+                newInst.unitCbm = matCbm;
+              }
+            } else if (itemName === 'ë„ì„œ/ì†Œí˜•ë¬¼í’ˆ(ì†Œë°•ìŠ¤ìš©)') {
+              const matCbm = materialSettings['ì†Œë°•ìŠ¤'];
+              if (matCbm !== undefined) {
+                newInst.unitCbm = matCbm;
+              }
+            }`;
 
-code = code.replace(
-  "cbm = (materialSettings['Áß¹Ú½º'] || 0) * item.quantity;",
-  "cbm = (materialSettings['Áß¹Ú½º'] || 0) * item.quantity;\n              } else if (itemName === 'µµ¼­/¼ÒÇü¹°Ç°(¼Ò¹Ú½º¿ë)') {\n                cbm = (materialSettings['¼Ò¹Ú½º'] || 0) * item.quantity;"
-);
+code = code.replace(target2, replace2);
 
 fs.writeFileSync('src/store/wizardStore.ts', code);
-console.log('done');
+console.log('wizardStore done');

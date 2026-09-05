@@ -1,4 +1,4 @@
-export type RoomCategory = '안방' | '입구방' | '작은방1' | '작은방2' | '작은방3' | '거실' | '주방' | '앞 발코니';
+export type RoomCategory = '안방' | '입구방' | '작은방1' | '작은방2' | '작은방3' | '거실' | '주방' | '앞 발코니' | '뒤 발코니' | '다용도실 및 현관';
 
 export interface ItemVariant {
   name: string;
@@ -17,6 +17,8 @@ const createStandardVariants = (small: number, normal: number, large: number): I
   { name: '일반 (기본)', cbm: normal, isDefault: true },
   { name: '대형', cbm: large },
 ];
+
+export const PACKING_MATERIALS = ['특대박스(이불)', '대박스(옷)', '중대박스', '중박스', '소박스', '바구니', '아이스박스', '담요(대)', '담요(중)', '침대비닐커버', '냉장고', '쇼파', '침대', '분해장농', '김치냉장고(대)', '김치냉장고(중)', '세탁기', '건조기', '서랍장', '피아노', '테이프', '에어캡', '랩', 'TV(50인치이하)', 'TV(65~75인치)', 'TV(85인치이상)'];
 
 export const ROOM_ITEMS: MasterItem[] = [
   {
@@ -230,6 +232,24 @@ export const VERANDA_ITEMS: MasterItem[] = [
   { name: '쌀통', variants: createStandardVariants(0.05, 0.1, 0.2) },
 ];
 
+
+export const REAR_BALCONY_ITEMS: MasterItem[] = [
+  { name: '세탁기', variants: KITCHEN_ITEMS.find(i => i.name === '세탁기')!.variants },
+  { name: '건조기', variants: KITCHEN_ITEMS.find(i => i.name === '건조기')!.variants },
+  { name: '워시타워', variants: [{ name: '일체형 (기본)', cbm: 1.5, isDefault: true }] },
+  { name: '생활물품/잔짐류(중박스용)', variants: [{ name: '중박스', cbm: 0, isDefault: true }] },
+  { name: '도서/소형물품(소박스용)', variants: [{ name: '소박스', cbm: 0, isDefault: true }] },
+  { name: '기타물품1', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
+  { name: '기타물품2', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
+];
+
+export const UTILITY_ROOM_ITEMS: MasterItem[] = [
+  { name: '신발류(중박스용)', variants: [{ name: '중박스', cbm: 0, isDefault: true }] },
+  { name: '생활물품/잔짐류(중박스용)', variants: [{ name: '중박스', cbm: 0, isDefault: true }] },
+  { name: '기타물품1', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
+  { name: '기타물품2', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
+];
+
 export const ROOM_CATEGORIES: Record<RoomCategory, MasterItem[]> = {
   '안방': ROOM_ITEMS,
   '입구방': ROOM_ITEMS,
@@ -239,6 +259,8 @@ export const ROOM_CATEGORIES: Record<RoomCategory, MasterItem[]> = {
   '거실': LIVING_ROOM_ITEMS,
   '주방': KITCHEN_ITEMS,
   '앞 발코니': VERANDA_ITEMS,
+  '뒤 발코니': REAR_BALCONY_ITEMS,
+  '다용도실 및 현관': UTILITY_ROOM_ITEMS,
 };
 
 export interface OptionDef {
@@ -263,4 +285,3 @@ export const OPTION_ITEMS: OptionDef[] = [
   { name: '대기료 (1시간 이상 지연 시)', defaultPrice: 50000 },
 ];
 
-export const PACKING_MATERIALS = ['특대박스(이불)', '대박스(옷)', '중대박스', '중박스', '소박스', '바구니', '아이스박스', '담요(대)', '담요(중)', '침대비닐커버', '냉장고', '쇼파', '침대', '분해장농', '김치냉장고(대)', '김치냉장고(중)', '세탁기', '건조기', '서랍장', '피아노', '테이프', '에어캡', '랩', 'TV(50인치이하)', 'TV(65~75인치)', 'TV(85인치이상)'];

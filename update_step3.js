@@ -1,19 +1,58 @@
 const fs = require('fs');
 let code = fs.readFileSync('src/app/(wizard)/step3/page.tsx', 'utf8');
 
-code = code.replace(
-  "// »ýÈ°¹°Ç°(ÀÜÁü·ù) -> Áß¹Ú½º",
-  "// »ýÈ°¹°Ç°/ÀÜÁü·ù(Áß¹Ú½º¿ë) -> Áß¹Ú½º"
-);
-code = code.replace(
-  "if (room.items['»ýÈ°¹°Ç°(ÀÜÁü·ù)']) {\n        room.items['»ýÈ°¹°Ç°(ÀÜÁü·ù)'].forEach(inst => mediumBox += inst.quantity);\n      }",
-  "if (room.items['»ýÈ°¹°Ç°/ÀÜÁü·ù(Áß¹Ú½º¿ë)']) {\n        room.items['»ýÈ°¹°Ç°/ÀÜÁü·ù(Áß¹Ú½º¿ë)'].forEach(inst => mediumBox += inst.quantity);\n      }\n      // µµ¼­/¼ÒÇü¹°Ç°(¼Ò¹Ú½º¿ë) -> ¼Ò¹Ú½º\n      if (room.items['µµ¼­/¼ÒÇü¹°Ç°(¼Ò¹Ú½º¿ë)']) {\n        room.items['µµ¼­/¼ÒÇü¹°Ç°(¼Ò¹Ú½º¿ë)'].forEach(inst => smallBox += inst.quantity);\n      }"
-);
+const target1 = `let mediumBox = 0;
+    let smallBox = 0;
 
-code = code.replace(
-  "sync('Áß¹Ú½º', mediumBox);",
-  "sync('Áß¹Ú½º', mediumBox);\n    sync('¼Ò¹Ú½º', smallBox);"
-);
+    Object.values(roomItems).forEach(room => {`;
+const replace1 = `let mediumBox = 0;
+    let smallBox = 0;
+    let dynamicCounts: Record<string, number> = {};
+
+    Object.values(roomItems).forEach(room => {
+      ['ê¸°íƒ€ë¬¼í’ˆ1', 'ê¸°íƒ€ë¬¼í’ˆ2'].forEach(key => {
+        if (room.items[key]) {
+          room.items[key].forEach(inst => {
+            dynamicCounts[inst.variantName] = (dynamicCounts[inst.variantName] || 0) + inst.quantity;
+          });
+        }
+      });
+      if (room.items['ì‹ ë°œë¥˜(ì¤‘ë°•ìŠ¤ìš©)']) {
+        room.items['ì‹ ë°œë¥˜(ì¤‘ë°•ìŠ¤ìš©)'].forEach(inst => mediumBox += inst.quantity);
+      }
+`;
+
+code = code.replace(target1, replace1);
+
+const target2 = `    sync('ëŒ€ë°•ìŠ¤(ì˜·)', clothes);
+    sync('íŠ¹ëŒ€ë°•ìŠ¤(ì´ë¶ˆ)', blankets);
+    sync('ì¤‘ë°•ìŠ¤', mediumBox);
+    sync('ì†Œë°•ìŠ¤', smallBox);
+
+    const hasChanges = Object.keys(newMaterials).some(key => newMaterials[key] !== resources.materials[key]);`;
+
+const replace2 = `    sync('ëŒ€ë°•ìŠ¤(ì˜·)', clothes + (dynamicCounts['ëŒ€ë°•ìŠ¤(ì˜·)'] || 0));
+    sync('íŠ¹ëŒ€ë°•ìŠ¤(ì´ë¶ˆ)', blankets + (dynamicCounts['íŠ¹ëŒ€ë°•ìŠ¤(ì´ë¶ˆ)'] || 0));
+    sync('ì¤‘ë°•ìŠ¤', mediumBox + (dynamicCounts['ì¤‘ë°•ìŠ¤'] || 0));
+    sync('ì†Œë°•ìŠ¤', smallBox + (dynamicCounts['ì†Œë°•ìŠ¤'] || 0));
+    
+    // For all other materials in dynamicCounts not explicitly synced above
+    Object.entries(dynamicCounts).forEach(([matName, count]) => {
+      if (!['ëŒ€ë°•ìŠ¤(ì˜·)', 'íŠ¹ëŒ€ë°•ìŠ¤(ì´ë¶ˆ)', 'ì¤‘ë°•ìŠ¤', 'ì†Œë°•ìŠ¤'].includes(matName)) {
+        // If they chose 'TV(50ì¸ì¹˜ì´í•˜)' as ê¸°íƒ€ë¬¼í’ˆ, we add it to the existing count in newMaterials
+        // Wait, newMaterials[matName] is already set by sync() for known items, so we should add to it.
+        // Actually, some items like tv50 are synced BEFORE this. So we can just ADD to newMaterials.
+        if (newMaterials[matName] !== undefined) {
+           newMaterials[matName] += count;
+        } else {
+           newMaterials[matName] = count;
+        }
+      }
+    });
+
+    const hasChanges = Object.keys(newMaterials).some(key => newMaterials[key] !== resources.materials[key]);`;
+
+code = code.replace(target2, replace2);
 
 fs.writeFileSync('src/app/(wizard)/step3/page.tsx', code);
-console.log('done');
+console.log('step3 done');
