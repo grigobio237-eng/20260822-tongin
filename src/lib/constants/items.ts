@@ -97,9 +97,11 @@ export const ROOM_ITEMS: MasterItem[] = [
   {
     name: 'TV',
     variants: [
-      { name: '50인치 이하', cbm: 0.5 },
-      { name: '65~75인치 (기본)', cbm: 0.5, isDefault: true },
-      { name: '85인치 이상 / 벽걸이', cbm: 1 },
+      { name: '55인치 이하', cbm: 0.5 },
+      { name: '65인치 (표준, 기본)', cbm: 0.5, isDefault: true },
+      { name: '75인치 (대형)', cbm: 1 },
+      { name: '85인치 (특대형)', cbm: 1.5 },
+      { name: '98인치 이상 (초대형)', cbm: 2 },
     ]
   },
   { name: 'TV받침대', variants: createStandardVariants(0.5, 0.5, 1) },
