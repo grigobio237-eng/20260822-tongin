@@ -14,8 +14,11 @@ export default function SettingsPage() {
   const [localVehiclePrices, setLocalVehiclePrices] = useState(store.vehiclePrices);
   const [localVehicleCbmLimits, setLocalVehicleCbmLimits] = useState(store.vehicleCbmLimits || { fiveTon: 15, twoHalfTon: 7.5, oneTon: 3 });
   const [localDefaultPackingMaterials, setLocalDefaultPackingMaterials] = useState(store.defaultPackingMaterials || { fiveTon: {}, twoHalfTon: {}, oneTon: {} });
-  const [localWorkerPrices, setLocalWorkerPrices] = useState(store.workerPrices);
+  const [localWorkerPrices, setLocalWorkerPrices] = useState(store.workerPrices || { male: 200000, female: 150000 });
   const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
+  const [localMaterialCbm, setLocalMaterialCbm] = useState(store.materialCbmSettings || {
+    '특대박스(이불)': 0, '대박스(옷)': 0, '중대박스': 0, '중박스': 0, '소박스': 0, '바구니': 0, '아이스박스': 0
+  });
   const [localLadderRates, setLocalLadderRates] = useState<Record<string, LadderRateTier>>(store.ladderRates || DEFAULT_LADDER_RATES);
   const [localPartnerContacts, setLocalPartnerContacts] = useState(store.partnerContacts);
 
@@ -38,6 +41,7 @@ export default function SettingsPage() {
       defaultPackingMaterials: localDefaultPackingMaterials,
       workerPrices: localWorkerPrices,
       optionPrices: localOptionPrices,
+      materialCbmSettings: localMaterialCbm,
       ladderRates: localLadderRates,
       partnerContacts: localPartnerContacts,
     });
@@ -48,6 +52,13 @@ export default function SettingsPage() {
     setLocalOptionPrices(prev => ({
       ...prev,
       [optionName]: value
+    }));
+  };
+
+  const handleMaterialCbmChange = (materialName: string, value: number) => {
+    setLocalMaterialCbm(prev => ({
+      ...prev,
+      [materialName]: value
     }));
   };
 
@@ -277,7 +288,26 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          
+          <section>
+            <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">포장재료 CBM 세팅</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {['특대박스(이불)', '대박스(옷)', '중대박스', '중박스', '소박스', '바구니', '아이스박스'].map((mat) => (
+                <div key={mat} className="flex flex-col">
+                  <label className="block text-xs font-semibold mb-1 text-gray-600 truncate" title={mat}>{mat}</label>
+                  <div className="relative">
+                    <input 
+                      type="number"
+                      step="0.01"
+                      value={localMaterialCbm[mat] ?? 0}
+                      onChange={(e) => handleMaterialCbmChange(mat, Number(e.target.value))}
+                      className="w-full border rounded p-2 text-sm text-right pr-6"
+                    />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">CBM</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
         </div>
       </div>

@@ -37,6 +37,7 @@ export interface SettingsState {
     female: number;
   };
   optionPrices: Record<string, number>;
+  materialCbmSettings: Record<string, number>;
   
   // 사다리차 층수/톤수별 단가 테이블 (단위: 원)
   ladderRates: Record<string, LadderRateTier>;
@@ -82,6 +83,15 @@ const defaultValues = {
   },
   workerPrices: { male: 200000, female: 150000 },
   optionPrices: initialOptionPrices,
+  materialCbmSettings: {
+    '특대박스(이불)': 0,
+    '대박스(옷)': 0,
+    '중대박스': 0,
+    '중박스': 0,
+    '소박스': 0,
+    '바구니': 0,
+    '아이스박스': 0
+  },
   ladderRates: DEFAULT_LADDER_RATES,
   partnerContacts: {
     cleaning: { companyName: '', phone: '', memo: '' },
@@ -108,6 +118,7 @@ export const useSettingsStore = create<SettingsState>()(
               defaultPackingMaterials: data.defaultPackingMaterials || get().defaultPackingMaterials,
               workerPrices: data.workerPrices || get().workerPrices,
               optionPrices: data.optionPrices || get().optionPrices,
+              materialCbmSettings: data.materialCbmSettings || get().materialCbmSettings,
               ladderRates: data.ladderRates || get().ladderRates,
               partnerContacts: data.partnerContacts || get().partnerContacts,
             });
