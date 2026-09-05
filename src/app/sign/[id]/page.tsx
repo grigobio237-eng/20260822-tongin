@@ -184,8 +184,33 @@ export default function CustomerSignPage() {
           <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
             <h3 className="font-bold text-slate-800 text-base mb-3">고객 전자서명</h3>
             {isSigned ? (
-              <div className="text-center py-6 bg-emerald-50 rounded-lg border border-emerald-200">
+              <div className="text-center py-6 bg-emerald-50 rounded-lg border border-emerald-200 flex flex-col items-center gap-4">
                 <span className="text-emerald-700 font-bold">✓ 전자서명이 정상 완료되었습니다.</span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const html2pdf = (await import('html2pdf.js')).default;
+                      const element = document.getElementById('contract-print-root');
+                      if (!element) return;
+                      const opt = {
+                        margin: [12, 0, 12, 0],
+                        filename: `통인익스프레스_계약서_${parsedData?.customerInfo.name || '고객'}_${parsedData?.id}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, logging: false },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak: { mode: ['css', 'legacy'] }
+                      };
+                      await html2pdf().set(opt as any).from(element).save();
+                    } catch (e) {
+                      console.error('PDF 다운로드 실패:', e);
+                      alert('PDF 다운로드 중 오류가 발생했습니다.');
+                    }
+                  }}
+                  className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg shadow-sm transition-colors"
+                >
+                  계약서 PDF 다운로드
+                </button>
               </div>
             ) : (
               <div>
