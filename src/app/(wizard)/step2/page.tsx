@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { ROOM_CATEGORIES, RoomCategory, MasterItem } from '@/lib/constants/items';
 import clsx from 'clsx';
@@ -15,6 +16,7 @@ interface ModalState {
 
 export default function Step2Page() {
   const router = useRouter();
+  const materialSettings = useSettingsStore(state => state.materialCbmSettings);
   const [activeTab, setActiveTab] = useState<RoomCategory>('방 1');
   const [modalState, setModalState] = useState<ModalState | null>(null);
   const [customCbmInput, setCustomCbmInput] = useState<string>('');
@@ -80,7 +82,14 @@ export default function Step2Page() {
       <div className="flex justify-between items-center px-1">
         <h3 className="font-bold text-gray-800">{activeTab} 물품 목록</h3>
         <div className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
-          소계: {Object.values(roomItems[activeTab]?.items || {}).flat().reduce((acc, inst) => acc + (inst.cbm || 0), 0).toFixed(1)} CBM
+          소계: {Object.entries(roomItems[activeTab]?.items || {}).reduce((totalAcc, [itemName, instances]) => {
+            return totalAcc + instances.reduce((acc, inst) => {
+              let cbm = inst.cbm || 0;
+              if (itemName === '옷') cbm = (materialSettings['대박스(옷)'] || 0) * inst.quantity;
+              if (itemName === '이불') cbm = (materialSettings['특대박스(이불)'] || 0) * inst.quantity;
+              return acc + cbm;
+            }, 0);
+          }, 0).toFixed(1)} CBM
         </div>
       </div>
 
@@ -106,6 +115,10 @@ export default function Step2Page() {
                   // 빈 껍데기 렌더링 (추가하지 않았을 때)
                   (() => {
                     const def = item.variants.find(v => v.isDefault) || item.variants[1] || item.variants[0];
+                    let defCbm = def.cbm;
+                    if (item.name === '옷') defCbm = materialSettings['대박스(옷)'] || 0;
+                    if (item.name === '이불') defCbm = materialSettings['특대박스(이불)'] || 0;
+
                     return (
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
@@ -113,7 +126,7 @@ export default function Step2Page() {
                             onClick={() => handleOpenModal(activeTab, item, '')}
                             className="flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors text-left"
                           >
-                            {def.name} ({def.cbm} CBM) <ChevronDown className="w-3 h-3 ml-1 shrink-0" />
+                            {def.name} ({defCbm} CBM) <ChevronDown className="w-3 h-3 ml-1 shrink-0" />
                           </button>
                         </div>
                         
@@ -137,14 +150,19 @@ export default function Step2Page() {
                     );
                   })()
                 ) : (
-                  instances.map((inst, idx) => (
+                  instances.map((inst, idx) => {
+                    let displayCbm = inst.unitCbm;
+                    if (item.name === '옷') displayCbm = materialSettings['대박스(옷)'] || 0;
+                    if (item.name === '이불') displayCbm = materialSettings['특대박스(이불)'] || 0;
+                    
+                    return (
                     <div key={inst.id} className="flex items-center justify-between border-t border-dashed pt-2 first:border-0 first:pt-0">
                       <div className="flex-1">
                         <button 
                           onClick={() => handleOpenModal(activeTab, item, inst.id)}
                           className="flex items-center text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-md hover:bg-blue-100 transition-colors text-left"
                         >
-                          {inst.variantName} ({inst.unitCbm} CBM) <ChevronDown className="w-3 h-3 ml-1 shrink-0" />
+                          {inst.variantName} ({displayCbm} CBM) <ChevronDown className="w-3 h-3 ml-1 shrink-0" />
                         </button>
                       </div>
                       
@@ -174,7 +192,8 @@ export default function Step2Page() {
                         )}
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>

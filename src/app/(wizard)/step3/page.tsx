@@ -124,6 +124,7 @@ export default function Step3Page() {
     let tv50 = 0, tv65 = 0, tv85 = 0;
     let bed = 0, drawer = 0, fridge = 0, kimchiL = 0, kimchiM = 0, washer = 0, dryer = 0;
     let sofa = 0, piano = 0, wardrobe = 0;
+    let clothes = 0, blankets = 0;
 
     Object.values(roomItems).forEach(room => {
       // TV
@@ -173,6 +174,14 @@ export default function Step3Page() {
       if (room.items['장롱']) {
         room.items['장롱'].forEach(inst => wardrobe += inst.quantity);
       }
+      // 옷 -> 대박스(옷)
+      if (room.items['옷']) {
+        room.items['옷'].forEach(inst => clothes += inst.quantity);
+      }
+      // 이불 -> 특대박스(이불)
+      if (room.items['이불']) {
+        room.items['이불'].forEach(inst => blankets += inst.quantity);
+      }
     });
 
     const newMaterials = { ...resources.materials };
@@ -196,6 +205,8 @@ export default function Step3Page() {
     sync('쇼파', sofa);
     sync('피아노', piano);
     sync('분해장농', wardrobe);
+    sync('대박스(옷)', clothes);
+    sync('특대박스(이불)', blankets);
 
     const hasChanges = Object.keys(newMaterials).some(key => newMaterials[key] !== resources.materials[key]);
 

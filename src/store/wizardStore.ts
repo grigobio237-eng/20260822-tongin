@@ -145,6 +145,13 @@ export const useWizardStore = create<WizardState>()(
             defaultVariantName = defaultVariant.name;
             defaultUnitCbm = defaultVariant.cbm;
           }
+
+          if (itemName === '옷' || itemName === '이불') {
+            const { useSettingsStore } = require('./settingsStore');
+            const materialSettings = useSettingsStore.getState().materialCbmSettings;
+            if (itemName === '옷') defaultUnitCbm = materialSettings['대박스(옷)'] || 0;
+            if (itemName === '이불') defaultUnitCbm = materialSettings['특대박스(이불)'] || 0;
+          }
           
           const newInstance: RoomItemInstance = {
             id: Math.random().toString(36).substring(2, 9),
@@ -359,18 +366,28 @@ export const useWizardStore = create<WizardState>()(
       
       recalculateCbm: () => {
         const { roomItems, resources } = get();
+        const { useSettingsStore } = require('./settingsStore');
+        const settings = useSettingsStore.getState();
+        const materialSettings = settings.materialCbmSettings;
+        
         let totalCbm = 0;
         
         Object.values(roomItems).forEach(roomData => {
-          Object.values(roomData.items).forEach(instances => { 
-            instances.forEach(item => { totalCbm += item.cbm; });
+          Object.entries(roomData.items).forEach(([itemName, instances]) => { 
+            instances.forEach(item => { 
+              let cbm = item.cbm;
+              if (itemName === '옷') {
+                cbm = (materialSettings['대박스(옷)'] || 0) * item.quantity;
+              } else if (itemName === '이불') {
+                cbm = (materialSettings['특대박스(이불)'] || 0) * item.quantity;
+              }
+              totalCbm += cbm; 
+            });
           });
         });
         
-        totalCbm = Math.round(totalCbm * 10) / 10;
+        totalCbm = Math.round(totalCbm * 100) / 100;
         
-        const { useSettingsStore } = require('./settingsStore');
-        const settings = useSettingsStore.getState();
         const limits = settings.vehicleCbmLimits;
         const calculated = calculateVehicles(totalCbm, limits);
         
