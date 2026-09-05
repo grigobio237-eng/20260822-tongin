@@ -402,6 +402,8 @@ export const useWizardStore = create<WizardState>()(
                 cbm = (materialSettings['중박스'] || 0) * item.quantity;
               } else if (itemName === '도서/소형물품(소박스용)') {
                 cbm = (materialSettings['소박스'] || 0) * item.quantity;
+              } else if (itemName === '기타물품1' || itemName === '기타물품2') {
+                cbm = (materialSettings[item.variantName] || 0) * item.quantity;
               }
               totalCbm += cbm; 
             });

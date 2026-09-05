@@ -91,6 +91,7 @@ export default function Step2Page() {
               if (itemName === '이불') cbm = (materialSettings['특대박스(이불)'] || 0) * inst.quantity;
               if (itemName === '생활물품/잔짐류(중박스용)') cbm = (materialSettings['중박스'] || 0) * inst.quantity;
               if (itemName === '도서/소형물품(소박스용)') cbm = (materialSettings['소박스'] || 0) * inst.quantity;
+              if (itemName === '기타물품1' || itemName === '기타물품2') cbm = (materialSettings[inst.variantName] || 0) * inst.quantity;
               return acc + cbm;
             }, 0);
           }, 0).toFixed(1)} CBM
@@ -125,6 +126,7 @@ export default function Step2Page() {
                     if (item.name === '이불') defCbm = materialSettings['특대박스(이불)'] || 0;
                     if (item.name === '생활물품/잔짐류(중박스용)') defCbm = materialSettings['중박스'] || 0;
                     if (item.name === '도서/소형물품(소박스용)') defCbm = materialSettings['소박스'] || 0;
+                    if (item.name === '기타물품1' || item.name === '기타물품2') defCbm = materialSettings[def.name] || 0;
 
                     return (
                       <div className="flex items-center justify-between">
@@ -163,6 +165,7 @@ export default function Step2Page() {
                     if (item.name === '이불') displayCbm = materialSettings['특대박스(이불)'] || 0;
                     if (item.name === '생활물품/잔짐류(중박스용)') displayCbm = materialSettings['중박스'] || 0;
                     if (item.name === '도서/소형물품(소박스용)') displayCbm = materialSettings['소박스'] || 0;
+                    if (item.name === '기타물품1' || item.name === '기타물품2') displayCbm = materialSettings[inst.variantName] || 0;
                     
                     return (
                     <div key={inst.id} className="flex items-center justify-between border-t border-dashed pt-2 first:border-0 first:pt-0">
@@ -395,13 +398,20 @@ export default function Step2Page() {
             
             <div className="p-4 overflow-y-auto space-y-3">
               {modalState.item.variants.map((v) => {
+                let modalVariantCbm = v.cbm;
+                if (modalState.item.name === '옷') modalVariantCbm = materialSettings['대박스(옷)'] || 0;
+                if (modalState.item.name === '이불') modalVariantCbm = materialSettings['특대박스(이불)'] || 0;
+                if (modalState.item.name === '생활물품/잔짐류(중박스용)') modalVariantCbm = materialSettings['중박스'] || 0;
+                if (modalState.item.name === '도서/소형물품(소박스용)') modalVariantCbm = materialSettings['소박스'] || 0;
+                if (modalState.item.name === '기타물품1' || modalState.item.name === '기타물품2') modalVariantCbm = materialSettings[v.name] || 0;
+
                 const currentVariantName = roomItems[modalState.room]?.items?.[modalState.item.name]?.find(inst => inst.id === modalState.instanceId)?.variantName;
                 const isSelected = currentVariantName === v.name || (!currentVariantName && v.isDefault);
                 
                 return (
                   <button
                     key={v.name}
-                    onClick={() => handleVariantSelect(v.name, v.cbm)}
+                    onClick={() => handleVariantSelect(v.name, typeof modalVariantCbm !== 'undefined' ? modalVariantCbm : v.cbm)}
                     className={clsx(
                       "w-full flex items-center justify-between p-4 rounded-xl border text-left transition-all active:scale-95",
                       isSelected 
@@ -413,7 +423,7 @@ export default function Step2Page() {
                       <p className={clsx("font-semibold text-base", isSelected ? "text-blue-700" : "text-gray-800")}>
                         {v.name}
                       </p>
-                      <p className="text-sm text-gray-500">{v.cbm} CBM</p>
+                      <p className="text-sm text-gray-500">{typeof modalVariantCbm !== 'undefined' ? modalVariantCbm : v.cbm} CBM</p>
                     </div>
                     {isSelected && <Check className="w-6 h-6 text-blue-600" />}
                   </button>
