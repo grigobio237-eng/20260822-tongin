@@ -47,13 +47,13 @@ export const ROOM_ITEMS: MasterItem[] = [
     variants: [
       { name: '콘솔형(슬림)', cbm: 0.5 },
       { name: '일반 수납형 (기본)', cbm: 0.5, isDefault: true },
-      { name: '의자/거울 일체형', cbm: 0.5 },
+      { name: '의자/거울 일체형', cbm: 1 },
     ]
   },
   {
     name: '침대(W)',
     variants: [
-      { name: '싱글/슈퍼싱글(SS)', cbm: 0.5 },
+      { name: '싱글/슈퍼싱글(SS)', cbm: 1 },
       { name: '퀸(Q, 기본)', cbm: 1.5, isDefault: true },
       { name: '킹/라지킹(K/LK)', cbm: 1.5 },
       { name: '패밀리/모션베드', cbm: 2 },
@@ -65,7 +65,7 @@ export const ROOM_ITEMS: MasterItem[] = [
     name: '책상',
     variants: [
       { name: '1인용/독서실 (~1200mm)', cbm: 0.5 },
-      { name: '일반 사무/컴퓨터 (기본)', cbm: 0.5, isDefault: true },
+      { name: '일반 사무/컴퓨터 (기본)', cbm: 1, isDefault: true },
       { name: 'L자형/모션데스크 (1800mm~)', cbm: 1 },
     ]
   },
@@ -91,7 +91,7 @@ export const ROOM_ITEMS: MasterItem[] = [
     variants: [
       { name: '3단/소형', cbm: 0.5 },
       { name: '5단/광폭 (기본)', cbm: 0.5, isDefault: true },
-      { name: '와이드 6~8단', cbm: 0.5 },
+      { name: '와이드 6~8단', cbm: 1 },
     ]
   },
   {
@@ -99,7 +99,7 @@ export const ROOM_ITEMS: MasterItem[] = [
     variants: [
       { name: '50인치 이하', cbm: 0.5 },
       { name: '65~75인치 (기본)', cbm: 0.5, isDefault: true },
-      { name: '85인치 이상 / 벽걸이', cbm: 0.5 },
+      { name: '85인치 이상 / 벽걸이', cbm: 1 },
     ]
   },
   { name: 'TV받침대', variants: createStandardVariants(0.5, 0.5, 1) },
@@ -133,7 +133,7 @@ export const ROOM_ITEMS: MasterItem[] = [
     variants: [
       { name: '소형/티테이블', cbm: 0.5 },
       { name: '일반 (기본)', cbm: 0.5, isDefault: true },
-      { name: '대형', cbm: 0.5 },
+      { name: '대형', cbm: 1 },
     ]
   },
   {
@@ -148,7 +148,7 @@ export const ROOM_ITEMS: MasterItem[] = [
     name: '에어드레서/스타일러',
     variants: [
       { name: '3벌용/소형', cbm: 0.5 },
-      { name: '5벌용/일반 (기본)', cbm: 0.5, isDefault: true },
+      { name: '5벌용/일반 (기본)', cbm: 1, isDefault: true },
       { name: '대용량', cbm: 1 },
     ]
   },
@@ -190,13 +190,13 @@ export const KITCHEN_ITEMS: MasterItem[] = [
     name: '식탁',
     variants: [
       { name: '2인용', cbm: 0.5 },
-      { name: '4인용 (의자 포함, 기본)', cbm: 0.5, isDefault: true },
+      { name: '4인용 (의자 포함, 기본)', cbm: 1, isDefault: true },
       { name: '6인용 / 8인용 대형', cbm: 1.5 },
     ]
   },
   { name: '의자', variants: ROOM_ITEMS.find(i => i.name === '의자')!.variants },
   { name: '장식장', variants: ROOM_ITEMS.find(i => i.name === '장식장')!.variants },
-  { name: '수납장', variants: createStandardVariants(0.5, 0.5, 0.5) },
+  { name: '수납장', variants: createStandardVariants(0.5, 0.5, 1) },
   {
     name: '냉장고',
     variants: [
@@ -217,7 +217,7 @@ export const KITCHEN_ITEMS: MasterItem[] = [
     name: '김치냉장고',
     variants: [
       { name: '1도어/소형', cbm: 0.5 },
-      { name: '뚜껑식 2룸', cbm: 0.5 },
+      { name: '뚜껑식 2룸', cbm: 1 },
       { name: '스탠드형 4룸 (기본)', cbm: 1, isDefault: true },
     ]
   },
@@ -231,8 +231,8 @@ export const VERANDA_ITEMS: MasterItem[] = [
   { name: '도서/소형물품(소박스용)', variants: [{ name: '소박스', cbm: 0, isDefault: true }] },
   { name: '생활물품/잔짐류(중박스용)', variants: [{ name: '중박스', cbm: 0, isDefault: true }] },
   { name: '장식장', variants: ROOM_ITEMS.find(i => i.name === '장식장')!.variants },
-  { name: '앵글/선반', variants: createStandardVariants(0.5, 0.5, 0.5) },
-  { name: '자전거', variants: createStandardVariants(0.5, 0.5, 0.5) },
+  { name: '앵글/선반', variants: createStandardVariants(0.5, 0.5, 1) },
+  { name: '자전거', variants: createStandardVariants(0.5, 0.5, 1) },
   { name: '서랍장', variants: ROOM_ITEMS.find(i => i.name === '서랍장')!.variants },
   { name: '항아리', variants: createStandardVariants(0.5, 0.5, 0.5) },
   { name: '화분', variants: createStandardVariants(0.5, 0.5, 0.5) },
@@ -247,11 +247,11 @@ export const REAR_BALCONY_ITEMS: MasterItem[] = [
     name: '세탁기',
     variants: [
       { name: '통돌이/소형', cbm: 0.5 },
-      { name: '드럼 세탁기 (기본)', cbm: 0.5, isDefault: true },
+      { name: '드럼 세탁기 (기본)', cbm: 1, isDefault: true },
       { name: '워시타워 (일체형)', cbm: 1.5 },
     ]
   },
-  { name: '건조기', variants: createStandardVariants(0.5, 0.5, 1) },
+  { name: '건조기', variants: createStandardVariants(0.5, 1, 1) },
   { name: '워시타워', variants: [{ name: '일체형 (기본)', cbm: 1.5, isDefault: true }] },
   { name: '생활물품/잔짐류(중박스용)', variants: [{ name: '중박스', cbm: 0, isDefault: true }] },
   { name: '도서/소형물품(소박스용)', variants: [{ name: '소박스', cbm: 0, isDefault: true }] },
