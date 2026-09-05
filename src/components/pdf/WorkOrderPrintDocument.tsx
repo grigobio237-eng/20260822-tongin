@@ -192,7 +192,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
           </div>
         </div>
 
-        <div className="text-center text-[10px] text-gray-500 border-t pt-2 mt-2">
+        <div className="text-center text-[10px] text-gray-500 border-t pt-3 mt-4 pb-4">
           본 작업지시서는 현장 작업자용으로 고객에게 배포하지 마십시오. / 통인익스프레스
         </div>
       </div>

@@ -295,7 +295,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
           </div>
         </div>
 
-        <div className="border-t border-slate-200 pt-1.5 text-center text-[9px] text-gray-400">
+        <div className="border-t border-slate-200 pt-3 mt-2 pb-4 text-center text-[9px] text-gray-400">
           본 리포트는 고객과의 신뢰를 바탕으로 작성된 공식 견적·계약 증빙 자료입니다.
         </div>
       </div>
