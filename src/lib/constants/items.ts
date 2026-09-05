@@ -166,32 +166,17 @@ export const LIVING_ROOM_ITEMS: MasterItem[] = [
       { name: '리클라이너 4인 / 패밀리', cbm: 2.4 },
     ]
   },
-  { name: '테이블', variants: createStandardVariants(0.2, 0.5, 0.8) },
-  { name: '오디오', variants: createStandardVariants(0.1, 0.3, 0.5) },
-  { name: '홈시어터', variants: createStandardVariants(0.1, 0.4, 0.8) },
-  { name: '거실장', variants: createStandardVariants(0.3, 0.8, 1.5) },
-  { name: '장식장', variants: ROOM_ITEMS.find(i => i.name === '장식장')!.variants },
-  { name: '수족관', variants: createStandardVariants(0.3, 0.6, 1.5) },
-  {
-    name: '피아노',
-    variants: [
-      { name: '콘솔/디지털', cbm: 1.0 },
-      { name: '일반/업라이트 (기본)', cbm: 2.0, isDefault: true },
-      { name: '그랜드 피아노', cbm: 4.0 },
-    ]
-  },
-  {
-    name: '운동기구',
-    variants: [
-      { name: '실내자전거/소형', cbm: 0.4 },
-      { name: '런닝머신 (기본)', cbm: 0.8, isDefault: true },
-      { name: '대형 홈짐', cbm: 1.5 },
-    ]
-  },
-  { name: '에어컨', variants: ROOM_ITEMS.find(i => i.name === '에어컨')!.variants },
-  { name: '안마기', variants: createStandardVariants(0.5, 1.0, 1.5) },
+  { name: '탁자', variants: ROOM_ITEMS.find(i => i.name === '탁자')!.variants },
+  { name: '책장', variants: ROOM_ITEMS.find(i => i.name === '책장')!.variants },
+  { name: '책상', variants: ROOM_ITEMS.find(i => i.name === '책상')!.variants },
+  { name: '의자', variants: ROOM_ITEMS.find(i => i.name === '의자')!.variants },
   { name: 'TV', variants: ROOM_ITEMS.find(i => i.name === 'TV')!.variants },
-  { name: 'TV받침대', variants: ROOM_ITEMS.find(i => i.name === 'TV받침대')!.variants },
+  { name: '장식장', variants: ROOM_ITEMS.find(i => i.name === '장식장')!.variants },
+  { name: '에어컨', variants: ROOM_ITEMS.find(i => i.name === '에어컨')!.variants },
+  { name: '콘솔', variants: createStandardVariants(0.2, 0.4, 0.6) },
+  { name: '거실장식장', variants: createStandardVariants(0.5, 1.0, 1.5) },
+  { name: '에어드레서/스타일러', variants: ROOM_ITEMS.find(i => i.name === '에어드레서/스타일러')!.variants },
+  { name: '공기청정기', variants: ROOM_ITEMS.find(i => i.name === '공기청정기')!.variants },
 ];
 
 export const KITCHEN_ITEMS: MasterItem[] = [
