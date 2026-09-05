@@ -209,7 +209,7 @@ export default function Step2Page() {
         {/* 기타 항목 2개 추가 */}
         {[1, 2].map(num => {
           const customKey = `기타 ${num}`;
-          const instances = roomItems[activeTab].items[customKey] || [];
+          const instances = roomItems[activeTab]?.items?.[customKey] || [];
           const itemState = instances[0];
           const qty = itemState?.quantity || 0;
           

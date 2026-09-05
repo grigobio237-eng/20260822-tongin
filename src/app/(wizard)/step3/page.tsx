@@ -128,6 +128,7 @@ export default function Step3Page() {
     let dynamicCounts: Record<string, number> = {};
 
     Object.values(roomItems).forEach(room => {
+      if (!room || !room.items) return;
       ['기타물품1', '기타물품2'].forEach(key => {
         if (room.items[key]) {
           room.items[key].forEach(inst => {

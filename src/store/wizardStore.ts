@@ -133,6 +133,10 @@ export const useWizardStore = create<WizardState>()(
       addRoomItemInstance: (room, itemName) => {
         set((state) => {
           const newRoomItems = { ...state.roomItems };
+          if (room && !newRoomItems[room]) {
+            newRoomItems[room] = { items: {}, note: '', images: [] };
+          }
+          if (!newRoomItems[room]) newRoomItems[room] = { items: {}, note: '', images: [] };
           const currentInstances = newRoomItems[room].items[itemName] || [];
           
           const masterItem = ROOM_CATEGORIES[room]?.find(i => i.name === itemName) || ROOM_CATEGORIES['안방']?.find(i => i.name === itemName);
@@ -175,6 +179,10 @@ export const useWizardStore = create<WizardState>()(
       removeRoomItemInstance: (room, itemName, id) => {
         set((state) => {
           const newRoomItems = { ...state.roomItems };
+          if (room && !newRoomItems[room]) {
+            newRoomItems[room] = { items: {}, note: '', images: [] };
+          }
+          if (!newRoomItems[room]) newRoomItems[room] = { items: {}, note: '', images: [] };
           const currentInstances = newRoomItems[room].items[itemName] || [];
           
           const filtered = currentInstances.filter(inst => inst.id !== id);
@@ -196,6 +204,10 @@ export const useWizardStore = create<WizardState>()(
       updateRoomItemQuantity: (room, itemName, id, quantity) => {
         set((state) => {
           const newRoomItems = { ...state.roomItems };
+          if (room && !newRoomItems[room]) {
+            newRoomItems[room] = { items: {}, note: '', images: [] };
+          }
+          if (!newRoomItems[room]) newRoomItems[room] = { items: {}, note: '', images: [] };
           const currentInstances = newRoomItems[room].items[itemName] || [];
           
           if (currentInstances.length === 0) {
@@ -246,6 +258,10 @@ export const useWizardStore = create<WizardState>()(
       changeItemVariant: (room, itemName, id, variantName, customCbm) => {
         set((state) => {
           const newRoomItems = { ...state.roomItems };
+          if (room && !newRoomItems[room]) {
+            newRoomItems[room] = { items: {}, note: '', images: [] };
+          }
+          if (!newRoomItems[room]) newRoomItems[room] = { items: {}, note: '', images: [] };
           const currentInstances = newRoomItems[room].items[itemName] || [];
           
           const index = currentInstances.findIndex(inst => inst.id === id);
@@ -375,7 +391,7 @@ export const useWizardStore = create<WizardState>()(
         let totalCbm = 0;
         
         Object.values(roomItems).forEach(roomData => {
-          Object.entries(roomData.items).forEach(([itemName, instances]) => { 
+          Object.entries(roomData?.items || {}).forEach(([itemName, instances]) => { 
             instances.forEach(item => { 
               let cbm = item.cbm;
               if (itemName === '옷') {
