@@ -146,12 +146,13 @@ export const useWizardStore = create<WizardState>()(
             defaultUnitCbm = defaultVariant.cbm;
           }
 
-          if (itemName === '옷' || itemName === '이불' || itemName === '생활물품(잔짐류)') {
+          if (itemName === '옷' || itemName === '이불' || itemName === '생활물품/잔짐류(중박스용)' || itemName === '도서/소형물품(소박스용)') {
             const { useSettingsStore } = require('./settingsStore');
             const materialSettings = useSettingsStore.getState().materialCbmSettings;
             if (itemName === '옷') defaultUnitCbm = materialSettings['대박스(옷)'] || 0;
             if (itemName === '이불') defaultUnitCbm = materialSettings['특대박스(이불)'] || 0;
-            if (itemName === '생활물품(잔짐류)') defaultUnitCbm = materialSettings['중박스'] || 0;
+            if (itemName === '생활물품/잔짐류(중박스용)') defaultUnitCbm = materialSettings['중박스'] || 0;
+            if (itemName === '도서/소형물품(소박스용)') defaultUnitCbm = materialSettings['소박스'] || 0;
           }
           
           const newInstance: RoomItemInstance = {
@@ -381,8 +382,10 @@ export const useWizardStore = create<WizardState>()(
                 cbm = (materialSettings['대박스(옷)'] || 0) * item.quantity;
               } else if (itemName === '이불') {
                 cbm = (materialSettings['특대박스(이불)'] || 0) * item.quantity;
-              } else if (itemName === '생활물품(잔짐류)') {
+              } else if (itemName === '생활물품/잔짐류(중박스용)') {
                 cbm = (materialSettings['중박스'] || 0) * item.quantity;
+              } else if (itemName === '도서/소형물품(소박스용)') {
+                cbm = (materialSettings['소박스'] || 0) * item.quantity;
               }
               totalCbm += cbm; 
             });

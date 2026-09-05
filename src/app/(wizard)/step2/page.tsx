@@ -87,7 +87,8 @@ export default function Step2Page() {
               let cbm = inst.cbm || 0;
               if (itemName === '옷') cbm = (materialSettings['대박스(옷)'] || 0) * inst.quantity;
               if (itemName === '이불') cbm = (materialSettings['특대박스(이불)'] || 0) * inst.quantity;
-              if (itemName === '생활물품(잔짐류)') cbm = (materialSettings['중박스'] || 0) * inst.quantity;
+              if (itemName === '생활물품/잔짐류(중박스용)') cbm = (materialSettings['중박스'] || 0) * inst.quantity;
+              if (itemName === '도서/소형물품(소박스용)') cbm = (materialSettings['소박스'] || 0) * inst.quantity;
               return acc + cbm;
             }, 0);
           }, 0).toFixed(1)} CBM
@@ -119,7 +120,8 @@ export default function Step2Page() {
                     let defCbm = def.cbm;
                     if (item.name === '옷') defCbm = materialSettings['대박스(옷)'] || 0;
                     if (item.name === '이불') defCbm = materialSettings['특대박스(이불)'] || 0;
-                    if (item.name === '생활물품(잔짐류)') defCbm = materialSettings['중박스'] || 0;
+                    if (item.name === '생활물품/잔짐류(중박스용)') defCbm = materialSettings['중박스'] || 0;
+                    if (item.name === '도서/소형물품(소박스용)') defCbm = materialSettings['소박스'] || 0;
 
                     return (
                       <div className="flex items-center justify-between">
@@ -156,7 +158,8 @@ export default function Step2Page() {
                     let displayCbm = inst.unitCbm;
                     if (item.name === '옷') displayCbm = materialSettings['대박스(옷)'] || 0;
                     if (item.name === '이불') displayCbm = materialSettings['특대박스(이불)'] || 0;
-                    if (item.name === '생활물품(잔짐류)') displayCbm = materialSettings['중박스'] || 0;
+                    if (item.name === '생활물품/잔짐류(중박스용)') displayCbm = materialSettings['중박스'] || 0;
+                    if (item.name === '도서/소형물품(소박스용)') displayCbm = materialSettings['소박스'] || 0;
                     
                     return (
                     <div key={inst.id} className="flex items-center justify-between border-t border-dashed pt-2 first:border-0 first:pt-0">
