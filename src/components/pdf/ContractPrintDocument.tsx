@@ -178,7 +178,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
       </div>
 
       {/* ================= PAGE 2: 공간별 상세 물품 목록 및 특이사항 ================= */}
-      <div className="w-[210mm] min-h-[273mm] px-[12mm] mx-auto box-border flex flex-col justify-between" style={{ pageBreakAfter: 'always' }}>
+      <div className="w-[210mm] min-h-[273mm] px-[12mm] mx-auto box-border flex flex-col justify-between">
         <div>
           <div className="flex justify-between items-end border-b-2 border-blue-900 pb-2 mb-3">
             <div>
