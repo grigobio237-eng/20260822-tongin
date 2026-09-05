@@ -152,6 +152,8 @@ export const ROOM_ITEMS: MasterItem[] = [
       { name: '대용량', cbm: 1.2 },
     ]
   },
+  { name: '기타물품1', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
+  { name: '기타물품2', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
 ];
 
 export const LIVING_ROOM_ITEMS: MasterItem[] = [
@@ -177,6 +179,8 @@ export const LIVING_ROOM_ITEMS: MasterItem[] = [
   { name: '거실장식장', variants: createStandardVariants(0.5, 1.0, 1.5) },
   { name: '에어드레서/스타일러', variants: ROOM_ITEMS.find(i => i.name === '에어드레서/스타일러')!.variants },
   { name: '공기청정기', variants: ROOM_ITEMS.find(i => i.name === '공기청정기')!.variants },
+  { name: '기타물품1', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
+  { name: '기타물품2', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
 ];
 
 export const KITCHEN_ITEMS: MasterItem[] = [
@@ -219,6 +223,8 @@ export const KITCHEN_ITEMS: MasterItem[] = [
   },
   { name: '가스렌지', variants: createStandardVariants(0.05, 0.1, 0.2) },
   { name: '식기류', variants: createStandardVariants(0.1, 0.3, 0.6) },
+  { name: '기타물품1', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
+  { name: '기타물품2', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
 ];
 
 export const VERANDA_ITEMS: MasterItem[] = [
@@ -231,6 +237,8 @@ export const VERANDA_ITEMS: MasterItem[] = [
   { name: '항아리', variants: createStandardVariants(0.1, 0.3, 0.5) },
   { name: '화분', variants: createStandardVariants(0.1, 0.2, 0.4) },
   { name: '쌀통', variants: createStandardVariants(0.05, 0.1, 0.2) },
+  { name: '기타물품1', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
+  { name: '기타물품2', variants: PACKING_MATERIALS.map(m => ({ name: m, cbm: 0 })) },
 ];
 
 
