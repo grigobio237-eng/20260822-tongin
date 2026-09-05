@@ -1,8 +1,19 @@
 const fs = require('fs');
 let code = fs.readFileSync('src/lib/constants/items.ts', 'utf8');
 
-code = code.split("{ name: '생활물품(잔짐류)', variants: [{ name: '중박스', cbm: 0, isDefault: true }] },").join(
-  "{ name: '도서/소형물품(소박스용)', variants: [{ name: '소박스', cbm: 0, isDefault: true }] },\n  { name: '생활물품/잔짐류(중박스용)', variants: [{ name: '중박스', cbm: 0, isDefault: true }] },"
+code = code.replace(
+  "export type RoomCategory = '방 1' | '방 2' | '방 3' | '방 4' | '방 5' | '거실' | '주방' | '베란다';",
+  "export type RoomCategory = '안방' | '입구방' | '작은방1' | '작은방2' | '작은방3' | '거실' | '주방' | '베란다';"
+);
+
+code = code.replace(
+  "'방 1': ROOM_ITEMS,\n  '방 2': ROOM_ITEMS,\n  '방 3': ROOM_ITEMS,\n  '방 4': ROOM_ITEMS,\n  '방 5': ROOM_ITEMS,",
+  "'안방': ROOM_ITEMS,\n  '입구방': ROOM_ITEMS,\n  '작은방1': ROOM_ITEMS,\n  '작은방2': ROOM_ITEMS,\n  '작은방3': ROOM_ITEMS,"
+);
+
+code = code.replace(
+  "'방 1': ROOM_ITEMS,\r\n  '방 2': ROOM_ITEMS,\r\n  '방 3': ROOM_ITEMS,\r\n  '방 4': ROOM_ITEMS,\r\n  '방 5': ROOM_ITEMS,",
+  "'안방': ROOM_ITEMS,\r\n  '입구방': ROOM_ITEMS,\r\n  '작은방1': ROOM_ITEMS,\r\n  '작은방2': ROOM_ITEMS,\r\n  '작은방3': ROOM_ITEMS,"
 );
 
 fs.writeFileSync('src/lib/constants/items.ts', code);

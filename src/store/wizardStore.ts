@@ -135,7 +135,7 @@ export const useWizardStore = create<WizardState>()(
           const newRoomItems = { ...state.roomItems };
           const currentInstances = newRoomItems[room].items[itemName] || [];
           
-          const masterItem = ROOM_CATEGORIES[room]?.find(i => i.name === itemName) || ROOM_CATEGORIES['방 1']?.find(i => i.name === itemName);
+          const masterItem = ROOM_CATEGORIES[room]?.find(i => i.name === itemName) || ROOM_CATEGORIES['안방']?.find(i => i.name === itemName);
           
           let defaultVariantName = itemName;
           let defaultUnitCbm = 0.1;
@@ -199,7 +199,7 @@ export const useWizardStore = create<WizardState>()(
           const currentInstances = newRoomItems[room].items[itemName] || [];
           
           if (currentInstances.length === 0) {
-             const masterItem = ROOM_CATEGORIES[room]?.find(i => i.name === itemName) || ROOM_CATEGORIES['방 1']?.find(i => i.name === itemName);
+             const masterItem = ROOM_CATEGORIES[room]?.find(i => i.name === itemName) || ROOM_CATEGORIES['안방']?.find(i => i.name === itemName);
              
              let defaultVariantName = itemName;
              let defaultUnitCbm = 0.1;

@@ -1,4 +1,4 @@
-export type RoomCategory = '방 1' | '방 2' | '방 3' | '방 4' | '방 5' | '거실' | '주방' | '베란다';
+export type RoomCategory = '안방' | '입구방' | '작은방1' | '작은방2' | '작은방3' | '거실' | '주방' | '베란다';
 
 export interface ItemVariant {
   name: string;
@@ -231,11 +231,11 @@ export const VERANDA_ITEMS: MasterItem[] = [
 ];
 
 export const ROOM_CATEGORIES: Record<RoomCategory, MasterItem[]> = {
-  '방 1': ROOM_ITEMS,
-  '방 2': ROOM_ITEMS,
-  '방 3': ROOM_ITEMS,
-  '방 4': ROOM_ITEMS,
-  '방 5': ROOM_ITEMS,
+  '안방': ROOM_ITEMS,
+  '입구방': ROOM_ITEMS,
+  '작은방1': ROOM_ITEMS,
+  '작은방2': ROOM_ITEMS,
+  '작은방3': ROOM_ITEMS,
   '거실': LIVING_ROOM_ITEMS,
   '주방': KITCHEN_ITEMS,
   '베란다': VERANDA_ITEMS,

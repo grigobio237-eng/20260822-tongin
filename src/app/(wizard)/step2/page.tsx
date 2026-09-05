@@ -17,7 +17,7 @@ interface ModalState {
 export default function Step2Page() {
   const router = useRouter();
   const materialSettings = useSettingsStore(state => state.materialCbmSettings);
-  const [activeTab, setActiveTab] = useState<RoomCategory>('방 1');
+  const [activeTab, setActiveTab] = useState<RoomCategory>('안방');
   const [modalState, setModalState] = useState<ModalState | null>(null);
   const [customCbmInput, setCustomCbmInput] = useState<string>('');
   
@@ -79,7 +79,7 @@ export default function Step2Page() {
       </div>
 
       {/* Items Grid Header */}
-      <div className="flex justify-between items-center px-1">
+      <div className="sticky top-0 bg-white z-10 py-3 mb-4 flex justify-between items-center px-1 border-b">
         <h3 className="font-bold text-gray-800">{activeTab} 물품 목록</h3>
         <div className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
           소계: {Object.entries(roomItems[activeTab]?.items || {}).reduce((totalAcc, [itemName, instances]) => {
