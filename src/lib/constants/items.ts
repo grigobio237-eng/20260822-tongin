@@ -36,8 +36,9 @@ export const ROOM_ITEMS: MasterItem[] = [
       { name: '대형 (4칸 이상)', cbm: 3.5 },
     ]
   },
-  { name: '옷', variants: createStandardVariants(0.1, 0.2, 0.4) },
-  { name: '이불', variants: createStandardVariants(0.1, 0.2, 0.4) },
+  { name: '옷', variants: [{ name: '대박스(옷)', cbm: 0, isDefault: true }] },
+  { name: '이불', variants: [{ name: '특대박스(이불)', cbm: 0, isDefault: true }] },
+  { name: '생활물품(잔짐류)', variants: [{ name: '중박스', cbm: 0, isDefault: true }] },
   {
     name: '화장대',
     variants: [
@@ -125,6 +126,7 @@ export const ROOM_ITEMS: MasterItem[] = [
 ];
 
 export const LIVING_ROOM_ITEMS: MasterItem[] = [
+  { name: '생활물품(잔짐류)', variants: [{ name: '중박스', cbm: 0, isDefault: true }] },
   {
     name: '쇼파',
     variants: [
@@ -163,6 +165,7 @@ export const LIVING_ROOM_ITEMS: MasterItem[] = [
 ];
 
 export const KITCHEN_ITEMS: MasterItem[] = [
+  { name: '생활물품(잔짐류)', variants: [{ name: '중박스', cbm: 0, isDefault: true }] },
   {
     name: '식탁',
     variants: [
@@ -213,6 +216,7 @@ export const KITCHEN_ITEMS: MasterItem[] = [
 ];
 
 export const VERANDA_ITEMS: MasterItem[] = [
+  { name: '생활물품(잔짐류)', variants: [{ name: '중박스', cbm: 0, isDefault: true }] },
   { name: '장식장', variants: ROOM_ITEMS.find(i => i.name === '장식장')!.variants },
   { name: '앵글/선반', variants: createStandardVariants(0.2, 0.5, 0.8) },
   { name: '자전거', variants: createStandardVariants(0.2, 0.5, 0.8) },
