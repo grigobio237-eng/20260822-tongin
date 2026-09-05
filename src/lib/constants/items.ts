@@ -202,9 +202,10 @@ export const KITCHEN_ITEMS: MasterItem[] = [
   {
     name: '냉장고',
     variants: [
-      { name: '일반 2도어 (~500L)', cbm: 1 },
-      { name: '4도어/양문형 (기본)', cbm: 1.5, isDefault: true },
-      { name: '비스포크/오브제 4도어', cbm: 2 },
+      { name: '일반 소형/원룸 (1~2도어)', cbm: 0.5 },
+      { name: '슬림 2도어 (300~400L, 기본)', cbm: 1, isDefault: true },
+      { name: '키친핏/빌트인 (600L대)', cbm: 1.5 },
+      { name: '4도어 패밀리형 대형 (800L+)', cbm: 2 },
     ]
   },
   { name: '정수기', variants: createStandardVariants(0.5, 0.5, 0.5) },
@@ -218,9 +219,9 @@ export const KITCHEN_ITEMS: MasterItem[] = [
   {
     name: '김치냉장고',
     variants: [
-      { name: '1도어/소형', cbm: 0.5 },
-      { name: '뚜껑식 2룸', cbm: 1 },
-      { name: '스탠드형 4룸 (기본)', cbm: 1, isDefault: true },
+      { name: '뚜껑형 (1~2룸)', cbm: 0.5 },
+      { name: '스탠드 3도어 (300~400L, 기본)', cbm: 1, isDefault: true },
+      { name: '스탠드 4도어 대형 (500L)', cbm: 1.5 },
     ]
   },
   { name: '가스렌지', variants: createStandardVariants(0.5, 0.5, 0.5) },
