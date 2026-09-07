@@ -32,7 +32,8 @@ export default function SettingsPage() {
   const [localMaterialCbm, setLocalMaterialCbm] = useState(store.materialCbmSettings || {
     '특대박스(이불)': 0, '대박스(옷)': 0, '중대박스': 0, '중박스': 0, '소박스': 0, '바구니': 0, '아이스박스': 0
   });
-  const [localLadderRates, setLocalLadderRates] = useState<Record<string, LadderRateTier>>(store.ladderRates || DEFAULT_LADDER_RATES);
+  const isOldLadderFormat = store.ladderRates && !store.ladderRates.tier_14;
+  const [localLadderRates, setLocalLadderRates] = useState<Record<string, LadderRateTier>>(isOldLadderFormat ? DEFAULT_LADDER_RATES : (store.ladderRates || DEFAULT_LADDER_RATES));
   const [localPartnerContacts, setLocalPartnerContacts] = useState(store.partnerContacts);
   
   const [activeTab, setActiveTab] = useState<'general' | 'db'>('general');
@@ -58,7 +59,13 @@ export default function SettingsPage() {
     if (store.defaultPackingMaterials) setLocalDefaultPackingMaterials(store.defaultPackingMaterials);
     setLocalWorkerPrices(store.workerPrices);
     setLocalOptionPrices(store.optionPrices);
-    if (store.ladderRates) setLocalLadderRates(store.ladderRates);
+    if (store.ladderRates) {
+      if (!store.ladderRates.tier_14) {
+        setLocalLadderRates(DEFAULT_LADDER_RATES);
+      } else {
+        setLocalLadderRates(store.ladderRates);
+      }
+    }
     if (store.partnerContacts) setLocalPartnerContacts(store.partnerContacts);
     if (store.itemCbmSettings) setLocalItemCbm(store.itemCbmSettings);
   }, [store]);
@@ -262,7 +269,7 @@ export default function SettingsPage() {
                       <td className="p-3 font-semibold text-gray-700 bg-gray-50">{tier.label}</td>
                       <td className="p-2">
                         <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
-                          value={tier.fiveTon === 0 ? '' : tier.fiveTon.toLocaleString()} 
+                          value={(tier.fiveTon || 0) === 0 ? '' : (tier.fiveTon || 0).toLocaleString()} 
                           onChange={(e) => {
                             const valStr = e.target.value.replace(/,/g, '');
                             const parsed = parseInt(valStr, 10);
@@ -272,7 +279,7 @@ export default function SettingsPage() {
                       </td>
                       <td className="p-2">
                         <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
-                          value={tier.sixTon === 0 ? '' : tier.sixTon.toLocaleString()} 
+                          value={(tier.sixTon || 0) === 0 ? '' : (tier.sixTon || 0).toLocaleString()} 
                           onChange={(e) => {
                             const valStr = e.target.value.replace(/,/g, '');
                             const parsed = parseInt(valStr, 10);
@@ -282,7 +289,7 @@ export default function SettingsPage() {
                       </td>
                       <td className="p-2">
                         <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
-                          value={tier.sevenHalfTon === 0 ? '' : tier.sevenHalfTon.toLocaleString()} 
+                          value={(tier.sevenHalfTon || 0) === 0 ? '' : (tier.sevenHalfTon || 0).toLocaleString()} 
                           onChange={(e) => {
                             const valStr = e.target.value.replace(/,/g, '');
                             const parsed = parseInt(valStr, 10);
@@ -292,7 +299,7 @@ export default function SettingsPage() {
                       </td>
                       <td className="p-2">
                         <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
-                          value={tier.tenTon === 0 ? '' : tier.tenTon.toLocaleString()} 
+                          value={(tier.tenTon || 0) === 0 ? '' : (tier.tenTon || 0).toLocaleString()} 
                           onChange={(e) => {
                             const valStr = e.target.value.replace(/,/g, '');
                             const parsed = parseInt(valStr, 10);

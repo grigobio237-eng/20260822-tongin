@@ -133,7 +133,7 @@ export const useSettingsStore = create<SettingsState>()(
               itemCbmSettings: data.itemCbmSettings || get().itemCbmSettings,
               optionPrices: data.optionPrices || get().optionPrices,
               materialCbmSettings: data.materialCbmSettings || get().materialCbmSettings,
-              ladderRates: data.ladderRates || get().ladderRates,
+              ladderRates: (data.ladderRates && data.ladderRates.tier_14) ? data.ladderRates : (get().ladderRates?.tier_14 ? get().ladderRates : DEFAULT_LADDER_RATES),
               partnerContacts: data.partnerContacts || get().partnerContacts,
             });
           }
