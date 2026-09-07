@@ -4,9 +4,10 @@ import { OPTION_ITEMS } from '@/lib/constants/items';
 
 export interface LadderRateTier {
   label: string;
-  oneTon: number;
   fiveTon: number;
-  heavyTon: number;
+  sixTon: number;
+  sevenHalfTon: number;
+  tenTon: number;
 }
 
 export interface PartnerContact {
@@ -64,13 +65,23 @@ const initialOptionPrices = OPTION_ITEMS.reduce((acc, item) => {
 }, {} as Record<string, number>);
 
 export const DEFAULT_LADDER_RATES: Record<string, LadderRateTier> = {
-  tier_2_5: { label: '2층 ~ 5층', oneTon: 100000, fiveTon: 140000, heavyTon: 190000 },
-  tier_6_9: { label: '6층 ~ 9층', oneTon: 120000, fiveTon: 170000, heavyTon: 220000 },
-  tier_10_13: { label: '10층 ~ 13층', oneTon: 140000, fiveTon: 200000, heavyTon: 250000 },
-  tier_14_17: { label: '14층 ~ 17층', oneTon: 170000, fiveTon: 230000, heavyTon: 280000 },
-  tier_18_20: { label: '18층 ~ 20층', oneTon: 200000, fiveTon: 270000, heavyTon: 330000 },
-  tier_21_25: { label: '21층 ~ 25층', oneTon: 240000, fiveTon: 330000, heavyTon: 400000 },
-  tier_26_plus: { label: '26층 이상', oneTon: 300000, fiveTon: 420000, heavyTon: 500000 },
+  tier_2_5: { label: '2~5층', fiveTon: 150000, sixTon: 180000, sevenHalfTon: 210000, tenTon: 240000 },
+  tier_6_7: { label: '6~7층', fiveTon: 160000, sixTon: 190000, sevenHalfTon: 220000, tenTon: 250000 },
+  tier_8_9: { label: '8~9층', fiveTon: 170000, sixTon: 200000, sevenHalfTon: 230000, tenTon: 260000 },
+  tier_10_11: { label: '10~11층', fiveTon: 180000, sixTon: 210000, sevenHalfTon: 240000, tenTon: 270000 },
+  tier_12_13: { label: '12~13층', fiveTon: 190000, sixTon: 220000, sevenHalfTon: 250000, tenTon: 280000 },
+  tier_14: { label: '14층', fiveTon: 200000, sixTon: 230000, sevenHalfTon: 260000, tenTon: 290000 },
+  tier_15: { label: '15층', fiveTon: 210000, sixTon: 240000, sevenHalfTon: 270000, tenTon: 300000 },
+  tier_16: { label: '16층', fiveTon: 220000, sixTon: 250000, sevenHalfTon: 280000, tenTon: 310000 },
+  tier_17: { label: '17층', fiveTon: 230000, sixTon: 260000, sevenHalfTon: 290000, tenTon: 320000 },
+  tier_18: { label: '18층', fiveTon: 250000, sixTon: 280000, sevenHalfTon: 310000, tenTon: 340000 },
+  tier_19: { label: '19층', fiveTon: 260000, sixTon: 290000, sevenHalfTon: 320000, tenTon: 350000 },
+  tier_20: { label: '20층', fiveTon: 280000, sixTon: 310000, sevenHalfTon: 340000, tenTon: 370000 },
+  tier_21: { label: '21층', fiveTon: 310000, sixTon: 340000, sevenHalfTon: 370000, tenTon: 400000 },
+  tier_22: { label: '22층', fiveTon: 340000, sixTon: 370000, sevenHalfTon: 400000, tenTon: 430000 },
+  tier_23: { label: '23층', fiveTon: 370000, sixTon: 400000, sevenHalfTon: 430000, tenTon: 460000 },
+  tier_24: { label: '24층', fiveTon: 400000, sixTon: 430000, sevenHalfTon: 460000, tenTon: 490000 },
+  tier_25_plus: { label: '25층이상', fiveTon: 0, sixTon: 0, sevenHalfTon: 0, tenTon: 0 },
 };
 
 const defaultValues = {

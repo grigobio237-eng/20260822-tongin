@@ -36,7 +36,7 @@ export default function Step3Page() {
 
   const recommendedVehicles = useMemo(() => calculateVehicles(totalCbm, vehicleLimits), [totalCbm, vehicleLimits]);
 
-  const [ladderTons, setLadderTons] = useState<{ [key: string]: 'oneTon' | 'fiveTon' | 'heavyTon' }>({
+  const [ladderTons, setLadderTons] = useState<{ [key: string]: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' }>({
     '사다리-출발지': 'fiveTon',
     '사다리-도착지': 'fiveTon',
   });
@@ -60,7 +60,7 @@ export default function Step3Page() {
     router.push('/step2');
   };
 
-  const getCalculatedLadderPrice = (optName: string, ton: 'oneTon' | 'fiveTon' | 'heavyTon') => {
+  const getCalculatedLadderPrice = (optName: string, ton: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon') => {
     if (!ladderRates) return optionPrices[optName] ?? 150000;
     const type = optName === '사다리-출발지' ? 'departure' : 'arrival';
     const floorStr = type === 'departure' ? customerInfo.departureFloor : customerInfo.arrivalFloor;
@@ -100,7 +100,7 @@ export default function Step3Page() {
     }
   };
 
-  const handleLadderTonChange = (optName: string, ton: 'oneTon' | 'fiveTon' | 'heavyTon') => {
+  const handleLadderTonChange = (optName: string, ton: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon') => {
     setLadderTons(prev => ({ ...prev, [optName]: ton }));
     if (options[optName]) {
       // update price immediately if selected
@@ -362,9 +362,10 @@ export default function Step3Page() {
                         onChange={(e) => handleLadderTonChange(opt.name, e.target.value as any)}
                         className="border rounded px-2 py-1 text-sm bg-white"
                       >
-                        <option value="oneTon">1톤 (소형)</option>
-                        <option value="fiveTon">5톤 (기본)</option>
-                        <option value="heavyTon">6톤 이상</option>
+                        <option value="fiveTon">5톤</option>
+                        <option value="sixTon">6톤</option>
+                        <option value="sevenHalfTon">7.5톤</option>
+                        <option value="tenTon">10톤</option>
                       </select>
                     </div>
                     <div className="flex justify-between items-center">

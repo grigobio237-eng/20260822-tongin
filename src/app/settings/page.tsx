@@ -93,7 +93,7 @@ export default function SettingsPage() {
     }));
   };
 
-  const updateLadderRate = (tierKey: string, field: 'oneTon' | 'fiveTon' | 'heavyTon', value: number) => {
+  const updateLadderRate = (tierKey: string, field: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon', value: number) => {
     setLocalLadderRates(prev => ({
       ...prev,
       [tierKey]: {
@@ -249,10 +249,11 @@ export default function SettingsPage() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-gray-50 text-sm border-y">
-                    <th className="p-3 text-left w-1/4">층수 구간</th>
-                    <th className="p-3 text-right">1톤 (소형)</th>
-                    <th className="p-3 text-right">5톤 (기본)</th>
-                    <th className="p-3 text-right">6톤 이상 (대형)</th>
+                    <th className="p-3 text-left w-1/5">층수 구간</th>
+                    <th className="p-3 text-right w-1/5">5톤</th>
+                    <th className="p-3 text-right w-1/5">6톤</th>
+                    <th className="p-3 text-right w-1/5">7.5톤</th>
+                    <th className="p-3 text-right w-1/5">10톤</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -260,13 +261,44 @@ export default function SettingsPage() {
                     <tr key={key} className="border-b">
                       <td className="p-3 font-semibold text-gray-700 bg-gray-50">{tier.label}</td>
                       <td className="p-2">
-                        <input type="number" className="w-full border rounded p-2 text-right" value={tier.oneTon} onChange={(e) => updateLadderRate(key, 'oneTon', Number(e.target.value))} />
+                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
+                          value={tier.fiveTon === 0 ? '' : tier.fiveTon.toLocaleString()} 
+                          onChange={(e) => {
+                            const valStr = e.target.value.replace(/,/g, '');
+                            const parsed = parseInt(valStr, 10);
+                            updateLadderRate(key, 'fiveTon', isNaN(parsed) ? 0 : parsed);
+                          }} 
+                        />
                       </td>
                       <td className="p-2">
-                        <input type="number" className="w-full border rounded p-2 text-right" value={tier.fiveTon} onChange={(e) => updateLadderRate(key, 'fiveTon', Number(e.target.value))} />
+                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
+                          value={tier.sixTon === 0 ? '' : tier.sixTon.toLocaleString()} 
+                          onChange={(e) => {
+                            const valStr = e.target.value.replace(/,/g, '');
+                            const parsed = parseInt(valStr, 10);
+                            updateLadderRate(key, 'sixTon', isNaN(parsed) ? 0 : parsed);
+                          }} 
+                        />
                       </td>
                       <td className="p-2">
-                        <input type="number" className="w-full border rounded p-2 text-right" value={tier.heavyTon} onChange={(e) => updateLadderRate(key, 'heavyTon', Number(e.target.value))} />
+                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
+                          value={tier.sevenHalfTon === 0 ? '' : tier.sevenHalfTon.toLocaleString()} 
+                          onChange={(e) => {
+                            const valStr = e.target.value.replace(/,/g, '');
+                            const parsed = parseInt(valStr, 10);
+                            updateLadderRate(key, 'sevenHalfTon', isNaN(parsed) ? 0 : parsed);
+                          }} 
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
+                          value={tier.tenTon === 0 ? '' : tier.tenTon.toLocaleString()} 
+                          onChange={(e) => {
+                            const valStr = e.target.value.replace(/,/g, '');
+                            const parsed = parseInt(valStr, 10);
+                            updateLadderRate(key, 'tenTon', isNaN(parsed) ? 0 : parsed);
+                          }} 
+                        />
                       </td>
                     </tr>
                   ))}
