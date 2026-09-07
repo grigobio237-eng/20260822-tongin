@@ -404,6 +404,11 @@ export const useWizardStore = create<WizardState>()(
                 cbm = (materialSettings['소박스'] || 0) * item.quantity;
               } else if (itemName === '기타물품1' || itemName === '기타물품2') {
                 cbm = (materialSettings[item.variantName] || 0) * item.quantity;
+              } else {
+                const overrideKey = `${itemName}|${item.variantName}`;
+                if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
+                  cbm = settings.itemCbmSettings[overrideKey] * item.quantity;
+                }
               }
               totalCbm += cbm; 
             });

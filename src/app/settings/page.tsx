@@ -4,7 +4,20 @@ import React, { useState, useEffect } from 'react';
 import { useSettingsStore, LadderRateTier, PartnerContact, DEFAULT_LADDER_RATES } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowLeft, Save } from 'lucide-react';
-import { OPTION_ITEMS, PACKING_MATERIALS } from '@/lib/constants/items';
+import { OPTION_ITEMS, PACKING_MATERIALS, ROOM_ITEMS, LIVING_ROOM_ITEMS, KITCHEN_ITEMS, VERANDA_ITEMS, REAR_BALCONY_ITEMS, UTILITY_ROOM_ITEMS } from '@/lib/constants/items';
+
+// 모든 가전/가구 리스트 병합 (중복 제거)
+const allMasterItems = [
+  ...ROOM_ITEMS,
+  ...LIVING_ROOM_ITEMS,
+  ...KITCHEN_ITEMS,
+  ...VERANDA_ITEMS,
+  ...REAR_BALCONY_ITEMS,
+  ...UTILITY_ROOM_ITEMS
+].filter((item, index, self) => 
+  index === self.findIndex((t) => t.name === item.name)
+).filter(item => !['옷', '이불', '생활물품/잔짐류(중박스용)', '도서/소형물품(소박스용)', '기타물품1', '기타물품2'].includes(item.name));
+
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -21,6 +34,22 @@ export default function SettingsPage() {
   });
   const [localLadderRates, setLocalLadderRates] = useState<Record<string, LadderRateTier>>(store.ladderRates || DEFAULT_LADDER_RATES);
   const [localPartnerContacts, setLocalPartnerContacts] = useState(store.partnerContacts);
+  
+  const [activeTab, setActiveTab] = useState<'general' | 'db'>('general');
+  const [localItemCbm, setLocalItemCbm] = useState(store.itemCbmSettings || {});
+  
+  const handleItemCbmChange = (itemName: string, variantName: string, value: string) => {
+    const key = `${itemName}|${variantName}`;
+    setLocalItemCbm(prev => {
+      const updated = { ...prev };
+      if (value === '') {
+        delete updated[key];
+      } else {
+        updated[key] = parseFloat(value);
+      }
+      return updated;
+    });
+  };
 
   useEffect(() => {
     setLocalCompanyName(store.companyName || '통인익스프레스');
@@ -31,6 +60,7 @@ export default function SettingsPage() {
     setLocalOptionPrices(store.optionPrices);
     if (store.ladderRates) setLocalLadderRates(store.ladderRates);
     if (store.partnerContacts) setLocalPartnerContacts(store.partnerContacts);
+    if (store.itemCbmSettings) setLocalItemCbm(store.itemCbmSettings);
   }, [store]);
 
   const handleSave = async () => {
@@ -44,6 +74,7 @@ export default function SettingsPage() {
       materialCbmSettings: localMaterialCbm,
       ladderRates: localLadderRates,
       partnerContacts: localPartnerContacts,
+      itemCbmSettings: localItemCbm,
     });
     router.back();
   };
@@ -94,7 +125,24 @@ export default function SettingsPage() {
         
         <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-8">
           
-          <section>
+          <div className="flex border-b">
+            <button
+              className={`px-6 py-3 font-bold ${activeTab === 'general' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('general')}
+            >
+              기본 환경 설정
+            </button>
+            <button
+              className={`px-6 py-3 font-bold ${activeTab === 'db' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('db')}
+            >
+              가전/가구 CBM DB 설정
+            </button>
+          </div>
+
+          {activeTab === 'general' && (
+            <div className="space-y-8">
+              <section>
             <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">기본 정보 설정</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -308,11 +356,52 @@ export default function SettingsPage() {
               ))}
             </div>
           </section>
-
         </div>
+        )}
+
+        {activeTab === 'db' && (
+          <div className="space-y-8">
+            <div className="bg-blue-50 p-4 rounded-xl text-sm text-blue-800">
+              <strong>가전/가구 CBM (체적) 설정</strong><br/>
+              프로그램에 하드코딩된 기본 권장 CBM을 덮어씁니다. 빈칸으로 두면 원래의 기본 권장 수치가 적용됩니다.
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {allMasterItems.map(item => (
+                <div key={item.name} className="border rounded-xl p-4 bg-gray-50">
+                  <h4 className="font-bold text-gray-800 mb-3 border-b pb-2">{item.name}</h4>
+                  <div className="space-y-2">
+                    {item.variants.map(v => {
+                      const key = `${item.name}|${v.name}`;
+                      const customVal = localItemCbm[key];
+                      return (
+                        <div key={v.name} className="flex justify-between items-center text-sm">
+                          <span className="text-gray-600 flex-1">{v.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400 w-16 text-right">기본: {v.cbm}</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              placeholder={v.cbm.toString()}
+                              value={customVal !== undefined ? customVal : ''}
+                              onChange={(e) => handleItemCbmChange(item.name, v.name, e.target.value)}
+                              className="border rounded px-2 py-1 w-20 text-right focus:ring-1 focus:ring-blue-500 outline-none bg-white"
+                            />
+                            <span className="text-gray-500 w-8">CBM</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+    </div>
       
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <div className="max-w-4xl mx-auto">
           <button 
             onClick={handleSave}

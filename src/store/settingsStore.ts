@@ -38,6 +38,7 @@ export interface SettingsState {
   };
   optionPrices: Record<string, number>;
   materialCbmSettings: Record<string, number>;
+  itemCbmSettings: Record<string, number>; // 가전/가구 기본 CBM 사용자 재정의
   
   // 사다리차 층수/톤수별 단가 테이블 (단위: 원)
   ladderRates: Record<string, LadderRateTier>;
@@ -96,7 +97,8 @@ const defaultValues = {
   partnerContacts: {
     cleaning: { companyName: '', phone: '', memo: '' },
     organizing: { companyName: '', phone: '', memo: '' },
-  }
+  },
+  itemCbmSettings: {}
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -117,6 +119,7 @@ export const useSettingsStore = create<SettingsState>()(
               vehicleCbmLimits: data.vehicleCbmLimits || get().vehicleCbmLimits,
               defaultPackingMaterials: data.defaultPackingMaterials || get().defaultPackingMaterials,
               workerPrices: data.workerPrices || get().workerPrices,
+              itemCbmSettings: data.itemCbmSettings || get().itemCbmSettings,
               optionPrices: data.optionPrices || get().optionPrices,
               materialCbmSettings: data.materialCbmSettings || get().materialCbmSettings,
               ladderRates: data.ladderRates || get().ladderRates,
