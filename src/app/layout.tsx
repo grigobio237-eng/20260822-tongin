@@ -1,5 +1,6 @@
 import React from 'react';
 import './globals.css';
+import GlobalInitializer from '@/components/GlobalInitializer';
 
 export const metadata = {
   title: '이사견적·계약서',
@@ -9,7 +10,10 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <GlobalInitializer />
+        {children}
+      </body>
     </html>
   );
 }
