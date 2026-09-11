@@ -37,8 +37,8 @@ export default function Step3Page() {
   const recommendedVehicles = useMemo(() => calculateVehicles(totalCbm, vehicleLimits), [totalCbm, vehicleLimits]);
 
   const [ladderTons, setLadderTons] = useState<{ [key: string]: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' }>({
-    '사다리-출발지': 'fiveTon',
-    '사다리-도착지': 'fiveTon',
+    '사다리·출발지': 'fiveTon',
+    '사다리·도착지': 'fiveTon',
   });
 
   const [manualPrices, setManualPrices] = useState<{ [key: string]: number }>({});
@@ -62,7 +62,7 @@ export default function Step3Page() {
 
   const getCalculatedLadderPrice = (optName: string, ton: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon') => {
     if (!ladderRates) return optionPrices[optName] ?? 150000;
-    const type = optName === '사다리-출발지' ? 'departure' : 'arrival';
+    const type = optName === '사다리·출발지' ? 'departure' : 'arrival';
     const floorStr = type === 'departure' ? customerInfo.departureFloor : customerInfo.arrivalFloor;
     const tierKey = getLadderTierKey(floorStr);
     return ladderRates[tierKey]?.[ton] ?? 150000;
@@ -259,7 +259,7 @@ export default function Step3Page() {
         <h2 className="text-xl font-bold mb-4">옵션 항목</h2>
         <div className="bg-white rounded-xl shadow-sm border p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {OPTION_ITEMS.map(opt => {
-            const isLadder = opt.name === '사다리-출발지' || opt.name === '사다리-도착지';
+            const isLadder = opt.name === '사다리·출발지' || opt.name === '사다리·도착지';
             const isSelected = !!options[opt.name];
             
             let displayPrice = optionPrices[opt.name] ?? opt.defaultPrice;
