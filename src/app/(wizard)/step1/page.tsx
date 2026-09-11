@@ -141,13 +141,16 @@ export default function Step1Page() {
               value={customerInfo.departureDetailAddress}
               onChange={(e) => updateCustomerInfo({ departureDetailAddress: e.target.value })}
             />
-            <input 
-              type="text" 
-              placeholder="층수 (예: 5층, 10층)"
-              className="w-full border rounded-lg p-2.5"
-              value={customerInfo.departureFloor}
-              onChange={(e) => updateCustomerInfo({ departureFloor: e.target.value })}
-            />
+            <div className="flex items-center gap-2">
+              <input 
+                type="number" 
+                placeholder="층수 입력 (숫자만)"
+                className="w-full border rounded-lg p-2.5"
+                value={customerInfo.departureFloor}
+                onChange={(e) => updateCustomerInfo({ departureFloor: e.target.value })}
+              />
+              <span className="text-gray-700 font-medium">층</span>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2 items-center">
             {['사다리', '계단', '승강기'].map(cond => {
@@ -205,13 +208,16 @@ export default function Step1Page() {
               value={customerInfo.arrivalDetailAddress}
               onChange={(e) => updateCustomerInfo({ arrivalDetailAddress: e.target.value })}
             />
-            <input 
-              type="text" 
-              placeholder="층수 (예: 5층, 10층)"
-              className="w-full border rounded-lg p-2.5"
-              value={customerInfo.arrivalFloor}
-              onChange={(e) => updateCustomerInfo({ arrivalFloor: e.target.value })}
-            />
+            <div className="flex items-center gap-2">
+              <input 
+                type="number" 
+                placeholder="층수 입력 (숫자만)"
+                className="w-full border rounded-lg p-2.5"
+                value={customerInfo.arrivalFloor}
+                onChange={(e) => updateCustomerInfo({ arrivalFloor: e.target.value })}
+              />
+              <span className="text-gray-700 font-medium">층</span>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2 items-center">
             {['사다리', '계단', '승강기'].map(cond => {
