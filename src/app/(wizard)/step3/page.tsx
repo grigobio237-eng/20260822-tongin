@@ -11,14 +11,15 @@ import { Mic, MicOff, Edit2 } from 'lucide-react';
 import clsx from 'clsx';
 
 const getLadderTierKey = (floorStr: string) => {
-  const floor = parseInt(floorStr, 10);
+  const match = floorStr.match(/\d+/);
+  const floor = match ? parseInt(match[0], 10) : NaN;
   if (isNaN(floor) || floor <= 5) return 'tier_2_5';
-  if (floor <= 9) return 'tier_6_9';
-  if (floor <= 13) return 'tier_10_13';
-  if (floor <= 17) return 'tier_14_17';
-  if (floor <= 20) return 'tier_18_20';
-  if (floor <= 25) return 'tier_21_25';
-  return 'tier_26_plus';
+  if (floor <= 7) return 'tier_6_7';
+  if (floor <= 9) return 'tier_8_9';
+  if (floor <= 11) return 'tier_10_11';
+  if (floor <= 13) return 'tier_12_13';
+  if (floor <= 24) return `tier_${floor}`;
+  return 'tier_25_plus';
 };
 
 export default function Step3Page() {

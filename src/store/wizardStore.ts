@@ -10,10 +10,12 @@ export interface CustomerInfo {
   packingDate: string;
   movingDate: string;
   departureAddress: string;
+  departureDetailAddress: string;
   departureFloor: string;
   departureConditions: string[]; 
   departureLadderCount?: number;
   arrivalAddress: string;
+  arrivalDetailAddress: string;
   arrivalFloor: string;
   arrivalConditions: string[];
   arrivalLadderCount?: number;
@@ -93,8 +95,8 @@ export interface WizardState {
 
 const initialCustomerInfo: CustomerInfo = {
   name: '', phone: '', contractDate: '', packingDate: '', movingDate: '',
-  departureAddress: '', departureFloor: '', departureConditions: [], departureLadderCount: 1,
-  arrivalAddress: '', arrivalFloor: '', arrivalConditions: [], arrivalLadderCount: 1, arrivalStatus: '',
+  departureAddress: '', departureDetailAddress: '', departureFloor: '', departureConditions: [], departureLadderCount: 1,
+  arrivalAddress: '', arrivalDetailAddress: '', arrivalFloor: '', arrivalConditions: [], arrivalLadderCount: 1, arrivalStatus: '',
 };
 
 const initialRoomItems: AllRoomsState = (Object.keys(ROOM_CATEGORIES) as RoomCategory[]).reduce((acc, room) => {

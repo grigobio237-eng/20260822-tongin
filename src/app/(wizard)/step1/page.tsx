@@ -136,7 +136,14 @@ export default function Step1Page() {
             />
             <input 
               type="text" 
-              placeholder="층수 (예: 5층)"
+              placeholder="상세주소 (예: 101동 101호)"
+              className="w-full border rounded-lg p-2.5 mb-2"
+              value={customerInfo.departureDetailAddress}
+              onChange={(e) => updateCustomerInfo({ departureDetailAddress: e.target.value })}
+            />
+            <input 
+              type="text" 
+              placeholder="층수 (예: 5층, 10층)"
               className="w-full border rounded-lg p-2.5"
               value={customerInfo.departureFloor}
               onChange={(e) => updateCustomerInfo({ departureFloor: e.target.value })}
@@ -193,7 +200,14 @@ export default function Step1Page() {
             />
             <input 
               type="text" 
-              placeholder="층수 (예: 5층)"
+              placeholder="상세주소 (예: 101동 101호)"
+              className="w-full border rounded-lg p-2.5 mb-2"
+              value={customerInfo.arrivalDetailAddress}
+              onChange={(e) => updateCustomerInfo({ arrivalDetailAddress: e.target.value })}
+            />
+            <input 
+              type="text" 
+              placeholder="층수 (예: 5층, 10층)"
               className="w-full border rounded-lg p-2.5"
               value={customerInfo.arrivalFloor}
               onChange={(e) => updateCustomerInfo({ arrivalFloor: e.target.value })}
