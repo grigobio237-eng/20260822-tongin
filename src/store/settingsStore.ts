@@ -6,9 +6,17 @@ import { OPTION_ITEMS } from '@/lib/constants/items';
 export interface DistanceRateTier {
   label: string;
   fiveTon: number;
+  fiveTonMarket?: number;
+  fiveTonRate?: number;
   sixTon: number;
+  sixTonMarket?: number;
+  sixTonRate?: number;
   sevenHalfTon: number;
+  sevenHalfTonMarket?: number;
+  sevenHalfTonRate?: number;
   tenTon: number;
+  tenTonMarket?: number;
+  tenTonRate?: number;
 }
 
 export interface LadderRateTier {
@@ -75,25 +83,26 @@ const initialOptionPrices = OPTION_ITEMS.reduce((acc, item) => {
 }, {} as Record<string, number>);
 
 
+
 export const DEFAULT_DISTANCE_RATES: Record<string, DistanceRateTier> = {
-  tier_30_under: { label: '30km이하 (시내)', fiveTon: 1130000, sixTon: 1360000, sevenHalfTon: 1700000, tenTon: 2260000 },
-  tier_30: { label: '~30km', fiveTon: 1250000, sixTon: 1500000, sevenHalfTon: 1880000, tenTon: 2500000 },
-  tier_60: { label: '~60km', fiveTon: 1440000, sixTon: 1730000, sevenHalfTon: 2160000, tenTon: 2880000 },
-  tier_90: { label: '~90km', fiveTon: 1670000, sixTon: 2000000, sevenHalfTon: 2510000, tenTon: 3340000 },
-  tier_120: { label: '~120km', fiveTon: 1870000, sixTon: 2240000, sevenHalfTon: 2810000, tenTon: 3740000 },
-  tier_150: { label: '~150km', fiveTon: 2160000, sixTon: 2590000, sevenHalfTon: 3240000, tenTon: 4320000 },
-  tier_180: { label: '~180km', fiveTon: 2350000, sixTon: 2820000, sevenHalfTon: 3530000, tenTon: 4700000 },
-  tier_210: { label: '~210km', fiveTon: 2510000, sixTon: 3010000, sevenHalfTon: 3770000, tenTon: 5020000 },
-  tier_240: { label: '~240km', fiveTon: 2710000, sixTon: 3250000, sevenHalfTon: 4070000, tenTon: 5420000 },
-  tier_270: { label: '~270km', fiveTon: 2910000, sixTon: 3490000, sevenHalfTon: 4370000, tenTon: 5820000 },
-  tier_300: { label: '~300km', fiveTon: 3070000, sixTon: 3680000, sevenHalfTon: 4610000, tenTon: 6140000 },
-  tier_330: { label: '~330km', fiveTon: 3260000, sixTon: 3910000, sevenHalfTon: 4890000, tenTon: 6520000 },
-  tier_360: { label: '~360km', fiveTon: 3480000, sixTon: 4180000, sevenHalfTon: 5220000, tenTon: 6960000 },
-  tier_390: { label: '~390km', fiveTon: 3640000, sixTon: 4370000, sevenHalfTon: 5460000, tenTon: 7280000 },
-  tier_410: { label: '~410km', fiveTon: 3800000, sixTon: 4560000, sevenHalfTon: 5700000, tenTon: 7600000 },
-  tier_440: { label: '~440km', fiveTon: 4040000, sixTon: 4850000, sevenHalfTon: 6060000, tenTon: 8080000 },
-  tier_470: { label: '~470km', fiveTon: 4280000, sixTon: 5140000, sevenHalfTon: 6420000, tenTon: 8560000 },
-  tier_470_plus: { label: '470km 초과', fiveTon: 4570000, sixTon: 5480000, sevenHalfTon: 6860000, tenTon: 9140000 },
+  tier_30_under: { label: '30km이하 (시내)', fiveTon: 1130000, fiveTonMarket: 1290000, fiveTonRate: 14, sixTon: 1360000, sixTonMarket: 1550000, sixTonRate: 12, sevenHalfTon: 1700000, sevenHalfTonMarket: 1940000, sevenHalfTonRate: 12, tenTon: 2260000, tenTonMarket: 2580000, tenTonRate: 12 },
+  tier_30: { label: '~30km', fiveTon: 1250000, fiveTonMarket: 1420000, fiveTonRate: 14, sixTon: 1500000, sixTonMarket: 1700000, sixTonRate: 12, sevenHalfTon: 1880000, sevenHalfTonMarket: 2130000, sevenHalfTonRate: 12, tenTon: 2500000, tenTonMarket: 2840000, tenTonRate: 12 },
+  tier_60: { label: '~60km', fiveTon: 1440000, fiveTonMarket: 1650000, fiveTonRate: 14, sixTon: 1730000, sixTonMarket: 1980000, sixTonRate: 13, sevenHalfTon: 2160000, sevenHalfTonMarket: 2480000, sevenHalfTonRate: 13, tenTon: 2880000, tenTonMarket: 3300000, tenTonRate: 13 },
+  tier_90: { label: '~90km', fiveTon: 1670000, fiveTonMarket: 1910000, fiveTonRate: 14, sixTon: 2000000, sixTonMarket: 2290000, sixTonRate: 13, sevenHalfTon: 2510000, sevenHalfTonMarket: 2870000, sevenHalfTonRate: 13, tenTon: 3340000, tenTonMarket: 3820000, tenTonRate: 13 },
+  tier_120: { label: '~120km', fiveTon: 1870000, fiveTonMarket: 2160000, fiveTonRate: 15, sixTon: 2240000, sixTonMarket: 2590000, sixTonRate: 14, sevenHalfTon: 2810000, sevenHalfTonMarket: 3240000, sevenHalfTonRate: 13, tenTon: 3740000, tenTonMarket: 4320000, tenTonRate: 13 },
+  tier_150: { label: '~150km', fiveTon: 2160000, fiveTonMarket: 2500000, fiveTonRate: 16, sixTon: 2590000, sixTonMarket: 3000000, sixTonRate: 14, sevenHalfTon: 3240000, sevenHalfTonMarket: 3750000, sevenHalfTonRate: 14, tenTon: 4320000, tenTonMarket: 5000000, tenTonRate: 14 },
+  tier_180: { label: '~180km', fiveTon: 2350000, fiveTonMarket: 2730000, fiveTonRate: 16, sixTon: 2820000, sixTonMarket: 3280000, sixTonRate: 14, sevenHalfTon: 3530000, sevenHalfTonMarket: 4100000, sevenHalfTonRate: 14, tenTon: 4700000, tenTonMarket: 5460000, tenTonRate: 14 },
+  tier_210: { label: '~210km', fiveTon: 2510000, fiveTonMarket: 2910000, fiveTonRate: 16, sixTon: 3010000, sixTonMarket: 3490000, sixTonRate: 14, sevenHalfTon: 3770000, sevenHalfTonMarket: 4370000, sevenHalfTonRate: 14, tenTon: 5020000, tenTonMarket: 5820000, tenTonRate: 14 },
+  tier_240: { label: '~240km', fiveTon: 2710000, fiveTonMarket: 3610000, fiveTonRate: 17, sixTon: 3250000, sixTonMarket: 4330000, sixTonRate: 25, sevenHalfTon: 4070000, sevenHalfTonMarket: 5420000, sevenHalfTonRate: 25, tenTon: 5420000, tenTonMarket: 7220000, tenTonRate: 25 },
+  tier_270: { label: '~270km', fiveTon: 2910000, fiveTonMarket: 3350000, fiveTonRate: 15, sixTon: 3490000, sixTonMarket: 4020000, sixTonRate: 13, sevenHalfTon: 4370000, sevenHalfTonMarket: 5030000, sevenHalfTonRate: 13, tenTon: 5820000, tenTonMarket: 6700000, tenTonRate: 13 },
+  tier_300: { label: '~300km', fiveTon: 3070000, fiveTonMarket: 3540000, fiveTonRate: 15, sixTon: 3680000, sixTonMarket: 4250000, sixTonRate: 13, sevenHalfTon: 4610000, sevenHalfTonMarket: 5310000, sevenHalfTonRate: 13, tenTon: 6140000, tenTonMarket: 7080000, tenTonRate: 13 },
+  tier_330: { label: '~330km', fiveTon: 3260000, fiveTonMarket: 3760000, fiveTonRate: 15, sixTon: 3910000, sixTonMarket: 4510000, sixTonRate: 13, sevenHalfTon: 4890000, sevenHalfTonMarket: 5640000, sevenHalfTonRate: 13, tenTon: 6520000, tenTonMarket: 7520000, tenTonRate: 13 },
+  tier_360: { label: '~360km', fiveTon: 3480000, fiveTonMarket: 4030000, fiveTonRate: 16, sixTon: 4180000, sixTonMarket: 4840000, sixTonRate: 14, sevenHalfTon: 5220000, sevenHalfTonMarket: 6050000, sevenHalfTonRate: 14, tenTon: 6960000, tenTonMarket: 8060000, tenTonRate: 14 },
+  tier_390: { label: '~390km', fiveTon: 3640000, fiveTonMarket: 4220000, fiveTonRate: 16, sixTon: 4370000, sixTonMarket: 5060000, sixTonRate: 14, sevenHalfTon: 5460000, sevenHalfTonMarket: 6330000, sevenHalfTonRate: 14, tenTon: 7280000, tenTonMarket: 8440000, tenTonRate: 14 },
+  tier_410: { label: '~410km', fiveTon: 3800000, fiveTonMarket: 4410000, fiveTonRate: 16, sixTon: 4560000, sixTonMarket: 5290000, sixTonRate: 14, sevenHalfTon: 5700000, sevenHalfTonMarket: 6620000, sevenHalfTonRate: 14, tenTon: 7600000, tenTonMarket: 8820000, tenTonRate: 14 },
+  tier_440: { label: '~440km', fiveTon: 4040000, fiveTonMarket: 4510000, fiveTonRate: 12, sixTon: 4850000, sixTonMarket: 5410000, sixTonRate: 10, sevenHalfTon: 6060000, sevenHalfTonMarket: 6770000, sevenHalfTonRate: 10, tenTon: 8080000, tenTonMarket: 9020000, tenTonRate: 10 },
+  tier_470: { label: '~470km', fiveTon: 4280000, fiveTonMarket: 4780000, fiveTonRate: 12, sixTon: 5140000, sixTonMarket: 5740000, sixTonRate: 10, sevenHalfTon: 6420000, sevenHalfTonMarket: 7170000, sevenHalfTonRate: 10, tenTon: 8560000, tenTonMarket: 9560000, tenTonRate: 10 },
+  tier_470_plus: { label: '470km 초과', fiveTon: 4570000, fiveTonMarket: 5060000, fiveTonRate: 11, sixTon: 5480000, sixTonMarket: 6070000, sixTonRate: 10, sevenHalfTon: 6860000, sevenHalfTonMarket: 7590000, sevenHalfTonRate: 10, tenTon: 9140000, tenTonMarket: 10120000, tenTonRate: 10 },
 };
 
 export const DEFAULT_LADDER_RATES: Record<string, LadderRateTier> = {
@@ -166,7 +175,7 @@ export const useSettingsStore = create<SettingsState>()(
               itemCbmSettings: data.itemCbmSettings || get().itemCbmSettings,
               optionPrices: data.optionPrices || get().optionPrices,
               materialCbmSettings: data.materialCbmSettings || get().materialCbmSettings,
-              distanceRates: data.distanceRates || get().distanceRates || DEFAULT_DISTANCE_RATES,
+              distanceRates: (data.distanceRates && (data.distanceRates as any).tier_30_under?.fiveTonMarket !== undefined) ? data.distanceRates : ((get().distanceRates as any)?.tier_30_under?.fiveTonMarket !== undefined ? get().distanceRates : DEFAULT_DISTANCE_RATES),
               ladderRates: (data.ladderRates && data.ladderRates.tier_14) ? data.ladderRates : (get().ladderRates?.tier_14 ? get().ladderRates : DEFAULT_LADDER_RATES),
               partnerContacts: data.partnerContacts || get().partnerContacts,
             });
