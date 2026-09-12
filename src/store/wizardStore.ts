@@ -22,6 +22,7 @@ export interface CustomerInfo {
   arrivalStatus: string;
   distanceKm?: string;
   durationMin?: string;
+  applyDistancePrice?: boolean;
 }
 
 export interface RoomItemInstance {
@@ -97,6 +98,7 @@ const initialCustomerInfo: CustomerInfo = {
   name: '', phone: '', contractDate: '', packingDate: '', movingDate: '',
   departureAddress: '', departureDetailAddress: '', departureFloor: '', departureConditions: [], departureLadderCount: 1,
   arrivalAddress: '', arrivalDetailAddress: '', arrivalFloor: '', arrivalConditions: [], arrivalLadderCount: 1, arrivalStatus: '',
+  applyDistancePrice: false,
 };
 
 const initialRoomItems: AllRoomsState = (Object.keys(ROOM_CATEGORIES) as RoomCategory[]).reduce((acc, room) => {

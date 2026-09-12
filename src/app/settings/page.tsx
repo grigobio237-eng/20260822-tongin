@@ -34,9 +34,10 @@ export default function SettingsPage() {
   });
   const isOldLadderFormat = store.ladderRates && !store.ladderRates.tier_14;
   const [localLadderRates, setLocalLadderRates] = useState<Record<string, LadderRateTier>>(isOldLadderFormat ? DEFAULT_LADDER_RATES : (store.ladderRates || DEFAULT_LADDER_RATES));
+  const [localDistanceRates, setLocalDistanceRates] = useState<Record<string, any>>(store.distanceRates || {});
   const [localPartnerContacts, setLocalPartnerContacts] = useState(store.partnerContacts);
   
-  const [activeTab, setActiveTab] = useState<'general' | 'db'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'db' | 'distance'>('general');
   const [localItemCbm, setLocalItemCbm] = useState(store.itemCbmSettings || {});
   
   const handleItemCbmChange = (itemName: string, variantName: string, value: string) => {
@@ -68,6 +69,7 @@ export default function SettingsPage() {
     }
     if (store.partnerContacts) setLocalPartnerContacts(store.partnerContacts);
     if (store.itemCbmSettings) setLocalItemCbm(store.itemCbmSettings);
+    if (store.distanceRates) setLocalDistanceRates(store.distanceRates);
   }, [store]);
 
   const handleSave = async () => {
@@ -82,6 +84,7 @@ export default function SettingsPage() {
       ladderRates: localLadderRates,
       partnerContacts: localPartnerContacts,
       itemCbmSettings: localItemCbm,
+      distanceRates: localDistanceRates,
     });
     router.back();
   };
@@ -145,7 +148,13 @@ export default function SettingsPage() {
             >
               가전/가구 CBM DB 설정
             </button>
-          </div>
+            <button
+              className={`px-6 py-3 font-bold ${activeTab === 'distance' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('distance')}
+            >
+              구간 단가 DB 설정
+            </button>
+</div>
 
           {activeTab === 'general' && (
             <div className="space-y-8">

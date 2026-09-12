@@ -2,6 +2,15 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { OPTION_ITEMS } from '@/lib/constants/items';
 
+
+export interface DistanceRateTier {
+  label: string;
+  fiveTon: number;
+  sixTon: number;
+  sevenHalfTon: number;
+  tenTon: number;
+}
+
 export interface LadderRateTier {
   label: string;
   fiveTon: number;
@@ -43,6 +52,7 @@ export interface SettingsState {
   
   // 사다리차 층수/톤수별 단가 테이블 (단위: 원)
   ladderRates: Record<string, LadderRateTier>;
+  distanceRates: Record<string, DistanceRateTier>;
   
   // 부가서비스 협력업체 정보
   partnerContacts: {
@@ -63,6 +73,28 @@ const initialOptionPrices = OPTION_ITEMS.reduce((acc, item) => {
   acc[item.name] = item.defaultPrice;
   return acc;
 }, {} as Record<string, number>);
+
+
+export const DEFAULT_DISTANCE_RATES: Record<string, DistanceRateTier> = {
+  tier_30_under: { label: '30km이하 (시내)', fiveTon: 1130000, sixTon: 1360000, sevenHalfTon: 1700000, tenTon: 2260000 },
+  tier_30: { label: '~30km', fiveTon: 1250000, sixTon: 1500000, sevenHalfTon: 1880000, tenTon: 2500000 },
+  tier_60: { label: '~60km', fiveTon: 1440000, sixTon: 1730000, sevenHalfTon: 2160000, tenTon: 2880000 },
+  tier_90: { label: '~90km', fiveTon: 1670000, sixTon: 2000000, sevenHalfTon: 2510000, tenTon: 3340000 },
+  tier_120: { label: '~120km', fiveTon: 1870000, sixTon: 2240000, sevenHalfTon: 2810000, tenTon: 3740000 },
+  tier_150: { label: '~150km', fiveTon: 2160000, sixTon: 2590000, sevenHalfTon: 3240000, tenTon: 4320000 },
+  tier_180: { label: '~180km', fiveTon: 2350000, sixTon: 2820000, sevenHalfTon: 3530000, tenTon: 4700000 },
+  tier_210: { label: '~210km', fiveTon: 2510000, sixTon: 3010000, sevenHalfTon: 3770000, tenTon: 5020000 },
+  tier_240: { label: '~240km', fiveTon: 2710000, sixTon: 3250000, sevenHalfTon: 4070000, tenTon: 5420000 },
+  tier_270: { label: '~270km', fiveTon: 2910000, sixTon: 3490000, sevenHalfTon: 4370000, tenTon: 5820000 },
+  tier_300: { label: '~300km', fiveTon: 3070000, sixTon: 3680000, sevenHalfTon: 4610000, tenTon: 6140000 },
+  tier_330: { label: '~330km', fiveTon: 3260000, sixTon: 3910000, sevenHalfTon: 4890000, tenTon: 6520000 },
+  tier_360: { label: '~360km', fiveTon: 3480000, sixTon: 4180000, sevenHalfTon: 5220000, tenTon: 6960000 },
+  tier_390: { label: '~390km', fiveTon: 3640000, sixTon: 4370000, sevenHalfTon: 5460000, tenTon: 7280000 },
+  tier_410: { label: '~410km', fiveTon: 3800000, sixTon: 4560000, sevenHalfTon: 5700000, tenTon: 7600000 },
+  tier_440: { label: '~440km', fiveTon: 4040000, sixTon: 4850000, sevenHalfTon: 6060000, tenTon: 8080000 },
+  tier_470: { label: '~470km', fiveTon: 4280000, sixTon: 5140000, sevenHalfTon: 6420000, tenTon: 8560000 },
+  tier_470_plus: { label: '470km 초과', fiveTon: 4570000, sixTon: 5480000, sevenHalfTon: 6860000, tenTon: 9140000 },
+};
 
 export const DEFAULT_LADDER_RATES: Record<string, LadderRateTier> = {
   tier_2_5: { label: '2~5층', fiveTon: 150000, sixTon: 180000, sevenHalfTon: 210000, tenTon: 240000 },
@@ -105,6 +137,7 @@ const defaultValues = {
     '아이스박스': 0
   },
   ladderRates: DEFAULT_LADDER_RATES,
+  distanceRates: DEFAULT_DISTANCE_RATES,
   partnerContacts: {
     cleaning: { companyName: '', phone: '', memo: '' },
     organizing: { companyName: '', phone: '', memo: '' },
@@ -133,6 +166,7 @@ export const useSettingsStore = create<SettingsState>()(
               itemCbmSettings: data.itemCbmSettings || get().itemCbmSettings,
               optionPrices: data.optionPrices || get().optionPrices,
               materialCbmSettings: data.materialCbmSettings || get().materialCbmSettings,
+              distanceRates: data.distanceRates || get().distanceRates || DEFAULT_DISTANCE_RATES,
               ladderRates: (data.ladderRates && data.ladderRates.tier_14) ? data.ladderRates : (get().ladderRates?.tier_14 ? get().ladderRates : DEFAULT_LADDER_RATES),
               partnerContacts: data.partnerContacts || get().partnerContacts,
             });

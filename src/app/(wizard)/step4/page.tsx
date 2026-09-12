@@ -29,13 +29,49 @@ export default function Step4Page() {
     (store.resources.workerMale * settingsStore.workerPrices.male) +
     (store.resources.workerFemale * settingsStore.workerPrices.female);
 
+  
+  const totalTonnage = (store.resources.vehicles.fiveTon * 5) + (store.resources.vehicles.twoHalfTon * 2.5) + (store.resources.vehicles.oneTon * 1);
+  let tonnageKey = 'fiveTon';
+  if (totalTonnage >= 10) tonnageKey = 'tenTon';
+  else if (totalTonnage >= 7.5) tonnageKey = 'sevenHalfTon';
+  else if (totalTonnage >= 6) tonnageKey = 'sixTon';
+  else tonnageKey = 'fiveTon';
+
+  let distanceValue = customerInfo.distanceKm ? parseFloat(customerInfo.distanceKm) : 0;
+  const getDistanceTier = (dist: number) => {
+    if (dist <= 30) return 'tier_30_under';
+    if (dist <= 60) return 'tier_60';
+    if (dist <= 90) return 'tier_90';
+    if (dist <= 120) return 'tier_120';
+    if (dist <= 150) return 'tier_150';
+    if (dist <= 180) return 'tier_180';
+    if (dist <= 210) return 'tier_210';
+    if (dist <= 240) return 'tier_240';
+    if (dist <= 270) return 'tier_270';
+    if (dist <= 300) return 'tier_300';
+    if (dist <= 330) return 'tier_330';
+    if (dist <= 360) return 'tier_360';
+    if (dist <= 390) return 'tier_390';
+    if (dist <= 410) return 'tier_410';
+    if (dist <= 440) return 'tier_440';
+    if (dist <= 470) return 'tier_470';
+    return 'tier_470_plus';
+  };
+  
+  const currentDistanceTier = getDistanceTier(distanceValue);
+  const distanceMatrixPrice = (settingsStore.distanceRates?.[currentDistanceTier] as any)?.[tonnageKey] || 0;
+
+  const finalBaseCost = customerInfo.applyDistancePrice ? distanceMatrixPrice : calculatedBaseCost;
+
   // editableBaseCost가 null이면 자동계산값, 아니면 수정된 값 사용
-  const baseCost = editableBaseCost !== null ? editableBaseCost : calculatedBaseCost;
+  const baseCost = editableBaseCost !== null ? editableBaseCost : finalBaseCost;
+
 
 
   const totalWorkers = store.resources.workerMale + store.resources.workerFemale;
 
   let optionsCost = 0;
+
   const calculatedOptions = Object.entries(options).map(([name, opt]) => {
     const basePrice = settingsStore.optionPrices[name] ?? (opt.totalPrice / Math.max(1, opt.quantity));
     let price = basePrice * opt.quantity;
@@ -63,6 +99,9 @@ export default function Step4Page() {
     optionsCost += price;
     return { name: displayName, price };
   });
+
+  const depLadderOpt = calculatedOptions.find(o => o.name.startsWith('사다리·출발지'));
+  const arrLadderOpt = calculatedOptions.find(o => o.name.startsWith('사다리·도착지'));
   
   const subTotal = baseCost + optionsCost;
   
@@ -351,7 +390,10 @@ export default function Step4Page() {
                 <div className="flex gap-1 mt-1 flex-wrap">
                   {customerInfo.departureConditions.length > 0 ? (
                     customerInfo.departureConditions.map(c => (
-                      <span key={c} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">{c}</span>
+                      <span key={c} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                        {c}
+                        {c === '사다리' && depLadderOpt ? ` (${depLadderOpt.price.toLocaleString()}원)` : ''}
+                      </span>
                     ))
                   ) : (
                     <span className="text-gray-400 text-xs">조건 미선택</span>
@@ -364,7 +406,10 @@ export default function Step4Page() {
                 <div className="flex gap-1 mt-1 flex-wrap">
                   {customerInfo.arrivalConditions.length > 0 ? (
                     customerInfo.arrivalConditions.map(c => (
-                      <span key={c} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">{c}</span>
+                      <span key={c} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">
+                        {c}
+                        {c === '사다리' && arrLadderOpt ? ` (${arrLadderOpt.price.toLocaleString()}원)` : ''}
+                      </span>
                     ))
                   ) : (
                     <span className="text-gray-400 text-xs">조건 미선택</span>
@@ -455,7 +500,23 @@ export default function Step4Page() {
 
       {/* 1. 정산 금액 요약 */}
       <section>
-        <h2 className="text-xl font-bold mb-4">비용 정산</h2>
+        
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">비용 정산</h2>
+          <label className="flex items-center gap-2 cursor-pointer bg-blue-50 text-blue-700 px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-sm">
+            <input 
+              type="checkbox" 
+              className="w-4 h-4 text-blue-600"
+              checked={customerInfo.applyDistancePrice || false}
+              onChange={(e) => {
+                store.updateCustomerInfo({ applyDistancePrice: e.target.checked });
+                setEditableBaseCost(null);
+              }}
+            />
+            <span className="font-semibold">장거리(구간별) 단가표 적용</span>
+          </label>
+        </div>
+
         <div className="bg-white rounded-xl shadow-sm border p-5 space-y-4">
           {/* 이사 기본비용 — 수정 가능 */}
           <div className="flex justify-between items-center py-2 border-b">
@@ -464,9 +525,9 @@ export default function Step4Page() {
               <input
                 type="number"
                 className="border rounded px-2 py-1 w-36 text-right font-semibold outline-none focus:ring-1 focus:ring-blue-500"
-                value={editableBaseCost !== null ? editableBaseCost : calculatedBaseCost}
+                value={editableBaseCost !== null ? editableBaseCost : finalBaseCost}
                 onChange={(e) => setEditableBaseCost(Number(e.target.value))}
-                onFocus={(e) => { if (editableBaseCost === null) setEditableBaseCost(calculatedBaseCost); }}
+                onFocus={(e) => { if (editableBaseCost === null) setEditableBaseCost(finalBaseCost); }}
               />
               <span className="absolute right-2 top-1.5 text-xs text-gray-400">원</span>
             </div>
