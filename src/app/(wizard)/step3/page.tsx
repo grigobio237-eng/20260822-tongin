@@ -31,6 +31,7 @@ export default function Step3Page() {
   } = useWizardStore();
   
   const optionPrices = useSettingsStore(state => state.optionPrices);
+  const itemPackingSettings = useSettingsStore(state => state.itemPackingSettings);
   const ladderRates = useSettingsStore(state => state.ladderRates);
   const vehicleLimits = useSettingsStore(state => state.vehicleCbmLimits);
   const router = useRouter();
@@ -120,16 +121,15 @@ export default function Step3Page() {
 
   
 
-  // 동적 포장재료 연동 (TV, 대형가전/가구 등)
+  // 동적 포장재료 연동 (DB 설정 우선, 없을 시 레거시 하드코딩 폴백)
   useEffect(() => {
-    let tv50 = 0, tv65 = 0, tv85 = 0;
-    let bed = 0, drawer = 0, fridge = 0, kimchiL = 0, kimchiM = 0, washer = 0, dryer = 0;
-    let sofa = 0, piano = 0, wardrobe = 0;
-    let clothes = 0, blankets = 0, mediumBox = 0, smallBox = 0;
+    let customCounts: Record<string, number> = {};
     let dynamicCounts: Record<string, number> = {};
 
     Object.values(roomItems).forEach(room => {
       if (!room || !room.items) return;
+      
+      // 1. 기타물품 수집 (dynamicCounts 유지)
       ['기타물품1', '기타물품2'].forEach(key => {
         if (room.items[key]) {
           room.items[key].forEach(inst => {
@@ -137,72 +137,47 @@ export default function Step3Page() {
           });
         }
       });
-      if (room.items['신발류(중박스용)']) {
-        room.items['신발류(중박스용)'].forEach(inst => mediumBox += inst.quantity);
-      }
-      // TV
-      if (room.items['TV']) {
-        room.items['TV'].forEach(inst => {
-          if (inst.variantName.includes('50인치')) tv50 += inst.quantity;
-          if (inst.variantName.includes('65~75')) tv65 += inst.quantity;
-          if (inst.variantName.includes('85인치')) tv85 += inst.quantity;
+
+      // 2. DB 포장재료 설정 및 기존 하드코딩 매핑
+      Object.entries(room.items).forEach(([itemName, instances]) => {
+        instances.forEach(inst => {
+          const settingKey = `${itemName}|${inst.variantName}`;
+          const packSetting = itemPackingSettings?.[settingKey];
+          const q = inst.quantity;
+          
+          if (packSetting && packSetting.materialName && packSetting.count > 0) {
+            // DB 우선
+            customCounts[packSetting.materialName] = (customCounts[packSetting.materialName] || 0) + (packSetting.count * q);
+          } else {
+            // 레거시 하드코딩 규칙 (DB 설정이 없을 때만)
+            if (itemName === '신발류(중박스용)') customCounts['중박스'] = (customCounts['중박스'] || 0) + q;
+            else if (itemName === 'TV') {
+              if (inst.variantName.includes('50인치')) customCounts['TV(50인치이하)'] = (customCounts['TV(50인치이하)'] || 0) + q;
+              else if (inst.variantName.includes('65~75')) customCounts['TV(65~75인치)'] = (customCounts['TV(65~75인치)'] || 0) + q;
+              else if (inst.variantName.includes('85인치')) customCounts['TV(85인치이상)'] = (customCounts['TV(85인치이상)'] || 0) + q;
+            }
+            else if (itemName === '침대(W)') {
+              customCounts['침대'] = (customCounts['침대'] || 0) + q;
+              customCounts['침대비닐커버'] = (customCounts['침대비닐커버'] || 0) + q;
+            }
+            else if (itemName === '서랍장') customCounts['서랍장'] = (customCounts['서랍장'] || 0) + q;
+            else if (itemName === '냉장고') customCounts['냉장고'] = (customCounts['냉장고'] || 0) + q;
+            else if (itemName === '김치냉장고') {
+              if (inst.variantName.includes('4룸')) customCounts['김치냉장고(대)'] = (customCounts['김치냉장고(대)'] || 0) + q;
+              else customCounts['김치냉장고(중)'] = (customCounts['김치냉장고(중)'] || 0) + q;
+            }
+            else if (itemName === '세탁기') customCounts['세탁기'] = (customCounts['세탁기'] || 0) + q;
+            else if (itemName === '건조기') customCounts['건조기'] = (customCounts['건조기'] || 0) + q;
+            else if (itemName === '쇼파') customCounts['쇼파'] = (customCounts['쇼파'] || 0) + q;
+            else if (itemName === '피아노') customCounts['피아노'] = (customCounts['피아노'] || 0) + q;
+            else if (itemName === '장롱') customCounts['분해장농'] = (customCounts['분해장농'] || 0) + q;
+            else if (itemName === '옷') customCounts['대박스(옷)'] = (customCounts['대박스(옷)'] || 0) + q;
+            else if (itemName === '이불') customCounts['특대박스(이불)'] = (customCounts['특대박스(이불)'] || 0) + q;
+            else if (itemName === '생활물품/잔짐류(중박스용)') customCounts['중박스'] = (customCounts['중박스'] || 0) + q;
+            else if (itemName === '도서/소형물품(소박스용)') customCounts['소박스'] = (customCounts['소박스'] || 0) + q;
+          }
         });
-      }
-      // 침대(W)
-      if (room.items['침대(W)']) {
-        room.items['침대(W)'].forEach(inst => bed += inst.quantity);
-      }
-      // 서랍장
-      if (room.items['서랍장']) {
-        room.items['서랍장'].forEach(inst => drawer += inst.quantity);
-      }
-      // 냉장고
-      if (room.items['냉장고']) {
-        room.items['냉장고'].forEach(inst => fridge += inst.quantity);
-      }
-      // 김치냉장고
-      if (room.items['김치냉장고']) {
-        room.items['김치냉장고'].forEach(inst => {
-          if (inst.variantName.includes('4룸')) kimchiL += inst.quantity;
-          else kimchiM += inst.quantity;
-        });
-      }
-      // 세탁기
-      if (room.items['세탁기']) {
-        room.items['세탁기'].forEach(inst => washer += inst.quantity);
-      }
-      // 건조기
-      if (room.items['건조기']) {
-        room.items['건조기'].forEach(inst => dryer += inst.quantity);
-      }
-      // 쇼파
-      if (room.items['쇼파']) {
-        room.items['쇼파'].forEach(inst => sofa += inst.quantity);
-      }
-      // 피아노
-      if (room.items['피아노']) {
-        room.items['피아노'].forEach(inst => piano += inst.quantity);
-      }
-      // 장롱 -> 분해장농
-      if (room.items['장롱']) {
-        room.items['장롱'].forEach(inst => wardrobe += inst.quantity);
-      }
-      // 옷 -> 대박스(옷)
-      if (room.items['옷']) {
-        room.items['옷'].forEach(inst => clothes += inst.quantity);
-      }
-      // 이불 -> 특대박스(이불)
-      if (room.items['이불']) {
-        room.items['이불'].forEach(inst => blankets += inst.quantity);
-      }
-      // 생활물품/잔짐류(중박스용) -> 중박스
-      if (room.items['생활물품/잔짐류(중박스용)']) {
-        room.items['생활물품/잔짐류(중박스용)'].forEach(inst => mediumBox += inst.quantity);
-      }
-      // 도서/소형물품(소박스용) -> 소박스
-      if (room.items['도서/소형물품(소박스용)']) {
-        room.items['도서/소형물품(소박스용)'].forEach(inst => smallBox += inst.quantity);
-      }
+      });
     });
 
     const newMaterials = { ...resources.materials };
@@ -212,31 +187,25 @@ export default function Step3Page() {
       }
     };
 
-    sync('TV(50인치이하)', tv50);
-    sync('TV(65~75인치)', tv65);
-    sync('TV(85인치이상)', tv85);
-    sync('침대비닐커버', bed);
-    sync('침대', bed);
-    sync('서랍장', drawer);
-    sync('냉장고', fridge);
-    sync('김치냉장고(대)', kimchiL);
-    sync('김치냉장고(중)', kimchiM);
-    sync('세탁기', washer);
-    sync('건조기', dryer);
-    sync('쇼파', sofa);
-    sync('피아노', piano);
-    sync('분해장농', wardrobe);
-    sync('대박스(옷)', clothes + (dynamicCounts['대박스(옷)'] || 0));
-    sync('특대박스(이불)', blankets + (dynamicCounts['특대박스(이불)'] || 0));
-    sync('중박스', mediumBox + (dynamicCounts['중박스'] || 0));
-    sync('소박스', smallBox + (dynamicCounts['소박스'] || 0));
+    // customCounts 적용
+    const allKnownKeys = [
+      'TV(50인치이하)', 'TV(65~75인치)', 'TV(85인치이상)', '침대비닐커버', '침대', 
+      '서랍장', '냉장고', '김치냉장고(대)', '김치냉장고(중)', '세탁기', '건조기', 
+      '쇼파', '피아노', '분해장농', '대박스(옷)', '특대박스(이불)', '중박스', '소박스'
+    ];
+    Object.keys(customCounts).forEach(k => { if (!allKnownKeys.includes(k)) allKnownKeys.push(k); });
     
-    // For all other materials in dynamicCounts not explicitly synced above
+    allKnownKeys.forEach(key => {
+      let count = customCounts[key] || 0;
+      if (['대박스(옷)', '특대박스(이불)', '중박스', '소박스'].includes(key)) {
+        count += (dynamicCounts[key] || 0);
+      }
+      sync(key, count);
+    });
+
+    // 기타물품으로 추가된 커스텀 자재
     Object.entries(dynamicCounts).forEach(([matName, count]) => {
       if (!['대박스(옷)', '특대박스(이불)', '중박스', '소박스'].includes(matName)) {
-        // If they chose 'TV(50인치이하)' as 기타물품, we add it to the existing count in newMaterials
-        // Wait, newMaterials[matName] is already set by sync() for known items, so we should add to it.
-        // Actually, some items like tv50 are synced BEFORE this. So we can just ADD to newMaterials.
         if (newMaterials[matName] !== undefined) {
            newMaterials[matName] += count;
         } else {
@@ -251,7 +220,7 @@ export default function Step3Page() {
       updateResources({ materials: newMaterials });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomItems, updateResources]);
+  }, [roomItems, updateResources, itemPackingSettings]);
 
   return (
     <div className="space-y-8 pb-24">

@@ -39,6 +39,7 @@ export default function SettingsPage() {
   
   const [activeTab, setActiveTab] = useState<'general' | 'db' | 'distance'>('general');
   const [localItemCbm, setLocalItemCbm] = useState(store.itemCbmSettings || {});
+  const [localItemPacking, setLocalItemPacking] = useState(store.itemPackingSettings || {});
   
   const handleItemCbmChange = (itemName: string, variantName: string, value: string) => {
     const key = `${itemName}|${variantName}`;
@@ -48,6 +49,23 @@ export default function SettingsPage() {
         delete updated[key];
       } else {
         updated[key] = parseFloat(value);
+      }
+      return updated;
+    });
+  };
+
+  
+  const handleItemPackingChange = (itemName: string, variantName: string, field: 'materialName' | 'count', value: string) => {
+    const key = `${itemName}|${variantName}`;
+    setLocalItemPacking(prev => {
+      const updated = { ...prev };
+      if (!updated[key]) updated[key] = { materialName: '', count: 0 };
+      
+      if (field === 'materialName') {
+        if (!value) delete updated[key];
+        else updated[key].materialName = value;
+      } else {
+        updated[key].count = parseInt(value, 10) || 0;
       }
       return updated;
     });
@@ -69,6 +87,7 @@ export default function SettingsPage() {
     }
     if (store.partnerContacts) setLocalPartnerContacts(store.partnerContacts);
     if (store.itemCbmSettings) setLocalItemCbm(store.itemCbmSettings);
+    if (store.itemPackingSettings) setLocalItemPacking(store.itemPackingSettings);
     if (store.distanceRates) setLocalDistanceRates(store.distanceRates);
   }, [store]);
 
@@ -84,6 +103,7 @@ export default function SettingsPage() {
       ladderRates: localLadderRates,
       partnerContacts: localPartnerContacts,
       itemCbmSettings: localItemCbm,
+      itemPackingSettings: localItemPacking,
       distanceRates: localDistanceRates,
     });
     router.back();
@@ -433,9 +453,25 @@ export default function SettingsPage() {
                               placeholder={v.cbm.toString()}
                               value={customVal !== undefined ? customVal : ''}
                               onChange={(e) => handleItemCbmChange(item.name, v.name, e.target.value)}
-                              className="border rounded px-2 py-1 w-20 text-right focus:ring-1 focus:ring-blue-500 outline-none bg-white"
+                              className="border rounded px-2 py-1 w-16 text-right focus:ring-1 focus:ring-blue-500 outline-none bg-white"
                             />
-                            <span className="text-gray-500 w-8">CBM</span>
+                            <span className="text-gray-500 w-8 text-xs">CBM</span>
+                            <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                            <select
+                              value={localItemPacking[key]?.materialName || ''}
+                              onChange={(e) => handleItemPackingChange(item.name, v.name, 'materialName', e.target.value)}
+                              className="border rounded px-1 py-1 w-24 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none"
+                            >
+                              <option value="">재료선택</option>
+                              {PACKING_MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+                            </select>
+                            <input
+                              type="number"
+                              placeholder="수량"
+                              value={localItemPacking[key]?.count || ''}
+                              onChange={(e) => handleItemPackingChange(item.name, v.name, 'count', e.target.value)}
+                              className="border rounded px-2 py-1 w-12 text-right focus:ring-1 focus:ring-blue-500 outline-none bg-white text-xs"
+                            />
                           </div>
                         </div>
                       );
