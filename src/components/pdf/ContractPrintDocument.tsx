@@ -189,37 +189,44 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
           </div>
 
           <div className="space-y-3">
-            {data.rooms && data.rooms.filter(r => r.items.length > 0 || r.memo).length > 0 ? (
-              data.rooms.filter(r => r.items.length > 0 || r.memo).map((room, idx) => (
-                <div key={room.id || idx} className="border border-slate-300 rounded overflow-hidden">
-                  <div className="bg-slate-100 px-2.5 py-1 flex justify-between items-center border-b border-slate-200">
-                    <span className="font-bold text-blue-900 text-[11px]">{room.name}</span>
-                    <span className="text-[10px] text-slate-500">등록 품목: {room.items?.length || 0}개</span>
-                  </div>
+            {data.rooms && data.rooms.some(r => (r.items || []).some(i => i.quantity > 0) || r.memo) ? (
+              data.rooms
+                .filter(r => (r.items || []).some(i => i.quantity > 0) || r.memo)
+                .map((room, idx) => {
+                  const activeItems = (room.items || []).filter(i => i.quantity > 0);
+                  const roomCbm = activeItems.reduce((acc, curr) => acc + ((curr.cbm || 0) * curr.quantity), 0);
                   
-                  {room.items && room.items.length > 0 ? (
-                    <div className="p-2">
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
-                        {room.items.map((item, itemIdx) => (
-                          <div key={itemIdx} className="flex justify-between border-b border-dotted border-slate-200 py-[2px]">
-                            <span className="text-slate-700">{item.name}</span>
-                            <span className="font-semibold text-slate-900">{item.quantity}개 {item.cbm ? `(${Math.round(item.cbm * 10) / 10} CBM)` : ''}</span>
-                          </div>
-                        ))}
+                  return (
+                    <div key={room.id || idx} className="border border-slate-300 rounded overflow-hidden">
+                      <div className="bg-slate-100 px-2.5 py-1 flex justify-between items-center border-b border-slate-200">
+                        <span className="font-bold text-blue-900 text-[11px]">{room.name}</span>
+                        <span className="text-[10px] text-slate-500">등록 품목: {activeItems.length}개 / {Math.round(roomCbm * 10) / 10} CBM</span>
                       </div>
-                    </div>
-                  ) : (
-                    <p className="text-gray-400 p-2 text-[10px]">해당 공간에 등록된 품목이 없습니다.</p>
-                  )}
+                      
+                      {activeItems.length > 0 ? (
+                        <div className="p-2">
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
+                            {activeItems.map((item, itemIdx) => (
+                              <div key={itemIdx} className="flex justify-between border-b border-dotted border-slate-200 py-[2px]">
+                                <span className="text-slate-700">{item.name}</span>
+                                <span className="font-semibold text-slate-900">{item.quantity}개</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-gray-400 p-2 text-[10px]">해당 공간에 등록된 품목이 없습니다.</p>
+                      )}
 
-                  {room.memo && (
-                    <div className="bg-amber-50/70 border-t border-amber-200 px-2.5 py-1 text-[9.5px] text-amber-900">
-                      <span className="font-bold mr-1">⚠️ 공간 주의/요청 메모:</span>
-                      {room.memo}
+                      {room.memo && (
+                        <div className="bg-amber-50/70 border-t border-amber-200 px-2.5 py-1 text-[9.5px] text-amber-900">
+                          <span className="font-bold mr-1">⚠️ 공간 주의/요청 메모:</span>
+                          {room.memo}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))
+                  );
+                })
             ) : (
               <div className="text-center py-20 text-gray-400">등록된 공간별 물품 데이터가 없습니다.</div>
             )}
