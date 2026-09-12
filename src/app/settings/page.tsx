@@ -445,7 +445,85 @@ export default function SettingsPage() {
               ))}
             </div>
           </div>
+
         )}
+
+        {activeTab === 'distance' && (
+          <div className="space-y-8">
+            <div className="bg-blue-50 p-4 rounded-xl text-sm text-blue-800">
+              <strong>구간별 단가 (장거리) 매트릭스 설정</strong><br/>
+              거리에 따른 기본 비용(차량+인건비 포함)을 설정합니다.
+            </div>
+
+            <section>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[1000px] border-collapse bg-white border text-sm">
+                  <thead>
+                    <tr className="bg-gray-100 border-b">
+                      <th className="p-3 text-center border-r font-semibold">구분 (기준거리)</th>
+                      <th className="p-3 text-center border-r font-semibold">5톤</th>
+                      <th className="p-3 text-center border-r font-semibold">6톤</th>
+                      <th className="p-3 text-center border-r font-semibold">7.5톤</th>
+                      <th className="p-3 text-center font-semibold">10톤</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(localDistanceRates).map(([tierKey, tier]) => (
+                      <tr key={tierKey} className="border-b hover:bg-gray-50">
+                        <td className="p-3 font-medium text-center border-r bg-gray-50 whitespace-nowrap">{tier.label}</td>
+                        {['fiveTon', 'sixTon', 'sevenHalfTon', 'tenTon'].map(cap => (
+                          <td key={cap} className="p-2 border-r align-top">
+                            <div className="flex flex-col gap-1">
+                              <div className="flex justify-between items-center text-xs text-gray-500">
+                                <span>시중가</span>
+                                <input 
+                                  className="w-24 text-right border p-1 rounded" 
+                                  value={(tier as any)[`${cap}Market`]?.toLocaleString() || ''}
+                                  onChange={(e) => {
+                                    const val = parseInt(e.target.value.replace(/,/g, ''), 10) || 0;
+                                    setLocalDistanceRates(prev => {
+                                      const newTier = { ...prev[tierKey] };
+                                      newTier[`${cap}Market`] = val;
+                                      const rate = newTier[`${cap}Rate`] || 0;
+                                      newTier[cap] = Math.round(val * (1 - rate / 100) / 1000) * 1000;
+                                      return { ...prev, [tierKey]: newTier };
+                                    });
+                                  }}
+                                />
+                              </div>
+                              <div className="flex justify-between items-center text-xs text-gray-500">
+                                <span>할인율(%)</span>
+                                <input 
+                                  className="w-16 text-right border p-1 rounded" 
+                                  value={(tier as any)[`${cap}Rate`] || ''}
+                                  onChange={(e) => {
+                                    const val = parseInt(e.target.value, 10) || 0;
+                                    setLocalDistanceRates(prev => {
+                                      const newTier = { ...prev[tierKey] };
+                                      newTier[`${cap}Rate`] = val;
+                                      const market = newTier[`${cap}Market`] || 0;
+                                      newTier[cap] = Math.round(market * (1 - val / 100) / 1000) * 1000;
+                                      return { ...prev, [tierKey]: newTier };
+                                    });
+                                  }}
+                                />
+                              </div>
+                              <div className="flex justify-between items-center text-sm font-bold text-blue-600 mt-1">
+                                <span>할인가</span>
+                                <span>{(tier as any)[cap]?.toLocaleString() || '0'}</span>
+                              </div>
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        )}
+
       </div>
     </div>
       
