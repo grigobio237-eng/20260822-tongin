@@ -102,7 +102,13 @@ export default function Step2Page() {
 
       {/* Items Grid */}
       <div className="bg-white rounded-xl shadow-sm border p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {ROOM_CATEGORIES[activeTab].map((item) => {
+        {[...ROOM_CATEGORIES[activeTab]].sort((a, b) => {
+          const isOtherA = a.name.startsWith('기타물품');
+          const isOtherB = b.name.startsWith('기타물품');
+          if (isOtherA && !isOtherB) return 1;
+          if (!isOtherA && isOtherB) return -1;
+          return a.name.localeCompare(b.name);
+        }).map((item) => {
           const instances = roomItems[activeTab]?.items?.[item.name] || [];
           
           return (
