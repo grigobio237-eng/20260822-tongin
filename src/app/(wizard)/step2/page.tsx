@@ -107,7 +107,7 @@ export default function Step2Page() {
           const isOtherB = b.name.startsWith('기타물품');
           if (isOtherA && !isOtherB) return 1;
           if (!isOtherA && isOtherB) return -1;
-          return a.name.localeCompare(b.name);
+          return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
         }).map((item) => {
           const instances = roomItems[activeTab]?.items?.[item.name] || [];
           
