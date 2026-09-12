@@ -434,7 +434,7 @@ export default function SettingsPage() {
               프로그램에 하드코딩된 기본 권장 CBM을 덮어씁니다. 빈칸으로 두면 원래의 기본 권장 수치가 적용됩니다.
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               {allMasterItems.map(item => (
                 <div key={item.name} className="border rounded-xl p-4 bg-gray-50">
                   <h4 className="font-bold text-gray-800 mb-3 border-b pb-2">{item.name}</h4>
