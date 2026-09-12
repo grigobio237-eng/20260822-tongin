@@ -73,8 +73,8 @@ export default function Step4Page() {
   let optionsCost = 0;
 
   const calculatedOptions = Object.entries(options).map(([name, opt]) => {
-    const basePrice = settingsStore.optionPrices[name] ?? (opt.totalPrice / Math.max(1, opt.quantity));
-    let price = basePrice * opt.quantity;
+    const basePrice = opt.totalPrice / Math.max(1, opt.quantity);
+    let price = opt.totalPrice;
     let displayName = name;
     
     if (name.includes(' (1일)')) {
@@ -86,11 +86,11 @@ export default function Step4Page() {
     } else if (name.includes('대기료')) {
       price = basePrice * opt.quantity * totalWorkers;
       displayName = `${name} (${totalWorkers}명)`;
-    } else if (name === '사다리-출발지') {
+    } else if (name === '사다리·출발지') {
       const count = customerInfo.departureLadderCount || 1;
       price = basePrice * opt.quantity * count;
       if (count > 1) displayName = `${name} (${count}대)`;
-    } else if (name === '사다리-도착지') {
+    } else if (name === '사다리·도착지') {
       const count = customerInfo.arrivalLadderCount || 1;
       price = basePrice * opt.quantity * count;
       if (count > 1) displayName = `${name} (${count}대)`;
