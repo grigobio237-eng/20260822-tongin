@@ -57,7 +57,7 @@ export interface SettingsState {
   optionPrices: Record<string, number>;
   materialCbmSettings: Record<string, number>;
   itemCbmSettings: Record<string, number>; // 가전/가구 기본 CBM 사용자 재정의
-  itemPackingSettings: Record<string, { materialName: string, count: number }>;
+  itemPackingSettings: Record<string, { materialName: string, count: number, materialName2?: string, count2?: number }>;
   
   // 사다리차 층수/톤수별 단가 테이블 (단위: 원)
   ladderRates: Record<string, LadderRateTier>;

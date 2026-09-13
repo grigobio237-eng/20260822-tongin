@@ -55,17 +55,20 @@ export default function SettingsPage() {
   };
 
   
-  const handleItemPackingChange = (itemName: string, variantName: string, field: 'materialName' | 'count', value: string) => {
+  const handleItemPackingChange = (itemName: string, variantName: string, field: 'materialName' | 'count' | 'materialName2' | 'count2', value: string) => {
     const key = `${itemName}|${variantName}`;
     setLocalItemPacking(prev => {
       const updated = { ...prev };
       if (!updated[key]) updated[key] = { materialName: '', count: 0 };
       
-      if (field === 'materialName') {
-        if (!value) delete updated[key];
-        else updated[key].materialName = value;
+      if (field === 'materialName' || field === 'materialName2') {
+        updated[key][field] = value;
       } else {
-        updated[key].count = parseInt(value, 10) || 0;
+        updated[key][field] = parseInt(value, 10) || 0;
+      }
+      
+      if (!updated[key].materialName && !updated[key].materialName2) {
+        delete updated[key];
       }
       return updated;
     });
@@ -470,6 +473,22 @@ export default function SettingsPage() {
                               placeholder="수량"
                               value={localItemPacking[key]?.count || ''}
                               onChange={(e) => handleItemPackingChange(item.name, v.name, 'count', e.target.value)}
+                              className="border rounded px-2 py-1 w-12 text-right focus:ring-1 focus:ring-blue-500 outline-none bg-white text-xs"
+                            />
+                            <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                            <select
+                              value={localItemPacking[key]?.materialName2 || ''}
+                              onChange={(e) => handleItemPackingChange(item.name, v.name, 'materialName2', e.target.value)}
+                              className="border rounded px-1 py-1 w-24 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none"
+                            >
+                              <option value="">재료선택2</option>
+                              {PACKING_MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+                            </select>
+                            <input
+                              type="number"
+                              placeholder="수량"
+                              value={localItemPacking[key]?.count2 || ''}
+                              onChange={(e) => handleItemPackingChange(item.name, v.name, 'count2', e.target.value)}
                               className="border rounded px-2 py-1 w-12 text-right focus:ring-1 focus:ring-blue-500 outline-none bg-white text-xs"
                             />
                           </div>

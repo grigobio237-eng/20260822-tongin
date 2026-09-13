@@ -145,9 +145,14 @@ export default function Step3Page() {
           const packSetting = itemPackingSettings?.[settingKey];
           const q = inst.quantity;
           
-          if (packSetting && packSetting.materialName && packSetting.count > 0) {
+          if (packSetting && (packSetting.materialName || packSetting.materialName2)) {
             // DB 우선
-            customCounts[packSetting.materialName] = (customCounts[packSetting.materialName] || 0) + (packSetting.count * q);
+            if (packSetting.materialName && packSetting.count > 0) {
+              customCounts[packSetting.materialName] = (customCounts[packSetting.materialName] || 0) + (packSetting.count * q);
+            }
+            if (packSetting.materialName2 && packSetting.count2 && packSetting.count2 > 0) {
+              customCounts[packSetting.materialName2] = (customCounts[packSetting.materialName2] || 0) + (packSetting.count2 * q);
+            }
           } else {
             // 레거시 하드코딩 규칙 (DB 설정이 없을 때만)
             if (itemName === '신발류(중박스용)') customCounts['중박스'] = (customCounts['중박스'] || 0) + q;
