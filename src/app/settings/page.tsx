@@ -301,6 +301,18 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
             >
               구간 단가 DB 설정
             </button>
+            <button
+              className={`px-6 py-3 font-bold ${activeTab === 'ladder' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('ladder')}
+            >
+              사다리차 DB 설정
+            </button>
+            <button
+              className={`px-6 py-3 font-bold ${activeTab === 'packing' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('packing')}
+            >
+              포장재료 DB 설정
+            </button>
 </div>
 
           {activeTab === 'general' && (
@@ -469,26 +481,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
             </div>
           </section>
 
-          <section>
-            <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">포장재료 CBM 세팅</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {['특대박스(이불)', '대박스(옷)', '중대박스', '중박스', '소박스', '바구니', '아이스박스'].map((mat) => (
-                <div key={mat} className="flex flex-col">
-                  <label className="block text-xs font-semibold mb-1 text-gray-600 truncate" title={mat}>{mat}</label>
-                  <div className="relative">
-                    <input 
-                      type="text"
-                      step="0.01"
-                      value={localMaterialCbm[mat] ?? 0}
-                      onChange={(e) => handleMaterialCbmChange(mat, parseNum(e.target.value))}
-                      className="w-full border rounded p-2 text-sm text-right pr-6"
-                    />
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">CBM</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+          
         </div>
         )}
 
@@ -622,9 +615,10 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
           <div className="space-y-8">
             <div className="bg-yellow-50 p-4 rounded-xl text-sm text-yellow-800">
               <strong>포장재료 DB 설정</strong><br/>
-              스텝 2 및 스텝 3에서 사용될 포장재료 목록을 자유롭게 추가/수정/삭제할 수 있습니다.
+              스텝 2 및 스텝 3에서 사용될 포장재료 목록을 자유롭게 추가/수정/삭제하고, 각 포장재료별 CBM을 설정할 수 있습니다.
             </div>
             <div className="bg-white p-6 rounded-xl border shadow-sm">
+              <h3 className="font-bold text-lg mb-4 pb-2 border-b">포장재료 목록 관리</h3>
               <div className="flex flex-wrap gap-3">
                 {localCustomPackingMaterials.map(mat => (
                   <div key={mat} className="flex items-center gap-2 bg-gray-50 border rounded px-3 py-2">
@@ -637,6 +631,27 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                 </button>
               </div>
             </div>
+            
+            <section className="bg-white p-6 rounded-xl border shadow-sm">
+              <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">포장재료별 CBM 세팅</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {localCustomPackingMaterials.map((mat) => (
+                  <div key={mat} className="flex flex-col">
+                    <label className="block text-xs font-semibold mb-1 text-gray-600 truncate" title={mat}>{mat}</label>
+                    <div className="relative">
+                      <input 
+                        type="text"
+                        step="0.01"
+                        value={localMaterialCbm[mat] ?? 0}
+                        onChange={(e) => handleMaterialCbmChange(mat, parseNum(e.target.value))}
+                        className="w-full border rounded p-2 text-sm text-right pr-6"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">CBM</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           </div>
         )}
 
