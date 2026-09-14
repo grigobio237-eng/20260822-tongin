@@ -47,7 +47,9 @@ const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
   const [localDistanceRates, setLocalDistanceRates] = useState<Record<string, any>>(store.distanceRates || {});
   const [localPartnerContacts, setLocalPartnerContacts] = useState(store.partnerContacts);
   
-  const [activeTab, setActiveTab] = useState<'general' | 'db' | 'roomMapping' | 'distance' | 'packing'>('general');
+  const formatNum = (num: number | undefined | null) => num ? num.toLocaleString() : '';
+const parseNum = (str: string) => Number(str.replace(/,/g, ''));
+  const [activeTab, setActiveTab] = useState<'general' | 'db' | 'roomMapping' | 'distance' | 'packing' | 'ladder'>('general');
   const [localItemCbm, setLocalItemCbm] = useState(store.itemCbmSettings || {});
   const [localItemPacking, setLocalItemPacking] = useState(store.itemPackingSettings || {});
   
@@ -331,14 +333,14 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-gray-600">단가</label>
                   <div className="relative">
-                    <input type="number" value={localVehiclePrices.fiveTon} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, fiveTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-8 text-sm" />
+                    <input type="text" value={formatNum(localVehiclePrices.fiveTon)} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, fiveTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-8 text-sm" />
                     <span className="absolute right-3 top-2 text-gray-500 text-sm">원</span>
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-gray-600">최대 적재량</label>
                   <div className="relative">
-                    <input type="number" value={localVehicleCbmLimits.fiveTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, fiveTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
+                    <input type="text" value={localVehicleCbmLimits.fiveTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, fiveTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
                     <span className="absolute right-3 top-2 text-gray-500 text-sm">CBM</span>
                   </div>
                 </div>
@@ -349,14 +351,14 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-gray-600">단가</label>
                   <div className="relative">
-                    <input type="number" value={localVehiclePrices.twoHalfTon} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, twoHalfTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-8 text-sm" />
+                    <input type="text" value={formatNum(localVehiclePrices.twoHalfTon)} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, twoHalfTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-8 text-sm" />
                     <span className="absolute right-3 top-2 text-gray-500 text-sm">원</span>
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-gray-600">최대 적재량</label>
                   <div className="relative">
-                    <input type="number" value={localVehicleCbmLimits.twoHalfTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, twoHalfTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
+                    <input type="text" value={localVehicleCbmLimits.twoHalfTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, twoHalfTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
                     <span className="absolute right-3 top-2 text-gray-500 text-sm">CBM</span>
                   </div>
                 </div>
@@ -367,14 +369,14 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-gray-600">단가</label>
                   <div className="relative">
-                    <input type="number" value={localVehiclePrices.oneTon} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, oneTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-8 text-sm" />
+                    <input type="text" value={formatNum(localVehiclePrices.oneTon)} onChange={(e) => setLocalVehiclePrices({ ...localVehiclePrices, oneTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-8 text-sm" />
                     <span className="absolute right-3 top-2 text-gray-500 text-sm">원</span>
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-gray-600">최대 적재량</label>
                   <div className="relative">
-                    <input type="number" value={localVehicleCbmLimits.oneTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, oneTon: Number(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
+                    <input type="text" value={localVehicleCbmLimits.oneTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, oneTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
                     <span className="absolute right-3 top-2 text-gray-500 text-sm">CBM</span>
                   </div>
                 </div>
@@ -389,14 +391,14 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
               <div>
                 <label className="block text-sm font-semibold mb-2">남자 작업자 (1인당)</label>
                 <div className="relative">
-                  <input type="number" value={localWorkerPrices.male} onChange={(e) => setLocalWorkerPrices({ ...localWorkerPrices, male: Number(e.target.value) })} className="w-full border rounded-lg p-3 text-right font-bold pr-10" />
+                  <input type="text" value={formatNum(localWorkerPrices.male)} onChange={(e) => setLocalWorkerPrices({ ...localWorkerPrices, male: parseNum(e.target.value) })} className="w-full border rounded-lg p-3 text-right font-bold pr-10" />
                   <span className="absolute right-4 top-3 text-gray-500">원</span>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2">여자 작업자 (1인당)</label>
                 <div className="relative">
-                  <input type="number" value={localWorkerPrices.female} onChange={(e) => setLocalWorkerPrices({ ...localWorkerPrices, female: Number(e.target.value) })} className="w-full border rounded-lg p-3 text-right font-bold pr-10" />
+                  <input type="text" value={formatNum(localWorkerPrices.female)} onChange={(e) => setLocalWorkerPrices({ ...localWorkerPrices, female: parseNum(e.target.value) })} className="w-full border rounded-lg p-3 text-right font-bold pr-10" />
                   <span className="absolute right-4 top-3 text-gray-500">원</span>
                 </div>
               </div>
@@ -404,69 +406,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
           </section>
 
           {/* 사다리차 층수/톤수별 단가 테이블 */}
-          <section>
-            <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">사다리차 층수/톤수별 단가 매트릭스</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 text-sm border-y">
-                    <th className="p-3 text-left w-1/5">층수 구간</th>
-                    <th className="p-3 text-right w-1/5">5톤</th>
-                    <th className="p-3 text-right w-1/5">6톤</th>
-                    <th className="p-3 text-right w-1/5">7.5톤</th>
-                    <th className="p-3 text-right w-1/5">10톤</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(localLadderRates).map(([key, tier]) => (
-                    <tr key={key} className="border-b">
-                      <td className="p-3 font-semibold text-gray-700 bg-gray-50">{tier.label}</td>
-                      <td className="p-2">
-                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
-                          value={(tier.fiveTon || 0) === 0 ? '' : (tier.fiveTon || 0).toLocaleString()} 
-                          onChange={(e) => {
-                            const valStr = e.target.value.replace(/,/g, '');
-                            const parsed = parseInt(valStr, 10);
-                            updateLadderRate(key, 'fiveTon', isNaN(parsed) ? 0 : parsed);
-                          }} 
-                        />
-                      </td>
-                      <td className="p-2">
-                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
-                          value={(tier.sixTon || 0) === 0 ? '' : (tier.sixTon || 0).toLocaleString()} 
-                          onChange={(e) => {
-                            const valStr = e.target.value.replace(/,/g, '');
-                            const parsed = parseInt(valStr, 10);
-                            updateLadderRate(key, 'sixTon', isNaN(parsed) ? 0 : parsed);
-                          }} 
-                        />
-                      </td>
-                      <td className="p-2">
-                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
-                          value={(tier.sevenHalfTon || 0) === 0 ? '' : (tier.sevenHalfTon || 0).toLocaleString()} 
-                          onChange={(e) => {
-                            const valStr = e.target.value.replace(/,/g, '');
-                            const parsed = parseInt(valStr, 10);
-                            updateLadderRate(key, 'sevenHalfTon', isNaN(parsed) ? 0 : parsed);
-                          }} 
-                        />
-                      </td>
-                      <td className="p-2">
-                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
-                          value={(tier.tenTon || 0) === 0 ? '' : (tier.tenTon || 0).toLocaleString()} 
-                          onChange={(e) => {
-                            const valStr = e.target.value.replace(/,/g, '');
-                            const parsed = parseInt(valStr, 10);
-                            updateLadderRate(key, 'tenTon', isNaN(parsed) ? 0 : parsed);
-                          }} 
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          
 
           {/* 부가서비스 협력업체 설정 */}
           <section>
@@ -518,20 +458,14 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                   <label className="block text-xs font-semibold mb-1 text-gray-600 truncate" title={item.name}>{item.name}</label>
                   <div className="relative">
                     <input 
-                      type="number"
-                      value={localOptionPrices[item.name] ?? item.defaultPrice}
-                      onChange={(e) => handleOptionChange(item.name, Number(e.target.value))}
+                      type="text"
+                      value={formatNum(localOptionPrices[item.name] ?? item.defaultPrice)}
+                      onChange={(e) => handleOptionChange(item.name, parseNum(e.target.value))}
                       className="w-full border rounded p-2 text-sm text-right pr-6"
                     />
                   </div>
-                  <div className="mt-3 text-center">
-                    <button onClick={() => handleAddVariant(item.name)} className="text-xs text-blue-600 hover:underline border border-blue-200 rounded px-3 py-1 bg-blue-50">+ 세부 항목 추가</button>
-                  </div>
                 </div>
               ))}
-            </div>
-            <div className="text-center mt-6">
-              <button onClick={handleAddMasterItem} className="px-6 py-3 bg-blue-100 text-blue-700 font-bold rounded-lg hover:bg-blue-200 shadow-sm">+ 새로운 큰 타이틀(품목) 추가하기</button>
             </div>
           </section>
 
@@ -543,10 +477,10 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                   <label className="block text-xs font-semibold mb-1 text-gray-600 truncate" title={mat}>{mat}</label>
                   <div className="relative">
                     <input 
-                      type="number"
+                      type="text"
                       step="0.01"
                       value={localMaterialCbm[mat] ?? 0}
-                      onChange={(e) => handleMaterialCbmChange(mat, Number(e.target.value))}
+                      onChange={(e) => handleMaterialCbmChange(mat, parseNum(e.target.value))}
                       className="w-full border rounded p-2 text-sm text-right pr-6"
                     />
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">CBM</span>
@@ -585,7 +519,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-gray-400 w-16 text-right">기본: {v.cbm}</span>
                             <input
-                              type="number"
+                              type="text"
                               step="0.01"
                               placeholder={v.cbm.toString()}
                               value={customVal !== undefined ? customVal : ''}
@@ -603,7 +537,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                               {localCustomPackingMaterials.map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                             <input
-                              type="number"
+                              type="text"
                               placeholder="수량"
                               value={localItemPacking[key]?.count || ''}
                               onChange={(e) => handleItemPackingChange(item.name, v.name, 'count', e.target.value)}
@@ -619,7 +553,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                               {localCustomPackingMaterials.map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                             <input
-                              type="number"
+                              type="text"
                               placeholder="수량"
                               value={localItemPacking[key]?.count2 || ''}
                               onChange={(e) => handleItemPackingChange(item.name, v.name, 'count2', e.target.value)}
@@ -630,8 +564,14 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                       );
                     })}
                   </div>
+                  <div className="mt-3 text-center">
+                    <button onClick={() => handleAddVariant(item.name)} className="text-xs text-blue-600 hover:underline border border-blue-200 rounded px-3 py-1 bg-blue-50">+ 세부 항목 추가</button>
+                  </div>
                 </div>
               ))}
+            </div>
+            <div className="text-center mt-6">
+              <button onClick={handleAddMasterItem} className="px-6 py-3 bg-blue-100 text-blue-700 font-bold rounded-lg hover:bg-blue-200 shadow-sm">+ 새로운 큰 타이틀(품목) 추가하기</button>
             </div>
           </div>
 
@@ -779,7 +719,80 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
       </div>
     </div>
       
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+    
+        {activeTab === 'ladder' && (
+          <div className="space-y-8">
+            <div className="bg-indigo-50 p-4 rounded-xl text-sm text-indigo-800">
+              <strong>사다리차 DB 설정</strong><br/>
+              사다리차의 층수 및 톤수별 단가를 설정합니다.
+            </div>
+            <section>
+            <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">사다리차 층수/톤수별 단가 매트릭스</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 text-sm border-y">
+                    <th className="p-3 text-left w-1/5">층수 구간</th>
+                    <th className="p-3 text-right w-1/5">5톤</th>
+                    <th className="p-3 text-right w-1/5">6톤</th>
+                    <th className="p-3 text-right w-1/5">7.5톤</th>
+                    <th className="p-3 text-right w-1/5">10톤</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(localLadderRates).map(([key, tier]) => (
+                    <tr key={key} className="border-b">
+                      <td className="p-3 font-semibold text-gray-700 bg-gray-50">{tier.label}</td>
+                      <td className="p-2">
+                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
+                          value={(tier.fiveTon || 0) === 0 ? '' : (tier.fiveTon || 0).toLocaleString()} 
+                          onChange={(e) => {
+                            const valStr = e.target.value.replace(/,/g, '');
+                            const parsed = parseInt(valStr, 10);
+                            updateLadderRate(key, 'fiveTon', isNaN(parsed) ? 0 : parsed);
+                          }} 
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
+                          value={(tier.sixTon || 0) === 0 ? '' : (tier.sixTon || 0).toLocaleString()} 
+                          onChange={(e) => {
+                            const valStr = e.target.value.replace(/,/g, '');
+                            const parsed = parseInt(valStr, 10);
+                            updateLadderRate(key, 'sixTon', isNaN(parsed) ? 0 : parsed);
+                          }} 
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
+                          value={(tier.sevenHalfTon || 0) === 0 ? '' : (tier.sevenHalfTon || 0).toLocaleString()} 
+                          onChange={(e) => {
+                            const valStr = e.target.value.replace(/,/g, '');
+                            const parsed = parseInt(valStr, 10);
+                            updateLadderRate(key, 'sevenHalfTon', isNaN(parsed) ? 0 : parsed);
+                          }} 
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input type="text" placeholder="협의" className="w-full border rounded p-2 text-right focus:ring-1 focus:ring-blue-500 outline-none" 
+                          value={(tier.tenTon || 0) === 0 ? '' : (tier.tenTon || 0).toLocaleString()} 
+                          onChange={(e) => {
+                            const valStr = e.target.value.replace(/,/g, '');
+                            const parsed = parseInt(valStr, 10);
+                            updateLadderRate(key, 'tenTon', isNaN(parsed) ? 0 : parsed);
+                          }} 
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+          </div>
+        )}
+
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <div className="max-w-4xl mx-auto">
           <button 
             onClick={handleSave}
