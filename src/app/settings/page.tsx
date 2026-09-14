@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSettingsStore, LadderRateTier, PartnerContact, DEFAULT_LADDER_RATES } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowLeft, Save } from 'lucide-react';
@@ -29,6 +29,13 @@ export default function SettingsPage() {
   const [localDefaultPackingMaterials, setLocalDefaultPackingMaterials] = useState(store.defaultPackingMaterials || { fiveTon: {}, twoHalfTon: {}, oneTon: {} });
   const [localWorkerPrices, setLocalWorkerPrices] = useState(store.workerPrices || { male: 200000, female: 150000 });
     const [localCustomMasterItems, setLocalCustomMasterItems] = useState<MasterItem[]>([]);
+  const sortedMasterItems = useMemo(() => {
+    return [...localCustomMasterItems].sort((a, b) => {
+      if (a.name.startsWith('기타물품') && !b.name.startsWith('기타물품')) return 1;
+      if (!a.name.startsWith('기타물품') && b.name.startsWith('기타물품')) return -1;
+      return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
+    });
+  }, [localCustomMasterItems]);
   const [localRoomItemMapping, setLocalRoomItemMapping] = useState<Record<string, string[]>>({});
 const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
   const [localMaterialCbm, setLocalMaterialCbm] = useState(store.materialCbmSettings || {
@@ -523,7 +530,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
             </div>
             
             <div className="grid grid-cols-1 gap-6">
-              {localCustomMasterItems.map(item => (
+              {sortedMasterItems.map(item => (
                 <div key={item.name} className="border rounded-xl p-4 bg-gray-50">
                   <div className="flex justify-between items-center mb-3 border-b pb-2">
                     <h4 className="font-bold text-gray-800 cursor-pointer hover:text-blue-600" onClick={() => handleEditMasterItemName(item.name)} title="이름 수정하기">{item.name} ✏️</h4>
@@ -616,7 +623,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
             <div className="bg-white p-6 rounded-xl border shadow-sm">
               <h3 className="font-bold text-lg mb-4 pb-2 border-b">{activeRoomTab} 노출 항목</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {localCustomMasterItems.map(item => {
+                {sortedMasterItems.map(item => {
                   const isChecked = (localRoomItemMapping[activeRoomTab] || []).includes(item.name);
                   return (
                     <label key={item.name} className={`flex items-center gap-2 p-2 rounded cursor-pointer border transition-colors ${isChecked ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-transparent hover:bg-gray-100'}`}>
