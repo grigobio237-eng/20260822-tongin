@@ -157,7 +157,22 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
     if (store.defaultPackingMaterials) setLocalDefaultPackingMaterials(store.defaultPackingMaterials);
     setLocalWorkerPrices(store.workerPrices);
         setLocalOptionPrices(store.optionPrices);
-    if (store.customMasterItems) setLocalCustomMasterItems(store.customMasterItems);
+    if (store.customMasterItems) {
+      let items = Array.from(new Map(store.customMasterItems.map(i => [i.name, i])).values());
+      
+      // 복구 로직: TV, 공기청정기가 없으면 기본 배열(ROOM_ITEMS 등에서 가져온 rawMasterItems)에서 찾아서 추가
+      const rawMasterItems = [...ROOM_ITEMS, ...LIVING_ROOM_ITEMS, ...KITCHEN_ITEMS, ...VERANDA_ITEMS, ...REAR_BALCONY_ITEMS, ...UTILITY_ROOM_ITEMS];
+      
+      const missingToRestore = ['TV', '공기청정기'];
+      missingToRestore.forEach(name => {
+        if (!items.some(i => i.name === name)) {
+          const original = rawMasterItems.find(i => i.name === name);
+          if (original) items.push(original);
+        }
+      });
+      
+      setLocalCustomMasterItems(items);
+    }
     if (store.roomItemMapping) setLocalRoomItemMapping(store.roomItemMapping);
     if (store.ladderRates) {
       if (!store.ladderRates.tier_14) {

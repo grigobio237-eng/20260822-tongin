@@ -197,6 +197,8 @@ export const useSettingsStore = create<SettingsState>()(
               distanceRates: (data.distanceRates && (data.distanceRates as any).tier_30_under?.fiveTonMarket !== undefined) ? data.distanceRates : ((get().distanceRates as any)?.tier_30_under?.fiveTonMarket !== undefined ? get().distanceRates : DEFAULT_DISTANCE_RATES),
               ladderRates: (data.ladderRates && data.ladderRates.tier_14) ? data.ladderRates : (get().ladderRates?.tier_14 ? get().ladderRates : DEFAULT_LADDER_RATES),
               partnerContacts: data.partnerContacts || get().partnerContacts,
+              customMasterItems: data.customMasterItems ? Array.from(new Map(data.customMasterItems.map(i => [i.name, i])).values()) : get().customMasterItems,
+              roomItemMapping: data.roomItemMapping || get().roomItemMapping,
             });
           }
         } catch (error) {
