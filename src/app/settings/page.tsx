@@ -594,6 +594,47 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
 
         )}
 
+        {activeTab === 'roomMapping' && (
+          <div className="space-y-8">
+            <div className="bg-green-50 p-4 rounded-xl text-sm text-green-800">
+              <strong>공간별 노출 셋팅</strong><br/>
+              각 방(공간)에 어떤 물품들이 나타날지 설정합니다. 불필요한 항목은 체크 해제하면 스텝 2 화면에서 숨겨집니다.
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              {Object.keys(ROOM_CATEGORIES).map(room => (
+                <button
+                  key={room}
+                  onClick={() => setActiveRoomTab(room)}
+                  className={`px-4 py-2 rounded-full text-sm font-bold ${activeRoomTab === room ? 'bg-green-600 text-white shadow-md' : 'bg-white border text-gray-600 hover:bg-gray-50'}`}
+                >
+                  {room}
+                </button>
+              ))}
+            </div>
+
+            <div className="bg-white p-6 rounded-xl border shadow-sm">
+              <h3 className="font-bold text-lg mb-4 pb-2 border-b">{activeRoomTab} 노출 항목</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                {localCustomMasterItems.map(item => {
+                  const isChecked = (localRoomItemMapping[activeRoomTab] || []).includes(item.name);
+                  return (
+                    <label key={item.name} className={`flex items-center gap-2 p-2 rounded cursor-pointer border transition-colors ${isChecked ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-transparent hover:bg-gray-100'}`}>
+                      <input 
+                        type="checkbox" 
+                        checked={isChecked}
+                        onChange={() => toggleRoomMapping(activeRoomTab, item.name)}
+                        className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
+                      />
+                      <span className={`text-sm ${isChecked ? 'font-bold text-green-800' : 'text-gray-500'}`}>{item.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'distance' && (
           <div className="space-y-8">
             <div className="bg-blue-50 p-4 rounded-xl text-sm text-blue-800">
