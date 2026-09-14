@@ -129,7 +129,8 @@ export const DEFAULT_LADDER_RATES: Record<string, LadderRateTier> = {
 };
 
 
-const allMasterItems = [...ROOM_ITEMS, ...LIVING_ROOM_ITEMS, ...KITCHEN_ITEMS, ...VERANDA_ITEMS, ...REAR_BALCONY_ITEMS, ...UTILITY_ROOM_ITEMS];
+const rawMasterItems = [...ROOM_ITEMS, ...LIVING_ROOM_ITEMS, ...KITCHEN_ITEMS, ...VERANDA_ITEMS, ...REAR_BALCONY_ITEMS, ...UTILITY_ROOM_ITEMS];
+const allMasterItems = Array.from(new Map(rawMasterItems.map(i => [i.name, i])).values());
 // 초기 룸 매핑 생성 함수
 const generateDefaultRoomMapping = () => {
   const mapping: Record<string, string[]> = {};
