@@ -31,6 +31,7 @@ export default function Step3Page() {
   } = useWizardStore();
   
   const optionPrices = useSettingsStore(state => state.optionPrices);
+  const customPackingMaterials = useSettingsStore(state => state.customPackingMaterials || PACKING_MATERIALS);
   const itemPackingSettings = useSettingsStore(state => state.itemPackingSettings);
   const ladderRates = useSettingsStore(state => state.ladderRates);
   const vehicleLimits = useSettingsStore(state => state.vehicleCbmLimits);
@@ -472,7 +473,7 @@ export default function Step3Page() {
           <div>
               <label className="block text-sm font-bold text-gray-700 mb-3">포장재료</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {PACKING_MATERIALS.filter(mat => {
+                {(customPackingMaterials || PACKING_MATERIALS).filter(mat => {
                   const hideWhenZero = ['TV(', '침대', '서랍장', '냉장고', '김치냉장고', '세탁기', '건조기', '쇼파', '분해장농', '피아노'];
                   if (hideWhenZero.some(prefix => mat.startsWith(prefix))) {
                     return (resources.materials[mat] || 0) > 0;

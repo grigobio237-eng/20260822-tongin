@@ -29,6 +29,7 @@ export default function SettingsPage() {
   const [localDefaultPackingMaterials, setLocalDefaultPackingMaterials] = useState(store.defaultPackingMaterials || { fiveTon: {}, twoHalfTon: {}, oneTon: {} });
   const [localWorkerPrices, setLocalWorkerPrices] = useState(store.workerPrices || { male: 200000, female: 150000 });
     const [localCustomMasterItems, setLocalCustomMasterItems] = useState<MasterItem[]>([]);
+  const [localCustomPackingMaterials, setLocalCustomPackingMaterials] = useState<string[]>([]);
   const sortedMasterItems = useMemo(() => {
     return [...localCustomMasterItems].sort((a, b) => {
       if (a.name.startsWith('기타물품') && !b.name.startsWith('기타물품')) return 1;
@@ -46,7 +47,7 @@ const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
   const [localDistanceRates, setLocalDistanceRates] = useState<Record<string, any>>(store.distanceRates || {});
   const [localPartnerContacts, setLocalPartnerContacts] = useState(store.partnerContacts);
   
-  const [activeTab, setActiveTab] = useState<'general' | 'db' | 'roomMapping' | 'distance'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'db' | 'roomMapping' | 'distance' | 'packing'>('general');
   const [localItemCbm, setLocalItemCbm] = useState(store.itemCbmSettings || {});
   const [localItemPacking, setLocalItemPacking] = useState(store.itemPackingSettings || {});
   
@@ -103,6 +104,24 @@ const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
         }
         return i;
       }));
+    }
+  };
+
+  const handleAddPackingMaterial = () => {
+    const name = prompt('추가할 포장재료 이름을 입력하세요:');
+    if (name && !localCustomPackingMaterials.includes(name)) {
+      setLocalCustomPackingMaterials(prev => [...prev, name]);
+    }
+  };
+  const handleDeletePackingMaterial = (name: string) => {
+    if (confirm(`'${name}' 포장재료를 삭제하시겠습니까?`)) {
+      setLocalCustomPackingMaterials(prev => prev.filter(m => m !== name));
+    }
+  };
+  const handleEditPackingMaterial = (oldName: string) => {
+    const newName = prompt('수정할 이름을 입력하세요:', oldName);
+    if (newName && newName !== oldName && !localCustomPackingMaterials.includes(newName)) {
+      setLocalCustomPackingMaterials(prev => prev.map(m => m === oldName ? newName : m));
     }
   };
 
@@ -174,6 +193,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
       setLocalCustomMasterItems(items);
     }
     if (store.roomItemMapping) setLocalRoomItemMapping(store.roomItemMapping);
+    if (store.customPackingMaterials) setLocalCustomPackingMaterials(store.customPackingMaterials);
     if (store.ladderRates) {
       if (!store.ladderRates.tier_14) {
         setLocalLadderRates(DEFAULT_LADDER_RATES);
@@ -202,6 +222,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
       itemPackingSettings: localItemPacking,
       customMasterItems: localCustomMasterItems,
       roomItemMapping: localRoomItemMapping,
+      customPackingMaterials: localCustomPackingMaterials,
       distanceRates: localDistanceRates,
     });
     router.back();
@@ -579,7 +600,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                               className="border rounded px-1 py-1 w-24 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none"
                             >
                               <option value="">재료선택</option>
-                              {PACKING_MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+                              {localCustomPackingMaterials.map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                             <input
                               type="number"
@@ -595,7 +616,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                               className="border rounded px-1 py-1 w-24 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none"
                             >
                               <option value="">재료선택2</option>
-                              {PACKING_MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+                              {localCustomPackingMaterials.map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                             <input
                               type="number"
@@ -652,6 +673,28 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                     </label>
                   );
                 })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'packing' && (
+          <div className="space-y-8">
+            <div className="bg-yellow-50 p-4 rounded-xl text-sm text-yellow-800">
+              <strong>포장재료 DB 설정</strong><br/>
+              스텝 2 및 스텝 3에서 사용될 포장재료 목록을 자유롭게 추가/수정/삭제할 수 있습니다.
+            </div>
+            <div className="bg-white p-6 rounded-xl border shadow-sm">
+              <div className="flex flex-wrap gap-3">
+                {localCustomPackingMaterials.map(mat => (
+                  <div key={mat} className="flex items-center gap-2 bg-gray-50 border rounded px-3 py-2">
+                    <span className="font-bold text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleEditPackingMaterial(mat)} title="이름 수정">{mat} ✏️</span>
+                    <button onClick={() => handleDeletePackingMaterial(mat)} className="text-red-400 hover:text-red-600 text-lg leading-none">&times;</button>
+                  </div>
+                ))}
+                <button onClick={handleAddPackingMaterial} className="flex items-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 rounded px-4 py-2 hover:bg-blue-100 font-bold">
+                  + 추가
+                </button>
               </div>
             </div>
           </div>

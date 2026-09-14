@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { OPTION_ITEMS, MasterItem, RoomCategory, ROOM_CATEGORIES, ROOM_ITEMS, LIVING_ROOM_ITEMS, KITCHEN_ITEMS, VERANDA_ITEMS, REAR_BALCONY_ITEMS, UTILITY_ROOM_ITEMS } from '@/lib/constants/items';
+import { OPTION_ITEMS, MasterItem, RoomCategory, ROOM_CATEGORIES, ROOM_ITEMS, LIVING_ROOM_ITEMS, KITCHEN_ITEMS, VERANDA_ITEMS, REAR_BALCONY_ITEMS, UTILITY_ROOM_ITEMS, PACKING_MATERIALS } from '@/lib/constants/items';
 
 
 export interface DistanceRateTier {
@@ -59,6 +59,7 @@ export interface SettingsState {
   itemCbmSettings: Record<string, number>; // 가전/가구 기본 CBM 사용자 재정의
   itemPackingSettings: Record<string, { materialName: string, count: number, materialName2?: string, count2?: number }>;
   customMasterItems: MasterItem[];
+  customPackingMaterials: string[];
   roomItemMapping: Record<RoomCategory, string[]>;
   
   // 사다리차 층수/톤수별 단가 테이블 (단위: 원)
@@ -169,6 +170,7 @@ const defaultValues = {
   itemCbmSettings: {},
   itemPackingSettings: {},
   customMasterItems: allMasterItems,
+  customPackingMaterials: PACKING_MATERIALS,
   roomItemMapping: generateDefaultRoomMapping()
 };
 
