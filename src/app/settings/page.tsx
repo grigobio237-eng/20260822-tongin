@@ -196,6 +196,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
     }
     if (store.roomItemMapping) setLocalRoomItemMapping(store.roomItemMapping);
     if (store.customPackingMaterials) setLocalCustomPackingMaterials(store.customPackingMaterials);
+    if (store.materialCbmSettings) setLocalMaterialCbm(store.materialCbmSettings);
     if (store.ladderRates) {
       if (!store.ladderRates.tier_14) {
         setLocalLadderRates(DEFAULT_LADDER_RATES);
