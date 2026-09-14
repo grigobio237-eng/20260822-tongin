@@ -352,7 +352,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-gray-600">최대 적재량</label>
                   <div className="relative">
-                    <input type="text" value={localVehicleCbmLimits.fiveTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, fiveTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
+                    <input type="number" step="0.1" value={localVehicleCbmLimits.fiveTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, fiveTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
                     <span className="absolute right-3 top-2 text-gray-500 text-sm">CBM</span>
                   </div>
                 </div>
@@ -370,7 +370,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-gray-600">최대 적재량</label>
                   <div className="relative">
-                    <input type="text" value={localVehicleCbmLimits.twoHalfTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, twoHalfTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
+                    <input type="number" step="0.1" value={localVehicleCbmLimits.twoHalfTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, twoHalfTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
                     <span className="absolute right-3 top-2 text-gray-500 text-sm">CBM</span>
                   </div>
                 </div>
@@ -388,7 +388,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                 <div>
                   <label className="block text-xs font-semibold mb-1 text-gray-600">최대 적재량</label>
                   <div className="relative">
-                    <input type="text" value={localVehicleCbmLimits.oneTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, oneTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
+                    <input type="number" step="0.1" value={localVehicleCbmLimits.oneTon} onChange={(e) => setLocalVehicleCbmLimits({ ...localVehicleCbmLimits, oneTon: parseNum(e.target.value) })} className="w-full border rounded p-2 text-right font-bold pr-10 text-sm" />
                     <span className="absolute right-3 top-2 text-gray-500 text-sm">CBM</span>
                   </div>
                 </div>
@@ -511,10 +511,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-gray-400 w-16 text-right">기본: {v.cbm}</span>
-                            <input
-                              type="text"
-                              step="0.01"
-                              placeholder={v.cbm.toString()}
+                            <input type="number" step="0.01" placeholder={v.cbm.toString()}
                               value={customVal !== undefined ? customVal : ''}
                               onChange={(e) => handleItemCbmChange(item.name, v.name, e.target.value)}
                               className="border rounded px-2 py-1 w-16 text-right focus:ring-1 focus:ring-blue-500 outline-none bg-white"
@@ -638,10 +635,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                       </td>
                       <td className="px-4 py-3 flex justify-end">
                         <div className="relative w-28">
-                          <input 
-                            type="text"
-                            step="0.01"
-                            value={localMaterialCbm[mat] ?? 0}
+                          <input type="number" step="0.01" value={localMaterialCbm[mat] ?? 0}
                             onChange={(e) => handleMaterialCbmChange(mat, parseNum(e.target.value))}
                             className="w-full border rounded px-3 py-1.5 text-right pr-10 focus:ring-1 focus:ring-blue-500 outline-none"
                           />
