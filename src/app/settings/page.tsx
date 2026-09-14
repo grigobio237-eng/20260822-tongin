@@ -612,46 +612,60 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
         )}
 
         {activeTab === 'packing' && (
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div className="bg-yellow-50 p-4 rounded-xl text-sm text-yellow-800">
-              <strong>포장재료 DB 설정</strong><br/>
-              스텝 2 및 스텝 3에서 사용될 포장재료 목록을 자유롭게 추가/수정/삭제하고, 각 포장재료별 CBM을 설정할 수 있습니다.
+              <strong>포장재료 통합 관리</strong><br/>
+              이곳에 등록된 모든 포장재료는 마스터 DB와 연동됩니다. 포장재료 이름 및 CBM을 리스트(엑셀 형식)로 한눈에 관리하세요.
             </div>
-            <div className="bg-white p-6 rounded-xl border shadow-sm">
-              <h3 className="font-bold text-lg mb-4 pb-2 border-b">포장재료 목록 관리</h3>
-              <div className="flex flex-wrap gap-3">
-                {localCustomPackingMaterials.map(mat => (
-                  <div key={mat} className="flex items-center gap-2 bg-gray-50 border rounded px-3 py-2">
-                    <span className="font-bold text-gray-700 cursor-pointer hover:text-blue-600" onClick={() => handleEditPackingMaterial(mat)} title="이름 수정">{mat} ✏️</span>
-                    <button onClick={() => handleDeletePackingMaterial(mat)} className="text-red-400 hover:text-red-600 text-lg leading-none">&times;</button>
-                  </div>
-                ))}
-                <button onClick={handleAddPackingMaterial} className="flex items-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 rounded px-4 py-2 hover:bg-blue-100 font-bold">
-                  + 추가
+
+            <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-100 text-gray-700">
+                  <tr>
+                    <th className="px-4 py-3 border-b font-bold w-1/2">포장재료 이름</th>
+                    <th className="px-4 py-3 border-b font-bold w-1/3 text-right pr-12">CBM (체적)</th>
+                    <th className="px-4 py-3 border-b font-bold w-1/6 text-center">관리</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {localCustomPackingMaterials.map(mat => (
+                    <tr key={mat} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-gray-800">{mat}</span>
+                          <button onClick={() => handleEditPackingMaterial(mat)} className="text-gray-400 hover:text-blue-600 text-xs" title="이름 수정">✏️</button>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 flex justify-end">
+                        <div className="relative w-28">
+                          <input 
+                            type="text"
+                            step="0.01"
+                            value={localMaterialCbm[mat] ?? 0}
+                            onChange={(e) => handleMaterialCbmChange(mat, parseNum(e.target.value))}
+                            className="w-full border rounded px-3 py-1.5 text-right pr-10 focus:ring-1 focus:ring-blue-500 outline-none"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">CBM</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <button onClick={() => handleDeletePackingMaterial(mat)} className="text-red-400 hover:text-white font-bold px-3 py-1 rounded hover:bg-red-500 transition-colors">삭제</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {localCustomPackingMaterials.length === 0 && (
+                    <tr>
+                      <td colSpan={3} className="text-center py-8 text-gray-500">등록된 포장재료가 없습니다.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              <div className="p-4 bg-gray-50 border-t flex justify-center">
+                <button onClick={handleAddPackingMaterial} className="flex items-center gap-2 bg-blue-100 text-blue-700 rounded-lg px-6 py-2.5 hover:bg-blue-200 font-bold shadow-sm transition-colors">
+                  + 새로운 포장재료 추가
                 </button>
               </div>
             </div>
-            
-            <section className="bg-white p-6 rounded-xl border shadow-sm">
-              <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">포장재료별 CBM 세팅</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {localCustomPackingMaterials.map((mat) => (
-                  <div key={mat} className="flex flex-col">
-                    <label className="block text-xs font-semibold mb-1 text-gray-600 truncate" title={mat}>{mat}</label>
-                    <div className="relative">
-                      <input 
-                        type="text"
-                        step="0.01"
-                        value={localMaterialCbm[mat] ?? 0}
-                        onChange={(e) => handleMaterialCbmChange(mat, parseNum(e.target.value))}
-                        className="w-full border rounded p-2 text-sm text-right pr-6"
-                      />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none">CBM</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
           </div>
         )}
 
