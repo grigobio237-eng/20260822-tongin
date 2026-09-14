@@ -19,6 +19,8 @@ export default function Step2Page() {
   const materialSettings = useSettingsStore(state => state.materialCbmSettings);
   const itemCbmSettings = useSettingsStore(state => state.itemCbmSettings);
   const [activeTab, setActiveTab] = useState<RoomCategory>('안방');
+  const customMasterItems = useSettingsStore(state => state.customMasterItems);
+  const roomItemMapping = useSettingsStore(state => state.roomItemMapping);
   const [modalState, setModalState] = useState<ModalState | null>(null);
   const [customCbmInput, setCustomCbmInput] = useState<string>('');
   

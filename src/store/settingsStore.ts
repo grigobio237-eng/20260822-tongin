@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { OPTION_ITEMS } from '@/lib/constants/items';
+import { OPTION_ITEMS, MasterItem, RoomCategory, ROOM_CATEGORIES, ROOM_ITEMS, LIVING_ROOM_ITEMS, KITCHEN_ITEMS, VERANDA_ITEMS, REAR_BALCONY_ITEMS, UTILITY_ROOM_ITEMS } from '@/lib/constants/items';
 
 
 export interface DistanceRateTier {
@@ -58,6 +58,8 @@ export interface SettingsState {
   materialCbmSettings: Record<string, number>;
   itemCbmSettings: Record<string, number>; // 가전/가구 기본 CBM 사용자 재정의
   itemPackingSettings: Record<string, { materialName: string, count: number, materialName2?: string, count2?: number }>;
+  customMasterItems: MasterItem[];
+  roomItemMapping: Record<RoomCategory, string[]>;
   
   // 사다리차 층수/톤수별 단가 테이블 (단위: 원)
   ladderRates: Record<string, LadderRateTier>;
@@ -126,6 +128,17 @@ export const DEFAULT_LADDER_RATES: Record<string, LadderRateTier> = {
   tier_25_plus: { label: '25층이상', fiveTon: 0, sixTon: 0, sevenHalfTon: 0, tenTon: 0 },
 };
 
+
+const allMasterItems = [...ROOM_ITEMS, ...LIVING_ROOM_ITEMS, ...KITCHEN_ITEMS, ...VERANDA_ITEMS, ...REAR_BALCONY_ITEMS, ...UTILITY_ROOM_ITEMS];
+// 초기 룸 매핑 생성 함수
+const generateDefaultRoomMapping = () => {
+  const mapping: Record<string, string[]> = {};
+  (Object.entries(ROOM_CATEGORIES) as [RoomCategory, MasterItem[]][]).forEach(([room, items]) => {
+    mapping[room] = items.map(i => i.name);
+  });
+  return mapping as Record<RoomCategory, string[]>;
+};
+
 const defaultValues = {
   companyName: '통인익스프레스',
   vehiclePrices: { fiveTon: 300000, twoHalfTon: 200000, oneTon: 150000 },
@@ -153,7 +166,9 @@ const defaultValues = {
     organizing: { companyName: '', phone: '', memo: '' },
   },
   itemCbmSettings: {},
-  itemPackingSettings: {}
+  itemPackingSettings: {},
+  customMasterItems: allMasterItems,
+  roomItemMapping: generateDefaultRoomMapping()
 };
 
 export const useSettingsStore = create<SettingsState>()(

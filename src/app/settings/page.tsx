@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useSettingsStore, LadderRateTier, PartnerContact, DEFAULT_LADDER_RATES } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowLeft, Save } from 'lucide-react';
-import { OPTION_ITEMS, PACKING_MATERIALS, ROOM_ITEMS, LIVING_ROOM_ITEMS, KITCHEN_ITEMS, VERANDA_ITEMS, REAR_BALCONY_ITEMS, UTILITY_ROOM_ITEMS } from '@/lib/constants/items';
+import { OPTION_ITEMS, PACKING_MATERIALS, ROOM_ITEMS, LIVING_ROOM_ITEMS, KITCHEN_ITEMS, VERANDA_ITEMS, REAR_BALCONY_ITEMS, UTILITY_ROOM_ITEMS, MasterItem, RoomCategory, ROOM_CATEGORIES } from '@/lib/constants/items';
 
 // 모든 가전/가구 리스트 병합 (중복 제거)
 const allMasterItems = [
@@ -28,7 +28,9 @@ export default function SettingsPage() {
   const [localVehicleCbmLimits, setLocalVehicleCbmLimits] = useState(store.vehicleCbmLimits || { fiveTon: 15, twoHalfTon: 7.5, oneTon: 3 });
   const [localDefaultPackingMaterials, setLocalDefaultPackingMaterials] = useState(store.defaultPackingMaterials || { fiveTon: {}, twoHalfTon: {}, oneTon: {} });
   const [localWorkerPrices, setLocalWorkerPrices] = useState(store.workerPrices || { male: 200000, female: 150000 });
-  const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
+    const [localCustomMasterItems, setLocalCustomMasterItems] = useState<MasterItem[]>([]);
+  const [localRoomItemMapping, setLocalRoomItemMapping] = useState<Record<string, string[]>>({});
+const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
   const [localMaterialCbm, setLocalMaterialCbm] = useState(store.materialCbmSettings || {
     '특대박스(이불)': 0, '대박스(옷)': 0, '중대박스': 0, '중박스': 0, '소박스': 0, '바구니': 0, '아이스박스': 0
   });
@@ -37,11 +39,78 @@ export default function SettingsPage() {
   const [localDistanceRates, setLocalDistanceRates] = useState<Record<string, any>>(store.distanceRates || {});
   const [localPartnerContacts, setLocalPartnerContacts] = useState(store.partnerContacts);
   
-  const [activeTab, setActiveTab] = useState<'general' | 'db' | 'distance'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'db' | 'roomMapping' | 'distance'>('general');
   const [localItemCbm, setLocalItemCbm] = useState(store.itemCbmSettings || {});
   const [localItemPacking, setLocalItemPacking] = useState(store.itemPackingSettings || {});
   
-  const handleItemCbmChange = (itemName: string, variantName: string, value: string) => {
+  
+  const handleAddMasterItem = () => {
+    const name = prompt('새로운 품목명(큰 타이틀)을 입력하세요:');
+    if (name) {
+      setLocalCustomMasterItems(prev => [...prev, { name, variants: [] }]);
+    }
+  };
+
+  const handleDeleteMasterItem = (itemName: string) => {
+    if (confirm(`'${itemName}' 품목을 정말 삭제하시겠습니까?`)) {
+      setLocalCustomMasterItems(prev => prev.filter(i => i.name !== itemName));
+    }
+  };
+
+  const handleEditMasterItemName = (oldName: string) => {
+    const newName = prompt('수정할 품목명을 입력하세요:', oldName);
+    if (newName && newName !== oldName) {
+      setLocalCustomMasterItems(prev => prev.map(i => i.name === oldName ? { ...i, name: newName } : i));
+    }
+  };
+
+  const handleAddVariant = (itemName: string) => {
+    const name = prompt('새로운 세부 규격(옵션명)을 입력하세요:');
+    if (name) {
+      setLocalCustomMasterItems(prev => prev.map(i => {
+        if (i.name === itemName) {
+          return { ...i, variants: [...i.variants, { name, cbm: 1 }] };
+        }
+        return i;
+      }));
+    }
+  };
+
+  const handleDeleteVariant = (itemName: string, variantName: string) => {
+    if (confirm(`'${variantName}' 규격을 정말 삭제하시겠습니까?`)) {
+      setLocalCustomMasterItems(prev => prev.map(i => {
+        if (i.name === itemName) {
+          return { ...i, variants: i.variants.filter(v => v.name !== variantName) };
+        }
+        return i;
+      }));
+    }
+  };
+
+  const handleEditVariantName = (itemName: string, oldVarName: string) => {
+    const newName = prompt('수정할 세부 규격명을 입력하세요:', oldVarName);
+    if (newName && newName !== oldVarName) {
+      setLocalCustomMasterItems(prev => prev.map(i => {
+        if (i.name === itemName) {
+          return { ...i, variants: i.variants.map(v => v.name === oldVarName ? { ...v, name: newName } : v) };
+        }
+        return i;
+      }));
+    }
+  };
+
+  const toggleRoomMapping = (room: string, itemName: string) => {
+    setLocalRoomItemMapping(prev => {
+      const current = prev[room] || [];
+      const updated = current.includes(itemName) 
+        ? current.filter(i => i !== itemName)
+        : [...current, itemName];
+      return { ...prev, [room]: updated };
+    });
+  };
+
+  const [activeRoomTab, setActiveRoomTab] = useState<string>('안방');
+const handleItemCbmChange = (itemName: string, variantName: string, value: string) => {
     const key = `${itemName}|${variantName}`;
     setLocalItemCbm(prev => {
       const updated = { ...prev };
@@ -80,7 +149,9 @@ export default function SettingsPage() {
     if (store.vehicleCbmLimits) setLocalVehicleCbmLimits(store.vehicleCbmLimits);
     if (store.defaultPackingMaterials) setLocalDefaultPackingMaterials(store.defaultPackingMaterials);
     setLocalWorkerPrices(store.workerPrices);
-    setLocalOptionPrices(store.optionPrices);
+        setLocalOptionPrices(store.optionPrices);
+    if (store.customMasterItems) setLocalCustomMasterItems(store.customMasterItems);
+    if (store.roomItemMapping) setLocalRoomItemMapping(store.roomItemMapping);
     if (store.ladderRates) {
       if (!store.ladderRates.tier_14) {
         setLocalLadderRates(DEFAULT_LADDER_RATES);
@@ -107,6 +178,8 @@ export default function SettingsPage() {
       partnerContacts: localPartnerContacts,
       itemCbmSettings: localItemCbm,
       itemPackingSettings: localItemPacking,
+      customMasterItems: localCustomMasterItems,
+      roomItemMapping: localRoomItemMapping,
       distanceRates: localDistanceRates,
     });
     router.back();
@@ -169,7 +242,13 @@ export default function SettingsPage() {
               className={`px-6 py-3 font-bold ${activeTab === 'db' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
               onClick={() => setActiveTab('db')}
             >
-              가전/가구 CBM DB 설정
+              마스터 DB 관리
+            </button>
+            <button
+              className={`px-6 py-3 font-bold ${activeTab === 'roomMapping' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('roomMapping')}
+            >
+              공간별 노출 셋팅
             </button>
             <button
               className={`px-6 py-3 font-bold ${activeTab === 'distance' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
@@ -402,8 +481,14 @@ export default function SettingsPage() {
                       className="w-full border rounded p-2 text-sm text-right pr-6"
                     />
                   </div>
+                  <div className="mt-3 text-center">
+                    <button onClick={() => handleAddVariant(item.name)} className="text-xs text-blue-600 hover:underline border border-blue-200 rounded px-3 py-1 bg-blue-50">+ 세부 항목 추가</button>
+                  </div>
                 </div>
               ))}
+            </div>
+            <div className="text-center mt-6">
+              <button onClick={handleAddMasterItem} className="px-6 py-3 bg-blue-100 text-blue-700 font-bold rounded-lg hover:bg-blue-200 shadow-sm">+ 새로운 큰 타이틀(품목) 추가하기</button>
             </div>
           </section>
 
@@ -438,16 +523,22 @@ export default function SettingsPage() {
             </div>
             
             <div className="grid grid-cols-1 gap-6">
-              {allMasterItems.map(item => (
+              {localCustomMasterItems.map(item => (
                 <div key={item.name} className="border rounded-xl p-4 bg-gray-50">
-                  <h4 className="font-bold text-gray-800 mb-3 border-b pb-2">{item.name}</h4>
+                  <div className="flex justify-between items-center mb-3 border-b pb-2">
+                    <h4 className="font-bold text-gray-800 cursor-pointer hover:text-blue-600" onClick={() => handleEditMasterItemName(item.name)} title="이름 수정하기">{item.name} ✏️</h4>
+                    <button onClick={() => handleDeleteMasterItem(item.name)} className="text-red-500 text-xs px-2 py-1 border border-red-200 rounded hover:bg-red-50">삭제</button>
+                  </div>
                   <div className="space-y-2">
                     {item.variants.map(v => {
                       const key = `${item.name}|${v.name}`;
                       const customVal = localItemCbm[key];
                       return (
                         <div key={v.name} className="flex justify-between items-center text-sm">
-                          <span className="text-gray-600 flex-1">{v.name}</span>
+                          <div className="flex items-center gap-1 flex-1 min-w-0 pr-2">
+                            <span className="text-gray-600 cursor-pointer hover:text-blue-600 truncate" onClick={() => handleEditVariantName(item.name, v.name)} title="규격명 수정">{v.name}</span>
+                            <button onClick={() => handleDeleteVariant(item.name, v.name)} className="text-gray-400 hover:text-red-500 text-xs shrink-0">✕</button>
+                          </div>
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-gray-400 w-16 text-right">기본: {v.cbm}</span>
                             <input
