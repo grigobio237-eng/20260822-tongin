@@ -267,12 +267,44 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
   return (
     <div className="min-h-screen bg-gray-50 p-4 pb-32">
       <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center gap-4 py-4">
-          <button onClick={() => router.back()} className="p-2 bg-white rounded-full shadow-sm border hover:bg-gray-100">
-            <ArrowLeft size={20} />
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">전역 단가 및 환경 설정</h1>
-        </div>
+        <div className="flex flex-wrap items-center gap-2 py-4 border-b w-full">
+            <button
+              className={`px-6 py-3 font-bold transition-colors ${activeTab === 'general' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('general')}
+            >
+              기본 환경 설정
+            </button>
+            <button
+              className={`px-6 py-3 font-bold transition-colors ${activeTab === 'db' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('db')}
+            >
+              마스터 DB 관리
+            </button>
+            <button
+              className={`px-6 py-3 font-bold transition-colors ${activeTab === 'roomMapping' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('roomMapping')}
+            >
+              공간별 노출 셋팅
+            </button>
+            <button
+              className={`px-6 py-3 font-bold transition-colors ${activeTab === 'packing' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('packing')}
+            >
+              포장재료 DB 설정
+            </button>
+            <button
+              className={`px-6 py-3 font-bold transition-colors ${activeTab === 'distance' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('distance')}
+            >
+              구간 단가 DB 설정
+            </button>
+            <button
+              className={`px-6 py-3 font-bold transition-colors ${activeTab === 'ladder' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('ladder')}
+            >
+              사다리차 DB 설정
+            </button>
+          </div>
         
         <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-8">
           
