@@ -31,7 +31,10 @@ export default function SettingsPage() {
     const [localCustomMasterItems, setLocalCustomMasterItems] = useState<MasterItem[]>([]);
   const [localCustomPackingMaterials, setLocalCustomPackingMaterials] = useState<string[]>([]);
   const sortedMasterItems = useMemo(() => {
-    return [...localCustomMasterItems].sort((a, b) => {
+    return localCustomMasterItems.map(item => ({
+      ...item,
+      variants: [...item.variants].sort((v1, v2) => v1.name > v2.name ? 1 : v1.name < v2.name ? -1 : 0)
+    })).sort((a, b) => {
       if (a.name.startsWith('기타물품') && !b.name.startsWith('기타물품')) return 1;
       if (!a.name.startsWith('기타물품') && b.name.startsWith('기타물품')) return -1;
       return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;

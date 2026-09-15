@@ -183,7 +183,7 @@ export const useSettingsStore = create<SettingsState>()(
       fetchSettings: async () => {
         set({ isLoading: true });
         try {
-          const res = await fetch('/api/settings');
+          const res = await fetch('/api/settings', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
           if (res.ok) {
             const data = (await res.json()) as Partial<SettingsState>;
             set({
