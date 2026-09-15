@@ -402,7 +402,7 @@ export const useWizardStore = create<WizardState>()(
               return; // Ghost room prevention
             }
             Object.entries(roomData?.items || {}).forEach(([itemName, instances]) => { 
-              if (!allowedNames.includes(itemName)) {
+              if (!allowedNames.includes(itemName) && !itemName.startsWith('기타 ')) {
                 hasGhostData = true;
                 return; // Ghost item prevention
               }
@@ -460,7 +460,7 @@ export const useWizardStore = create<WizardState>()(
               delete newRoomItems[roomName as RoomCategory];
             } else if (newRoomItems[roomName as RoomCategory]?.items) {
               Object.keys(newRoomItems[roomName as RoomCategory].items).forEach(itemName => {
-                if (!allowed.includes(itemName)) {
+                if (!allowed.includes(itemName) && !itemName.startsWith('기타 ')) {
                   delete newRoomItems[roomName as RoomCategory].items[itemName];
                 }
               });
