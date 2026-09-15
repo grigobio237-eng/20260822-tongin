@@ -127,7 +127,9 @@ export default function Step3Page() {
     let customCounts: Record<string, number> = {};
     let dynamicCounts: Record<string, number> = {};
 
-    Object.values(roomItems).forEach(room => {
+    Object.entries(roomItems).forEach(([roomName, room]) => {
+      const allowedNames = (useSettingsStore.getState().roomItemMapping as any)?.[roomName];
+      if (!allowedNames) return; // Ghost room prevention
       if (!room || !room.items) return;
       
       // 1. 기타물품 수집 (dynamicCounts 유지)
