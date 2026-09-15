@@ -94,14 +94,20 @@ export default function Step2Page() {
           <div className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
             소계: {Object.entries(roomItems[activeTab]?.items || {}).reduce((totalAcc, [itemName, instances]) => {
             const allowedNames = roomItemMapping[activeTab] || [];
-            if (!allowedNames.includes(itemName)) return totalAcc; // Skip hidden/ghost items
+            if (!allowedNames.includes(itemName) && !itemName.startsWith('기타 ')) return totalAcc; // Skip hidden/ghost items
             return totalAcc + instances.reduce((acc, inst) => {
               let cbm = inst.cbm || 0;
               if (itemName === '옷') cbm = (materialSettings['대박스(옷)'] || 0) * inst.quantity;
-              if (itemName === '이불') cbm = (materialSettings['특대박스(이불)'] || 0) * inst.quantity;
-              if (itemName === '생활물품/잔짐류(중박스용)') cbm = (materialSettings['중박스'] || 0) * inst.quantity;
-              if (itemName === '도서/소형물품(소박스용)') cbm = (materialSettings['소박스'] || 0) * inst.quantity;
-              if (itemName === '기타물품1' || itemName === '기타물품2') cbm = (materialSettings[inst.variantName] || 0) * inst.quantity;
+              else if (itemName === '이불') cbm = (materialSettings['특대박스(이불)'] || 0) * inst.quantity;
+              else if (itemName === '생활물품/잔짐류(중박스용)') cbm = (materialSettings['중박스'] || 0) * inst.quantity;
+              else if (itemName === '도서/소형물품(소박스용)') cbm = (materialSettings['소박스'] || 0) * inst.quantity;
+              else if (itemName === '기타물품1' || itemName === '기타물품2') cbm = (materialSettings[inst.variantName] || 0) * inst.quantity;
+              else {
+                const overrideKey = `${itemName}|${inst.variantName}`;
+                if (itemCbmSettings && itemCbmSettings[overrideKey] !== undefined) {
+                  cbm = itemCbmSettings[overrideKey] * inst.quantity;
+                }
+              }
               return acc + cbm;
             }, 0);
           }, 0).toFixed(1)} CBM
