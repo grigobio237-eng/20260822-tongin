@@ -88,6 +88,8 @@ export default function Step2Page() {
           <h3 className="font-bold text-gray-800">{activeTab} 물품 목록</h3>
           <div className="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-200">
             소계: {Object.entries(roomItems[activeTab]?.items || {}).reduce((totalAcc, [itemName, instances]) => {
+            const allowedNames = roomItemMapping[activeTab] || [];
+            if (!allowedNames.includes(itemName)) return totalAcc; // Skip hidden/ghost items
             return totalAcc + instances.reduce((acc, inst) => {
               let cbm = inst.cbm || 0;
               if (itemName === '옷') cbm = (materialSettings['대박스(옷)'] || 0) * inst.quantity;
@@ -104,13 +106,15 @@ export default function Step2Page() {
 
       {/* Items Grid */}
       <div className="bg-white rounded-xl shadow-sm border p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {[...ROOM_CATEGORIES[activeTab]].sort((a, b) => {
-          const isOtherA = a.name.startsWith('기타물품');
-          const isOtherB = b.name.startsWith('기타물품');
-          if (isOtherA && !isOtherB) return 1;
-          if (!isOtherA && isOtherB) return -1;
-          return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
-        }).map((item) => {
+        {(() => {
+          const allowedNames = roomItemMapping[activeTab] || [];
+          const items = (customMasterItems || []).filter(item => allowedNames.includes(item.name));
+          return items.sort((a, b) => {
+            if (a.name.startsWith('기타물품') && !b.name.startsWith('기타물품')) return 1;
+            if (!a.name.startsWith('기타물품') && b.name.startsWith('기타물품')) return -1;
+            return a.name > b.name ? 1 : (a.name < b.name ? -1 : 0);
+          });
+        })().map((item) => {
           const instances = roomItems[activeTab]?.items?.[item.name] || [];
           
           return (

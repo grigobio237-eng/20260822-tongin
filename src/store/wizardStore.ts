@@ -394,8 +394,12 @@ export const useWizardStore = create<WizardState>()(
         
         let totalCbm = 0;
         
-        Object.values(roomItems).forEach(roomData => {
+        Object.entries(roomItems).forEach(([roomName, roomData]) => {
+          const allowedNames = settings.roomItemMapping?.[roomName];
           Object.entries(roomData?.items || {}).forEach(([itemName, instances]) => { 
+            // If roomItemMapping exists and this item is NOT in it, skip it entirely! (Ghost item prevention)
+            if (allowedNames && !allowedNames.includes(itemName)) return;
+            
             instances.forEach(item => { 
               let cbm = item.cbm;
               if (itemName === '옷') {
