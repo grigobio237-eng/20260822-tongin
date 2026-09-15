@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
@@ -31,6 +31,11 @@ export default function Step2Page() {
   const addRoomItemInstance = useWizardStore((state) => state.addRoomItemInstance);
   const removeRoomItemInstance = useWizardStore((state) => state.removeRoomItemInstance);
   const totalCbm = useWizardStore((state) => state.totalCbm);
+    const recalculateCbm = useWizardStore((state) => state.recalculateCbm);
+
+    useEffect(() => {
+      recalculateCbm();
+    }, []);
   const calculatedVehicles = useWizardStore((state) => state.calculatedVehicles);
 
   const handleOpenModal = (room: RoomCategory, item: MasterItem, instanceId?: string) => {

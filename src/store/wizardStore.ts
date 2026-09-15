@@ -394,11 +394,18 @@ export const useWizardStore = create<WizardState>()(
         
         let totalCbm = 0;
         
-        Object.entries(roomItems).forEach(([roomName, roomData]) => {
-          const allowedNames = settings.roomItemMapping?.[roomName];
-          Object.entries(roomData?.items || {}).forEach(([itemName, instances]) => { 
-            // If roomItemMapping exists and this item is NOT in it, skip it entirely! (Ghost item prevention)
-            if (allowedNames && !allowedNames.includes(itemName)) return;
+        let hasGhostData = false;
+          Object.entries(roomItems).forEach(([roomName, roomData]) => {
+            const allowedNames = (settings.roomItemMapping as any)?.[roomName];
+            if (!allowedNames) {
+              hasGhostData = true;
+              return; // Ghost room prevention
+            }
+            Object.entries(roomData?.items || {}).forEach(([itemName, instances]) => { 
+              if (!allowedNames.includes(itemName)) {
+                hasGhostData = true;
+                return; // Ghost item prevention
+              }
             
             instances.forEach(item => { 
               let cbm = item.cbm;
@@ -443,6 +450,24 @@ export const useWizardStore = create<WizardState>()(
         addMats(defaultMats.fiveTon, calculated.fiveTon);
         addMats(defaultMats.twoHalfTon, calculated.twoHalfTon);
         addMats(defaultMats.oneTon, calculated.oneTon);
+        
+        // Clean up ghost data from DB (Zustand state)
+        if (hasGhostData) {
+          const newRoomItems = { ...roomItems };
+          Object.keys(newRoomItems).forEach(roomName => {
+            const allowed = (settings.roomItemMapping as any)?.[roomName];
+            if (!allowed) {
+              delete newRoomItems[roomName as RoomCategory];
+            } else if (newRoomItems[roomName as RoomCategory]?.items) {
+              Object.keys(newRoomItems[roomName as RoomCategory].items).forEach(itemName => {
+                if (!allowed.includes(itemName)) {
+                  delete newRoomItems[roomName as RoomCategory].items[itemName];
+                }
+              });
+            }
+          });
+          set({ roomItems: newRoomItems });
+        }
         
         set({ 
           totalCbm, 
