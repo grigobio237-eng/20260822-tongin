@@ -526,10 +526,13 @@ export default function Step4Page() {
             <span className="text-gray-600">이사 기본비용</span>
             <div className="relative">
               <input
-                type="number"
-                className="border rounded px-2 py-1 w-36 text-right font-semibold outline-none focus:ring-1 focus:ring-blue-500"
-                value={editableBaseCost !== null ? editableBaseCost : finalBaseCost}
-                onChange={(e) => setEditableBaseCost(Number(e.target.value))}
+                type="text"
+                className="border rounded px-2 py-1 w-36 pr-6 text-right font-semibold outline-none focus:ring-1 focus:ring-blue-500"
+                value={(editableBaseCost !== null ? editableBaseCost : finalBaseCost).toLocaleString()}
+                onChange={(e) => {
+                  const val = Number(e.target.value.replace(/,/g, ''));
+                  if (!isNaN(val)) setEditableBaseCost(val);
+                }}
                 onFocus={(e) => { if (editableBaseCost === null) setEditableBaseCost(finalBaseCost); }}
               />
               <span className="absolute right-2 top-1.5 text-xs text-gray-400">원</span>
@@ -551,11 +554,14 @@ export default function Step4Page() {
               <span className="text-blue-600 font-semibold">-</span>
               <div className="relative">
                 <input 
-                  type="number"
-                  className="border rounded px-2 py-1 w-28 text-right font-semibold text-blue-600 outline-none focus:ring-1 focus:ring-blue-500"
+                  type="text"
+                  className="border rounded px-2 py-1 w-28 pr-6 text-right font-semibold text-blue-600 outline-none focus:ring-1 focus:ring-blue-500"
                   placeholder="0"
-                  value={store.discount || ''}
-                  onChange={(e) => store.setDiscount(Number(e.target.value))}
+                  value={store.discount ? store.discount.toLocaleString() : ''}
+                  onChange={(e) => {
+                    const val = Number(e.target.value.replace(/,/g, ''));
+                    if (!isNaN(val)) store.setDiscount(val);
+                  }}
                 />
                 <span className="absolute right-2 top-1.5 text-xs text-gray-400">원</span>
               </div>
@@ -603,11 +609,14 @@ export default function Step4Page() {
               </label>
               <div className="relative">
                 <input 
-                  type="number"
+                  type="text"
                   className="w-full border rounded-lg p-3 pr-8 text-right font-bold focus:ring-2 focus:ring-blue-500 outline-none"
-                  value={deposit || ''}
-                  onChange={e => setDeposit(Number(e.target.value))}
-                  placeholder={String(autoDeposit)}
+                  value={deposit ? deposit.toLocaleString() : ''}
+                  onChange={e => {
+                    const val = Number(e.target.value.replace(/,/g, ''));
+                    if (!isNaN(val)) setDeposit(val);
+                  }}
+                  placeholder={autoDeposit.toLocaleString()}
                 />
                 <span className="absolute right-3 top-3.5 text-gray-500">원</span>
               </div>
