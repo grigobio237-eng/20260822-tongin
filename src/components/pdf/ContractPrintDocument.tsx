@@ -9,8 +9,10 @@ export interface ContractPrintData {
     packingDate: string;
     movingDate: string;
     departureAddress: string;
+    departureDetailAddress?: string;
     departureFloor: number;
     arrivalAddress: string;
+    arrivalDetailAddress?: string;
     arrivalFloor: number;
     serviceType: string;
     arrivalStatus: string;
@@ -75,9 +77,9 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
               </tr>
               <tr>
                 <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">출발지</th>
-                <td className="border border-slate-300 p-1.5">{c?.departureAddress || '-'} ({c?.departureFloor || 1}층)</td>
+                <td className="border border-slate-300 p-1.5">{c?.departureAddress || '-'} {c?.departureDetailAddress || ''} ({c?.departureFloor || 1}층)</td>
                 <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">도착지</th>
-                <td className="border border-slate-300 p-1.5">{c?.arrivalAddress || '-'} ({c?.arrivalFloor || 1}층)</td>
+                <td className="border border-slate-300 p-1.5">{c?.arrivalAddress || '-'} {c?.arrivalDetailAddress || ''} ({c?.arrivalFloor || 1}층)</td>
               </tr>
               <tr>
                 <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">포장일시</th>

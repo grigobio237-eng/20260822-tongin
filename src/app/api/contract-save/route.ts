@@ -38,12 +38,11 @@ export async function POST(req: Request) {
     const now = Math.floor(Date.now() / 1000);
 
     // 동적으로 컬럼 추가 시도 (이미 있으면 에러 무시)
-    try {
-      await (db as any).prepare("ALTER TABLE contracts ADD COLUMN rooms_json TEXT").run();
-    } catch (e) {}
-    try {
-      await (db as any).prepare("ALTER TABLE contracts ADD COLUMN options_json TEXT").run();
-    } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN rooms_json TEXT").run(); } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN options_json TEXT").run(); } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN resources_json TEXT").run(); } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN departure_detail_address TEXT").run(); } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN arrival_detail_address TEXT").run(); } catch (e) {}
 
     const sql = `
       INSERT OR REPLACE INTO contracts (
@@ -54,8 +53,8 @@ export async function POST(req: Request) {
         worker_count_male, worker_count_female,
         moving_cost, option_cost, total_cost, deposit, balance,
         stt_memo, signature_url, pdf_url, status, created_at, updated_at,
-        rooms_json, options_json
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        rooms_json, options_json, resources_json, departure_detail_address, arrival_detail_address
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const result = await (db as any).prepare(sql).bind(
@@ -89,7 +88,10 @@ export async function POST(req: Request) {
       now,
       now,
       JSON.stringify(body.rooms || []),
-      JSON.stringify(body.options || [])
+      JSON.stringify(body.options || []),
+      JSON.stringify(body.resources || {}),
+      String(customer.departureDetailAddress || ''),
+      String(customer.arrivalDetailAddress || '')
     ).run();
 
     if (!result.success) {

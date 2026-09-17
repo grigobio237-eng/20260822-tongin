@@ -155,7 +155,8 @@ export default function Step4Page() {
           resources: {
             vehicles: store.resources?.vehicles || {},
             workerMale: store.resources?.workerMale || 0,
-            workerFemale: store.resources?.workerFemale || 0
+            workerFemale: store.resources?.workerFemale || 0,
+            materials: store.resources?.materials || {}
           },
           sttMemo: store.sttMemo,
           optionCost: optionsCost
