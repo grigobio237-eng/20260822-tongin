@@ -11,9 +11,19 @@ export default function AdminContractsPage() {
   const router = useRouter();
   const hydrateContract = useWizardStore((state) => state.hydrateContract);
   
-  const handleEdit = (contract: any) => {
-    hydrateContract(contract);
-    router.push('/step1');
+  const handleEdit = async (contract: any) => {
+    try {
+      const res = await fetch(`/api/contract-get?id=${contract.id}`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        hydrateContract(json.data);
+        router.push('/step1');
+      } else {
+        alert('견적서 정보를 불러오는데 실패했습니다.');
+      }
+    } catch(e) {
+      alert('오류가 발생했습니다.');
+    }
   };
   const [loading, setLoading] = useState(true);
 

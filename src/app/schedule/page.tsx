@@ -22,9 +22,19 @@ export default function SchedulePage() {
   const router = useRouter();
   const hydrateContract = useWizardStore((state) => state.hydrateContract);
   
-  const handleEdit = (contractData: any) => {
-    hydrateContract(contractData);
-    router.push('/step1');
+  const handleEdit = async (id: string) => {
+    try {
+      const res = await fetch(`/api/contract-get?id=${id}`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        hydrateContract(json.data);
+        router.push('/step1');
+      } else {
+        alert('견적서 정보를 불러오는데 실패했습니다.');
+      }
+    } catch(e) {
+      alert('오류가 발생했습니다.');
+    }
   };
   const [currentDate, setCurrentDate] = useState(new Date());
   const [contracts, setContracts] = useState<ContractOverview[]>([]);
@@ -307,7 +317,7 @@ export default function SchedulePage() {
 
             <div className="px-6 py-4 border-t bg-gray-50 flex gap-2">
               <button
-                onClick={() => handleEdit(detailData)}
+                onClick={() => handleEdit(selectedId!)}
                 disabled={detailLoading || !detailData}
                 className="flex-1 bg-white border border-indigo-600 text-indigo-700 hover:bg-indigo-50 py-3 rounded-xl font-bold flex justify-center items-center gap-2 disabled:opacity-50 transition-colors"
               >
