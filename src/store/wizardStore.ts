@@ -376,42 +376,46 @@ export const useWizardStore = create<WizardState>()(
         const settings = useSettingsStore.getState();
         const materialSettings = settings.materialCbmSettings;
         
+        const newRoomItems = JSON.parse(JSON.stringify(roomItems));
         let totalCbm = 0;
         
-        let hasGhostData = false;
-          Object.entries(roomItems).forEach(([roomName, roomData]) => {
-            const allowedNames = (settings.roomItemMapping as any)?.[roomName];
-            if (!allowedNames) {
-              hasGhostData = true;
-              return; // Ghost room prevention
-            }
-            Object.entries(roomData?.items || {}).forEach(([itemName, instances]) => { 
+        Object.keys(newRoomItems).forEach(roomName => {
+          const allowedNames = (settings.roomItemMapping as any)?.[roomName];
+          if (!allowedNames) {
+            delete newRoomItems[roomName as RoomCategory];
+            return;
+          }
+          if (newRoomItems[roomName as RoomCategory]?.items) {
+            Object.keys(newRoomItems[roomName as RoomCategory].items).forEach(itemName => {
               if (!allowedNames.includes(itemName) && !itemName.startsWith('기타 ')) {
-                hasGhostData = true;
-                return; // Ghost item prevention
+                delete newRoomItems[roomName as RoomCategory].items[itemName];
+                return;
               }
-            
-            instances.forEach(item => { 
-              let cbm = item.cbm;
-              if (itemName === '옷') {
-                cbm = (materialSettings['대박스(옷)'] || 0) * item.quantity;
-              } else if (itemName === '이불') {
-                cbm = (materialSettings['특대박스(이불)'] || 0) * item.quantity;
-              } else if (itemName === '생활물품/잔짐류(중박스용)') {
-                cbm = (materialSettings['중박스'] || 0) * item.quantity;
-              } else if (itemName === '도서/소형물품(소박스용)') {
-                cbm = (materialSettings['소박스'] || 0) * item.quantity;
-              } else if (itemName === '기타물품1' || itemName === '기타물품2') {
-                cbm = (materialSettings[item.variantName] || 0) * item.quantity;
-              } else {
-                const overrideKey = `${itemName}|${item.variantName}`;
-                if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
-                  cbm = settings.itemCbmSettings[overrideKey] * item.quantity;
+              const instances = newRoomItems[roomName as RoomCategory].items[itemName];
+              instances.forEach((item: any) => {
+                let cbm = item.cbm;
+                if (itemName === '옷') {
+                  cbm = (materialSettings['대박스(옷)'] || 0) * item.quantity;
+                } else if (itemName === '이불') {
+                  cbm = (materialSettings['특대박스(이불)'] || 0) * item.quantity;
+                } else if (itemName === '생활물품/잔짐류(중박스용)') {
+                  cbm = (materialSettings['중박스'] || 0) * item.quantity;
+                } else if (itemName === '도서/소형물품(소박스용)') {
+                  cbm = (materialSettings['소박스'] || 0) * item.quantity;
+                } else if (itemName === '기타물품1' || itemName === '기타물품2') {
+                  cbm = (materialSettings[item.variantName] || 0) * item.quantity;
+                } else {
+                  const overrideKey = `${itemName}|${item.variantName}`;
+                  if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
+                    cbm = settings.itemCbmSettings[overrideKey] * item.quantity;
+                  }
                 }
-              }
-              totalCbm += cbm; 
+                item.cbm = cbm;
+                item.unitCbm = item.quantity > 0 ? cbm / item.quantity : 0;
+                totalCbm += cbm;
+              });
             });
-          });
+          }
         });
         
         totalCbm = Math.round(totalCbm * 100) / 100;
@@ -419,25 +423,8 @@ export const useWizardStore = create<WizardState>()(
         const limits = settings.vehicleCbmLimits;
         const calculated = calculateVehicles(totalCbm, limits);
         
-        // Clean up ghost data from DB (Zustand state)
-        if (hasGhostData) {
-          const newRoomItems = { ...roomItems };
-          Object.keys(newRoomItems).forEach(roomName => {
-            const allowed = (settings.roomItemMapping as any)?.[roomName];
-            if (!allowed) {
-              delete newRoomItems[roomName as RoomCategory];
-            } else if (newRoomItems[roomName as RoomCategory]?.items) {
-              Object.keys(newRoomItems[roomName as RoomCategory].items).forEach(itemName => {
-                if (!allowed.includes(itemName) && !itemName.startsWith('기타 ')) {
-                  delete newRoomItems[roomName as RoomCategory].items[itemName];
-                }
-              });
-            }
-          });
-          set({ roomItems: newRoomItems });
-        }
-        
         set({ 
+          roomItems: newRoomItems,
           totalCbm, 
           calculatedVehicles: calculated,
           resources: { 
