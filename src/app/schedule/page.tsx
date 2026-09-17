@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight, X, FileText, Loader2, Home } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, FileText, Loader2, Home, Edit } from 'lucide-react';
 import { WorkOrderPrintDocument } from '@/components/pdf/WorkOrderPrintDocument';
+import { useWizardStore } from '@/store/wizardStore';
 
 // Types
 interface ContractOverview {
@@ -19,6 +20,12 @@ interface ContractOverview {
 
 export default function SchedulePage() {
   const router = useRouter();
+  const hydrateContract = useWizardStore((state) => state.hydrateContract);
+  
+  const handleEdit = (contractData: any) => {
+    hydrateContract(contractData);
+    router.push('/step1');
+  };
   const [currentDate, setCurrentDate] = useState(new Date());
   const [contracts, setContracts] = useState<ContractOverview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -298,11 +305,19 @@ export default function SchedulePage() {
               )}
             </div>
 
-            <div className="px-6 py-4 border-t bg-gray-50">
+            <div className="px-6 py-4 border-t bg-gray-50 flex gap-2">
+              <button
+                onClick={() => handleEdit(detailData)}
+                disabled={detailLoading || !detailData}
+                className="flex-1 bg-white border border-indigo-600 text-indigo-700 hover:bg-indigo-50 py-3 rounded-xl font-bold flex justify-center items-center gap-2 disabled:opacity-50 transition-colors"
+              >
+                <Edit size={20} />
+                견적 수정하기
+              </button>
               <button
                 onClick={handleDownloadWorkOrder}
                 disabled={detailLoading || pdfLoading || !detailData}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 disabled:opacity-50 transition-colors"
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold flex justify-center items-center gap-2 disabled:opacity-50 transition-colors"
               >
                 {pdfLoading ? <Loader2 size={20} className="animate-spin" /> : <FileText size={20} />}
                 {pdfLoading ? '작업지시서 생성 중...' : '작업지시서 PDF 다운로드'}

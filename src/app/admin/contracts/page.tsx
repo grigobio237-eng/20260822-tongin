@@ -2,10 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FileText, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
+import { FileText, CheckCircle, Clock, ArrowLeft, Edit } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useWizardStore } from '@/store/wizardStore';
 
 export default function AdminContractsPage() {
   const [contracts, setContracts] = useState<any[]>([]);
+  const router = useRouter();
+  const hydrateContract = useWizardStore((state) => state.hydrateContract);
+  
+  const handleEdit = (contract: any) => {
+    hydrateContract(contract);
+    router.push('/step1');
+  };
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

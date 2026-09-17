@@ -94,6 +94,7 @@ export interface WizardState {
   setDiscount: (amount: number) => void;
   recalculateCbm: () => void;
   reset: () => void;
+  hydrateContract: (contract: any) => void;
 }
 
 const initialCustomerInfo: CustomerInfo = {
@@ -446,6 +447,82 @@ export const useWizardStore = create<WizardState>()(
         });
       },
 
+      hydrateContract: (contract: any) => {
+        let rooms = [];
+        try { rooms = contract.rooms_json ? JSON.parse(contract.rooms_json) : []; } catch(e){}
+        let options = [];
+        try { options = contract.options_json ? JSON.parse(contract.options_json) : []; } catch(e){}
+        let resources: any = {};
+        try { resources = contract.resources_json ? JSON.parse(contract.resources_json) : {}; } catch(e){}
+
+        const roomItems: any = {};
+        rooms.forEach((r: any) => {
+          roomItems[r.roomName] = { items: {}, note: r.note || '', images: r.images || [] };
+          if (r.items) {
+            r.items.forEach((item: any) => {
+              roomItems[r.roomName].items[item.name] = [{
+                id: Math.random().toString(36).substring(7),
+                quantity: item.quantity,
+                properties: {}
+              }];
+            });
+          }
+        });
+
+        const optionsState: any = {
+          ladder: [], ladderDeparture: [], ladderArrival: [],
+          cleaning: [], aircon: [], wallTv: [], elevator: []
+        };
+        options.forEach((opt: any) => {
+          // 간략한 복원 로직
+          let matched = false;
+          ['ladder', 'ladderDeparture', 'ladderArrival', 'cleaning', 'aircon', 'wallTv', 'elevator'].forEach((cat) => {
+            if (opt.name.includes(cat) || opt.category === cat) {
+               optionsState[cat].push({ name: opt.name, quantity: 1, price: opt.price || 0 });
+               matched = true;
+            }
+          });
+          if (!matched) {
+             optionsState['ladder'].push({ name: opt.name, quantity: 1, price: opt.price || 0 });
+          }
+        });
+
+        set({
+          contractId: contract.id,
+          currentStep: 1,
+          customerInfo: {
+            name: contract.customer_name || '',
+            phone: contract.customer_phone || '',
+            contractDate: contract.contract_date || '',
+            packingDate: contract.packing_date || '',
+            movingDate: contract.moving_date || '',
+            departureAddress: contract.departure_address || '',
+            departureDetailAddress: contract.departure_detail_address || '',
+            departureFloor: contract.departure_floor?.toString() || '',
+            departureConditions: [],
+            departureLadderCount: 1,
+            arrivalAddress: contract.arrival_address || '',
+            arrivalDetailAddress: contract.arrival_detail_address || '',
+            arrivalFloor: contract.arrival_floor?.toString() || '',
+            arrivalConditions: [],
+            arrivalLadderCount: 1,
+            arrivalStatus: contract.arrival_status || '',
+            applyDistancePrice: false,
+          },
+          roomItems: roomItems,
+          totalCbm: contract.total_cbm || 0,
+          options: optionsState,
+          sttMemo: contract.stt_memo || '',
+          resources: {
+            vehicles: resources.vehicles || { fiveTon: 0, twoHalfTon: 0, oneTon: 0 },
+            materials: resources.materials || {},
+            workerMale: contract.worker_count_male || 0,
+            workerFemale: contract.worker_count_female || 0
+          },
+          discount: 0,
+          surcharge: { noEvilSpirits: false, endOfMonth: false }
+        });
+      },
       reset: () => set({
         contractId: null,
         currentStep: 1,
