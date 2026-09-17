@@ -457,14 +457,28 @@ export const useWizardStore = create<WizardState>()(
 
         const roomItems: any = {};
         rooms.forEach((r: any) => {
-          roomItems[r.roomName] = { items: {}, note: r.note || '', images: r.images || [] };
+          const rName = r.roomName || r.name;
+          if (!rName) return;
+          roomItems[rName] = { items: {}, note: r.memo || r.note || '', images: r.images || [] };
           if (r.items) {
             r.items.forEach((item: any) => {
-              roomItems[r.roomName].items[item.name] = [{
+              let itemName = item.name;
+              let variantName = item.name;
+              const match = item.name.match(/^(.*?)\s*\((.*)\)$/);
+              if (match) {
+                 itemName = match[1].trim();
+                 variantName = match[2].trim();
+              }
+              if (!roomItems[rName].items[itemName]) {
+                 roomItems[rName].items[itemName] = [];
+              }
+              roomItems[rName].items[itemName].push({
                 id: Math.random().toString(36).substring(7),
                 quantity: item.quantity,
-                properties: {}
-              }];
+                variantName: variantName,
+                cbm: item.cbm || 0,
+                unitCbm: (item.cbm || 0) / Math.max(1, item.quantity || 1)
+              });
             });
           }
         });
