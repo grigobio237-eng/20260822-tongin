@@ -97,15 +97,17 @@ export default function CustomerSignPage() {
         packingDate: contract.packing_date,
         movingDate: contract.moving_date,
         departureAddress: contract.departure_address,
+        departureDetailAddress: contract.departure_detail_address,
         departureFloor: contract.departure_floor,
         arrivalAddress: contract.arrival_address,
+        arrivalDetailAddress: contract.arrival_detail_address,
         arrivalFloor: contract.arrival_floor,
         serviceType: contract.service_type,
         arrivalStatus: contract.arrival_status
       },
       rooms: contract.rooms_json ? JSON.parse(contract.rooms_json) : [],
       options: contract.options_json ? JSON.parse(contract.options_json) : [],
-      resources: {
+      resources: contract.resources_json ? JSON.parse(contract.resources_json) : {
         workerMale: contract.worker_count_male,
         workerFemale: contract.worker_count_female
       },
