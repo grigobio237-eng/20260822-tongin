@@ -156,33 +156,18 @@ export default function Step3Page() {
             if (packSetting.materialName2 && packSetting.count2 && packSetting.count2 > 0) {
               customCounts[packSetting.materialName2] = (customCounts[packSetting.materialName2] || 0) + (packSetting.count2 * q);
             }
-          } else {
-            // 레거시 하드코딩 규칙 (DB 설정이 없을 때만)
-            if (itemName === '신발류(중박스용)') customCounts['중박스'] = (customCounts['중박스'] || 0) + q;
-            else if (itemName === 'TV') {
-              if (inst.variantName.includes('50인치')) customCounts['TV(50인치이하)'] = (customCounts['TV(50인치이하)'] || 0) + q;
-              else if (inst.variantName.includes('65~75')) customCounts['TV(65~75인치)'] = (customCounts['TV(65~75인치)'] || 0) + q;
-              else if (inst.variantName.includes('85인치')) customCounts['TV(85인치이상)'] = (customCounts['TV(85인치이상)'] || 0) + q;
-            }
-            else if (itemName === '침대(W)') {
-              customCounts['침대'] = (customCounts['침대'] || 0) + q;
-              customCounts['침대비닐커버'] = (customCounts['침대비닐커버'] || 0) + q;
-            }
-            else if (itemName === '서랍장') customCounts['서랍장'] = (customCounts['서랍장'] || 0) + q;
-            else if (itemName === '냉장고') customCounts['냉장고'] = (customCounts['냉장고'] || 0) + q;
-            else if (itemName === '김치냉장고') {
-              if (inst.variantName.includes('4룸')) customCounts['김치냉장고(대)'] = (customCounts['김치냉장고(대)'] || 0) + q;
-              else customCounts['김치냉장고(중)'] = (customCounts['김치냉장고(중)'] || 0) + q;
-            }
-            else if (itemName === '세탁기') customCounts['세탁기'] = (customCounts['세탁기'] || 0) + q;
-            else if (itemName === '건조기') customCounts['건조기'] = (customCounts['건조기'] || 0) + q;
-            else if (itemName === '쇼파') customCounts['쇼파'] = (customCounts['쇼파'] || 0) + q;
-            else if (itemName === '피아노') customCounts['피아노'] = (customCounts['피아노'] || 0) + q;
-            else if (itemName === '장롱') customCounts['분해장농'] = (customCounts['분해장농'] || 0) + q;
-            else if (itemName === '옷') customCounts['대박스(옷)'] = (customCounts['대박스(옷)'] || 0) + q;
-            else if (itemName === '이불') customCounts['특대박스(이불)'] = (customCounts['특대박스(이불)'] || 0) + q;
-            else if (itemName === '생활물품/잔짐류(중박스용)') customCounts['중박스'] = (customCounts['중박스'] || 0) + q;
-            else if (itemName === '도서/소형물품(소박스용)') customCounts['소박스'] = (customCounts['소박스'] || 0) + q;
+          } 
+          
+          // 레거시 하드코딩 규칙 (박스류 유지)
+          if (itemName === '신발류(중박스용)') customCounts['중박스'] = (customCounts['중박스'] || 0) + q;
+          else if (itemName === '옷') customCounts['대박스(옷)'] = (customCounts['대박스(옷)'] || 0) + q;
+          else if (itemName === '이불') customCounts['특대박스(이불)'] = (customCounts['특대박스(이불)'] || 0) + q;
+          else if (itemName === '생활물품/잔짐류(중박스용)') customCounts['중박스'] = (customCounts['중박스'] || 0) + q;
+          else if (itemName === '도서/소형물품(소박스용)') customCounts['소박스'] = (customCounts['소박스'] || 0) + q;
+          else if (!itemName.startsWith('기타물품')) {
+            // 가전/가구 등은 포장재료 목록에 직접 노출 (DB 설정과 무관하게 무조건 아이템 자체를 노출)
+            const label = inst.variantName.includes(itemName) || itemName.length > 5 ? inst.variantName : `${itemName}(${inst.variantName})`;
+            dynamicCounts[label] = (dynamicCounts[label] || 0) + q;
           }
         });
       });
@@ -475,13 +460,18 @@ export default function Step3Page() {
           <div>
               <label className="block text-sm font-bold text-gray-700 mb-3">포장재료</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {(customPackingMaterials || PACKING_MATERIALS).filter(mat => {
-                  const hideWhenZero = ['TV(', '침대', '서랍장', '냉장고', '김치냉장고', '세탁기', '건조기', '쇼파', '분해장농', '피아노'];
-                  if (hideWhenZero.some(prefix => mat.startsWith(prefix))) {
-                    return (resources.materials[mat] || 0) > 0;
-                  }
-                  return true;
-                }).map(mat => {
+                {(() => {
+                  const baseMaterials = customPackingMaterials || PACKING_MATERIALS;
+                  const activeExtraMaterials = Object.keys(resources.materials).filter(k => (resources.materials[k] || 0) > 0 && !baseMaterials.includes(k));
+                  const allMaterialsToRender = [...baseMaterials, ...activeExtraMaterials];
+                  
+                  return allMaterialsToRender.filter(mat => {
+                    const hideWhenZero = ['TV(', '침대', '서랍장', '냉장고', '김치냉장고', '세탁기', '건조기', '쇼파', '분해장농', '피아노'];
+                    if (hideWhenZero.some(prefix => mat.startsWith(prefix)) || !baseMaterials.includes(mat)) {
+                      return (resources.materials[mat] || 0) > 0;
+                    }
+                    return true;
+                  }).map(mat => {
                   const val = resources.materials[mat] || 0;
                   return (
                     <div key={mat} className="flex flex-col gap-1 border rounded p-2 bg-gray-50">
@@ -519,7 +509,8 @@ export default function Step3Page() {
                       )}
                     </div>
                   );
-                })}
+                })
+                })()}
               </div>
             </div>
         </div>
