@@ -469,22 +469,24 @@ export const useWizardStore = create<WizardState>()(
           }
         });
 
-        const optionsState: any = {
-          ladder: [], ladderDeparture: [], ladderArrival: [],
-          cleaning: [], aircon: [], wallTv: [], elevator: []
-        };
+        const optionsState: Record<string, any> = {};
         options.forEach((opt: any) => {
-          // 간략한 복원 로직
-          let matched = false;
-          ['ladder', 'ladderDeparture', 'ladderArrival', 'cleaning', 'aircon', 'wallTv', 'elevator'].forEach((cat) => {
-            if (opt.name.includes(cat) || opt.category === cat) {
-               optionsState[cat].push({ name: opt.name, quantity: 1, price: opt.price || 0 });
-               matched = true;
-            }
-          });
-          if (!matched) {
-             optionsState['ladder'].push({ name: opt.name, quantity: 1, price: opt.price || 0 });
+          let baseName = opt.name;
+          if (baseName.includes('보관료')) {
+             if (baseName.includes('실내')) baseName = '실내보관료 (1일)';
+             if (baseName.includes('컨테이너')) baseName = '컨테이너보관료 (1일)';
+          } else if (baseName.includes('대기료')) {
+             baseName = '대기료 (1시간 이상 지연 시)';
+          } else if (baseName.includes('사다리·출발지')) {
+             baseName = '사다리·출발지';
+          } else if (baseName.includes('사다리·도착지')) {
+             baseName = '사다리·도착지';
           }
+          optionsState[baseName] = {
+            quantity: opt.quantity || 1,
+            price: opt.unitPrice || opt.price || opt.totalPrice || 0,
+            totalPrice: opt.totalPrice || opt.price || 0,
+          };
         });
 
         set({
