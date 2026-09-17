@@ -69,14 +69,23 @@ export default function AdminContractsPage() {
                     견적 검토 중 (미서명)
                   </span>
                 )}
-                <Link 
-                  href={`/sign/${contract.id}`} 
-                  target="_blank"
-                  className="flex items-center gap-1 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-semibold transition-colors"
-                >
-                  <FileText size={16} />
-                  문서 열람하기
-                </Link>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(contract)}
+                    className="flex items-center gap-1 text-sm bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg font-semibold transition-colors"
+                  >
+                    <Edit size={16} />
+                    견적 수정하기
+                  </button>
+                  <Link 
+                    href={`/sign/${contract.id}`} 
+                    target="_blank"
+                    className="flex items-center gap-1 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-semibold transition-colors"
+                  >
+                    <FileText size={16} />
+                    문서 열람하기
+                  </Link>
+                </div>
               </div>
             </div>
           );
