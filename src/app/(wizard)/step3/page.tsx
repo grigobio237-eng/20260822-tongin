@@ -148,14 +148,7 @@ export default function Step3Page() {
       if (!allowedNames) return; // Ghost room prevention
       if (!room || !room.items) return;
       
-      // 1. 기타물품 수집 (dynamicCounts 유지)
-      ['기타물품1', '기타물품2'].forEach(key => {
-        if (room.items[key]) {
-          room.items[key].forEach(inst => {
-            dynamicCounts[inst.variantName] = (dynamicCounts[inst.variantName] || 0) + inst.quantity;
-          });
-        }
-      });
+      // 기타물품 제외 처리 완료
 
       // 2. DB 포장재료 설정 및 기존 하드코딩 매핑
       Object.entries(room.items).forEach(([itemName, instances]) => {
@@ -180,8 +173,9 @@ export default function Step3Page() {
           else if (itemName === '이불') customCounts['특대박스(이불)'] = (customCounts['특대박스(이불)'] || 0) + q;
           else if (itemName === '생활물품/잔짐류(중박스용)') customCounts['중박스'] = (customCounts['중박스'] || 0) + q;
           else if (itemName === '도서/소형물품(소박스용)') customCounts['소박스'] = (customCounts['소박스'] || 0) + q;
-          else if (!itemName.startsWith('기타물품')) {
+          else if (!['기타물품1', '기타물품2', '식기류'].includes(itemName) && !itemName.startsWith('기타물품')) {
             // 가전/가구 등은 포장재료 목록에 직접 노출 (DB 설정과 무관하게 무조건 아이템 자체를 노출)
+            // 사용자 요청에 의해 제외할 항목: 도서/소형, 생활물품, 식기류, 신발류, 옷, 이불, 기타물품1, 2
             const label = inst.variantName.includes(itemName) || itemName.length > 5 ? inst.variantName : `${itemName}(${inst.variantName})`;
             dynamicCounts[label] = (dynamicCounts[label] || 0) + q;
           }
