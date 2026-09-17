@@ -58,6 +58,7 @@ export interface ResourceState {
 }
 
 export interface WizardState {
+  contractId: string | null;
   currentStep: number;
   customerInfo: CustomerInfo;
   roomItems: AllRoomsState; // RoomData 객체로 유지
@@ -71,6 +72,7 @@ export interface WizardState {
   surcharge: { noEvilSpirits: boolean; endOfMonth: boolean };
   discount: number;
 
+  setContractId: (id: string | null) => void;
   setStep: (step: number) => void;
   updateCustomerInfo: (info: Partial<CustomerInfo>) => void;
   
@@ -117,6 +119,7 @@ const initialResources: ResourceState = {
 export const useWizardStore = create<WizardState>()(
   persist(
     (set, get) => ({
+      contractId: null,
       currentStep: 1,
       customerInfo: initialCustomerInfo,
       roomItems: initialRoomItems,
@@ -128,6 +131,7 @@ export const useWizardStore = create<WizardState>()(
       surcharge: { noEvilSpirits: false, endOfMonth: false },
       discount: 0,
       
+      setContractId: (id) => set({ contractId: id }),
       setStep: (step) => set({ currentStep: step }),
       
       updateCustomerInfo: (info) => set((state) => ({ 
@@ -443,6 +447,7 @@ export const useWizardStore = create<WizardState>()(
       },
 
       reset: () => set({
+        contractId: null,
         currentStep: 1,
         customerInfo: initialCustomerInfo,
         roomItems: initialRoomItems,

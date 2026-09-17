@@ -12,7 +12,7 @@ import clsx from 'clsx';
 export default function Step4Page() {
   const store = useWizardStore();
   const settingsStore = useSettingsStore();
-  const { customerInfo, options, reset, setStep } = store;
+  const { contractId, setContractId, customerInfo, options, reset, setStep } = store;
   const { partnerContacts } = settingsStore;
   const router = useRouter();
   
@@ -122,12 +122,13 @@ export default function Step4Page() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    const newContractId = contractId || `CT_${Date.now()}`;
     try {
       const res = await fetch('/api/contract-save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: `CT_${Date.now()}`,
+          id: newContractId,
           customerInfo,
           options: calculatedOptions.map(opt => ({
             name: opt.name,
@@ -167,6 +168,7 @@ export default function Step4Page() {
       try {
         const json = JSON.parse(text);
         if (json.success) {
+          setContractId(newContractId);
           setCompletedContract({ id: json.contractId, pdfUrl: json.pdfUrl || '' });
         } else {
           alert(`저장 결과: ${text}`);
