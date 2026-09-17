@@ -196,7 +196,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
                 .filter(r => (r.items || []).some(i => i.quantity > 0) || r.memo)
                 .map((room, idx) => {
                   const activeItems = (room.items || []).filter(i => i.quantity > 0);
-                  const roomCbm = activeItems.reduce((acc, curr) => acc + ((curr.cbm || 0) * curr.quantity), 0);
+                  const roomCbm = activeItems.reduce((acc, curr) => acc + (curr.cbm || 0), 0);
                   
                   return (
                     <div key={room.id || idx} className="border border-slate-300 rounded overflow-hidden">

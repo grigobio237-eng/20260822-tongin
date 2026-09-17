@@ -148,7 +148,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
           <div className="flex flex-row flex-wrap gap-4">
             {rooms?.filter(r => (r.items || []).some(i => i.quantity > 0) || r.memo).map(room => {
               const activeItems = (room.items || []).filter(i => i.quantity > 0);
-              const roomCbm = activeItems.reduce((acc, curr) => acc + ((curr.cbm || 0) * curr.quantity), 0);
+              const roomCbm = activeItems.reduce((acc, curr) => acc + (curr.cbm || 0), 0);
               
               return (
                 <div key={room.name} className="border border-slate-300 p-2 rounded break-inside-avoid w-[calc(50%-0.5rem)] flex-none bg-white shadow-sm">
