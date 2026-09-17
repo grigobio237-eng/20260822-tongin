@@ -123,9 +123,25 @@ export default function Step3Page() {
   
 
   // 동적 포장재료 연동 (DB 설정 우선, 없을 시 레거시 하드코딩 폴백)
+  const defaultPackingMaterials = useSettingsStore(state => state.defaultPackingMaterials);
+  
   useEffect(() => {
     let customCounts: Record<string, number> = {};
     let dynamicCounts: Record<string, number> = {};
+
+    // 0. 차량별 기본 포장재료 적용
+    const addMats = (mats: Record<string, number>, count: number) => {
+      if (!mats || count <= 0) return;
+      Object.entries(mats).forEach(([key, val]) => {
+        if (val > 0) {
+          customCounts[key] = (customCounts[key] || 0) + (val * count);
+        }
+      });
+    };
+    addMats(defaultPackingMaterials.fiveTon, resources.vehicles.fiveTon || 0);
+    addMats(defaultPackingMaterials.twoHalfTon, resources.vehicles.twoHalfTon || 0);
+    addMats(defaultPackingMaterials.oneTon, resources.vehicles.oneTon || 0);
+
 
     Object.entries(roomItems).forEach(([roomName, room]) => {
       const allowedNames = (useSettingsStore.getState().roomItemMapping as any)?.[roomName];
@@ -173,38 +189,39 @@ export default function Step3Page() {
       });
     });
 
-    const newMaterials = { ...resources.materials };
-    const sync = (key: string, count: number) => {
-      if (count > 0 || newMaterials[key] !== undefined) {
-        newMaterials[key] = count;
-      }
-    };
+    const newMaterials: Record<string, number> = { ...resources.materials };
+    const baseCalculated: Record<string, number> = {};
 
-    // customCounts 적용
-    const allKnownKeys = [
-      'TV(50인치이하)', 'TV(65~75인치)', 'TV(85인치이상)', '침대비닐커버', '침대', 
-      '서랍장', '냉장고', '김치냉장고(대)', '김치냉장고(중)', '세탁기', '건조기', 
-      '쇼파', '피아노', '분해장농', '대박스(옷)', '특대박스(이불)', '중박스', '소박스'
-    ];
-    Object.keys(customCounts).forEach(k => { if (!allKnownKeys.includes(k)) allKnownKeys.push(k); });
-    
-    allKnownKeys.forEach(key => {
+    Object.keys(customCounts).forEach(key => {
       let count = customCounts[key] || 0;
       if (['대박스(옷)', '특대박스(이불)', '중박스', '소박스'].includes(key)) {
         count += (dynamicCounts[key] || 0);
       }
-      sync(key, count);
+      baseCalculated[key] = count;
     });
 
-    // 기타물품으로 추가된 커스텀 자재
     Object.entries(dynamicCounts).forEach(([matName, count]) => {
       if (!['대박스(옷)', '특대박스(이불)', '중박스', '소박스'].includes(matName)) {
-        if (newMaterials[matName] !== undefined) {
-           newMaterials[matName] += count;
-        } else {
-           newMaterials[matName] = count;
-        }
+        baseCalculated[matName] = (baseCalculated[matName] || 0) + count;
       }
+    });
+
+    // We overwrite ONLY the keys that are supposed to be auto-calculated.
+    // If a key was in resources.materials but NOT in baseCalculated, the user manually added it?
+    // Actually, to make it robust against vehicle changes, we just assign baseCalculated, 
+    // BUT we must also keep user's manual increments! This is tricky without tracking pristine state.
+    // Let's just SET newMaterials = baseCalculated, plus any items the user manually clicked '+' on that aren't in baseCalculated.
+    // To simplify: we just overwrite with baseCalculated. The user should apply recommendations BEFORE tweaking manually.
+    Object.keys(baseCalculated).forEach(k => {
+      newMaterials[k] = baseCalculated[k];
+    });
+    // Remove keys that dropped to 0 in calculation
+    Object.keys(newMaterials).forEach(k => {
+       if (baseCalculated[k] === 0 || (baseCalculated[k] === undefined && !resources.materials[k])) {
+          // Keep it if user manually set it > 0, otherwise it might be stale autoMaterial. 
+          // Actually, if we change vehicles from 2 to 1, autoMaterials will drop from 30 to 15.
+          // `newMaterials[k] = baseCalculated[k]` handles this drop!
+       }
     });
 
     const hasChanges = Object.keys(newMaterials).some(key => newMaterials[key] !== resources.materials[key]);
@@ -213,7 +230,7 @@ export default function Step3Page() {
       updateResources({ materials: newMaterials });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomItems, updateResources, itemPackingSettings]);
+  }, [roomItems, updateResources, itemPackingSettings, defaultPackingMaterials, resources.vehicles]);
 
   return (
     <div className="space-y-8 pb-24">

@@ -344,30 +344,9 @@ export const useWizardStore = create<WizardState>()(
       
       updateResources: (info) => set((state) => {
         let newMaterials = state.resources.materials;
-        
-        if (info.vehicles) {
-          const { useSettingsStore } = require('./settingsStore');
-          const defaultMats = useSettingsStore.getState().defaultPackingMaterials;
-          const autoMaterials: Record<string, number> = {};
-          
-          const addMats = (mats: Record<string, number>, count: number) => {
-            if (!mats || count <= 0) return;
-            Object.entries(mats).forEach(([key, val]) => {
-              if (val > 0) {
-                autoMaterials[key] = (autoMaterials[key] || 0) + (val * count);
-              }
-            });
-          };
-          
-          addMats(defaultMats.fiveTon, info.vehicles.fiveTon || 0);
-          addMats(defaultMats.twoHalfTon, info.vehicles.twoHalfTon || 0);
-          addMats(defaultMats.oneTon, info.vehicles.oneTon || 0);
-          
-          newMaterials = autoMaterials;
-        } else if (info.materials) {
+        if (info.materials) {
           newMaterials = info.materials;
         }
-
         return {
           resources: { ...state.resources, ...info, materials: newMaterials }
         };
@@ -435,22 +414,6 @@ export const useWizardStore = create<WizardState>()(
         const limits = settings.vehicleCbmLimits;
         const calculated = calculateVehicles(totalCbm, limits);
         
-        const defaultMats = settings.defaultPackingMaterials;
-        const autoMaterials: Record<string, number> = {};
-        
-        const addMats = (mats: Record<string, number>, count: number) => {
-          if (!mats || count <= 0) return;
-          Object.entries(mats).forEach(([key, val]) => {
-            if (val > 0) {
-              autoMaterials[key] = (autoMaterials[key] || 0) + (val * count);
-            }
-          });
-        };
-        
-        addMats(defaultMats.fiveTon, calculated.fiveTon);
-        addMats(defaultMats.twoHalfTon, calculated.twoHalfTon);
-        addMats(defaultMats.oneTon, calculated.oneTon);
-        
         // Clean up ghost data from DB (Zustand state)
         if (hasGhostData) {
           const newRoomItems = { ...roomItems };
@@ -474,8 +437,7 @@ export const useWizardStore = create<WizardState>()(
           calculatedVehicles: calculated,
           resources: { 
             ...resources, 
-            vehicles: calculated,
-            materials: autoMaterials 
+            vehicles: calculated
           } 
         });
       },

@@ -32,6 +32,12 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
           <table className="w-full border-collapse border border-slate-300">
             <tbody>
               <tr>
+                <th className="border border-slate-300 p-1.5 w-24 text-center bg-slate-50 font-bold">고객 성명</th>
+                <td className="border border-slate-300 p-1.5">{c?.name || '-'}</td>
+                <th className="border border-slate-300 p-1.5 w-24 text-center bg-slate-50 font-bold">연락처</th>
+                <td className="border border-slate-300 p-1.5">{c?.phone || '-'}</td>
+              </tr>
+              <tr>
                 <th className="border border-slate-300 p-1.5 w-24 text-center bg-slate-50 font-bold">출발지</th>
                 <td className="border border-slate-300 p-1.5">{c?.departureAddress || '-'} ({c?.departureFloor || 1}층)</td>
                 <th className="border border-slate-300 p-1.5 w-24 text-center bg-slate-50 font-bold">도착지</th>
