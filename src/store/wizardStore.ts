@@ -451,7 +451,7 @@ export const useWizardStore = create<WizardState>()(
             r.items.forEach((item: any) => {
               let itemName = item.name;
               let variantName = item.name;
-              const match = item.name.match(/^(.*?)\s*\((.*)\)$/);
+              const match = item.name.match(/^(.*?) \((.*)\)$/);
               if (match) {
                  itemName = match[1].trim();
                  variantName = match[2].trim();
@@ -510,7 +510,9 @@ export const useWizardStore = create<WizardState>()(
             arrivalConditions: [],
             arrivalLadderCount: 1,
             arrivalStatus: contract.arrival_status || '',
-            applyDistancePrice: false,
+            distanceKm: contract.distance_km || '',
+            durationMin: contract.duration_min || '',
+            applyDistancePrice: contract.apply_distance_price === 1,
           },
           roomItems: roomItems,
           totalCbm: contract.total_cbm || 0,

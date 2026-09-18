@@ -43,6 +43,9 @@ export async function POST(req: Request) {
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN resources_json TEXT").run(); } catch (e) {}
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN departure_detail_address TEXT").run(); } catch (e) {}
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN arrival_detail_address TEXT").run(); } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN distance_km TEXT").run(); } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN duration_min TEXT").run(); } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN apply_distance_price INTEGER").run(); } catch (e) {}
 
     const sql = `
       INSERT OR REPLACE INTO contracts (
@@ -53,8 +56,9 @@ export async function POST(req: Request) {
         worker_count_male, worker_count_female,
         moving_cost, option_cost, total_cost, deposit, balance,
         stt_memo, signature_url, pdf_url, status, created_at, updated_at,
-        rooms_json, options_json, resources_json, departure_detail_address, arrival_detail_address
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        rooms_json, options_json, resources_json, departure_detail_address, arrival_detail_address,
+        distance_km, duration_min, apply_distance_price
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const result = await (db as any).prepare(sql).bind(
@@ -91,7 +95,10 @@ export async function POST(req: Request) {
       JSON.stringify(body.options || []),
       JSON.stringify(body.resources || {}),
       String(customer.departureDetailAddress || ''),
-      String(customer.arrivalDetailAddress || '')
+      String(customer.arrivalDetailAddress || ''),
+      String(customer.distanceKm || ''),
+      String(customer.durationMin || ''),
+      customer.applyDistancePrice ? 1 : 0
     ).run();
 
     if (!result.success) {
