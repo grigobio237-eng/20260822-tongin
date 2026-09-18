@@ -125,17 +125,35 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
         {/* 5. 포장 재료 준비 목록 */}
         <div className="break-inside-avoid">
           <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2 pb-[2px]">5. 포장 재료 준비 목록</h4>
-          <div className="border border-slate-300 p-2 min-h-[50px] bg-gray-50 rounded">
-            {materials && Object.keys(materials).length > 0 ? (
-              <div className="flex gap-2 flex-wrap">
-                {Object.entries(materials)
-                  .filter(([k, v]) => v > 0)
-                  .map(([k, v]) => (
-                    <span key={k} className="bg-white border border-slate-300 rounded px-2 py-1 text-[11px] font-bold shadow-sm">
-                      {k}: <span className="text-blue-700">{v}</span>
-                    </span>
-                  ))}
-              </div>
+          <div className="min-h-[50px] rounded overflow-hidden">
+            {materials && Object.values(materials).some(v => v > 0) ? (
+              <table className="w-full text-[11px] border-collapse border border-slate-300 bg-white text-center">
+                <thead className="bg-slate-50 font-bold text-slate-700">
+                  <tr>
+                    <th className="border border-slate-300 py-1 w-[35%] bg-slate-100">품목</th>
+                    <th className="border border-slate-300 py-1 w-[15%]">수량</th>
+                    <th className="border border-slate-300 py-1 w-[35%] bg-slate-100">품목</th>
+                    <th className="border border-slate-300 py-1 w-[15%]">수량</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                    const mats = Object.entries(materials).filter(([k, v]) => v > 0);
+                    const rows = [];
+                    for (let i = 0; i < mats.length; i += 2) {
+                      rows.push(
+                        <tr key={i}>
+                          <td className="border border-slate-300 py-[6px] text-slate-700 text-left px-3 bg-slate-50">{mats[i][0]}</td>
+                          <td className="border border-slate-300 py-[6px] font-bold text-blue-700">{mats[i][1]}</td>
+                          <td className="border border-slate-300 py-[6px] text-slate-700 text-left px-3 bg-slate-50">{mats[i + 1] ? mats[i + 1][0] : ''}</td>
+                          <td className="border border-slate-300 py-[6px] font-bold text-blue-700">{mats[i + 1] ? mats[i + 1][1] : ''}</td>
+                        </tr>
+                      );
+                    }
+                    return rows;
+                  })()}
+                </tbody>
+              </table>
             ) : (
               <p className="text-gray-500 text-[11px]">기본 재료만 준비</p>
             )}
