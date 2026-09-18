@@ -158,13 +158,16 @@ export default function Step3Page() {
           const packSetting = itemPackingSettings?.[settingKey];
           const q = inst.quantity;
           
+          let hasCustomMaterial = false;
           if (packSetting && (packSetting.materialName || packSetting.materialName2)) {
             // DB 우선
             if (packSetting.materialName && packSetting.count > 0) {
               customCounts[packSetting.materialName] = (customCounts[packSetting.materialName] || 0) + (packSetting.count * q);
+              hasCustomMaterial = true;
             }
             if (packSetting.materialName2 && packSetting.count2 && packSetting.count2 > 0) {
               customCounts[packSetting.materialName2] = (customCounts[packSetting.materialName2] || 0) + (packSetting.count2 * q);
+              hasCustomMaterial = true;
             }
           } 
           
@@ -175,10 +178,11 @@ export default function Step3Page() {
           else if (itemName === '생활물품/잔짐류(중박스용)') customCounts['중박스'] = (customCounts['중박스'] || 0) + q;
           else if (itemName === '도서/소형물품(소박스용)') customCounts['소박스'] = (customCounts['소박스'] || 0) + q;
           else if (!['기타물품1', '기타물품2', '식기류'].includes(itemName) && !itemName.startsWith('기타물품')) {
-            // 가전/가구 등은 포장재료 목록에 직접 노출 (DB 설정과 무관하게 무조건 아이템 자체를 노출)
-            // 사용자 요청에 의해 제외할 항목: 도서/소형, 생활물품, 식기류, 신발류, 옷, 이불, 기타물품1, 2
-            const label = inst.variantName.includes(itemName) || itemName.length > 5 ? inst.variantName : `${itemName}(${inst.variantName})`;
-            dynamicCounts[label] = (dynamicCounts[label] || 0) + q;
+            // 가전/가구 등은 포장재료 목록에 노출하되, 이미 DB에서 전용 포장재료(예: TV(65인치))가 설정된 경우 중복 노출 방지
+            if (!hasCustomMaterial) {
+              const label = inst.variantName.includes(itemName) || itemName.length > 5 ? inst.variantName : `${itemName}(${inst.variantName})`;
+              dynamicCounts[label] = (dynamicCounts[label] || 0) + q;
+            }
           }
         });
       });
