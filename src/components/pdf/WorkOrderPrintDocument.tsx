@@ -126,7 +126,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
         <div className="break-inside-avoid">
           <h4 className="font-bold text-blue-900 mb-1 border-l-2 border-blue-900 pl-2 pb-[2px]">5. 포장 재료 준비 목록</h4>
           <div className="min-h-[50px] rounded overflow-hidden">
-            {materials && Object.values(materials).some(v => v > 0) ? (
+            {materials ? (
               <table className="w-full text-[11px] border-collapse border border-slate-300 bg-white text-center">
                 <thead className="bg-slate-50 font-bold text-slate-700">
                   <tr>
@@ -138,7 +138,22 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
                 </thead>
                 <tbody>
                   {(() => {
-                    const mats = Object.entries(materials).filter(([k, v]) => v > 0);
+                    const fixedItems = [
+                      '특대박스(이불)', '대박스(옷)', '중대박스', '중박스', '소박스',
+                      '바구니', '아이스박스', '담요(대)', '담요(중)', '에어캡', '랩', '깔판'
+                    ];
+                    const mats: [string, number][] = [];
+                    // Add fixed items first, regardless of quantity
+                    fixedItems.forEach(item => {
+                      mats.push([item, materials[item] || 0]);
+                    });
+                    // Add remaining items that have quantity > 0
+                    Object.entries(materials).forEach(([k, v]) => {
+                      if (!fixedItems.includes(k) && v > 0) {
+                        mats.push([k, v]);
+                      }
+                    });
+                    
                     const rows = [];
                     for (let i = 0; i < mats.length; i += 2) {
                       rows.push(
