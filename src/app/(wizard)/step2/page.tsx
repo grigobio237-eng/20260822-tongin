@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { ROOM_CATEGORIES, RoomCategory, MasterItem } from '@/lib/constants/items';
 import clsx from 'clsx';
-import { Check, ChevronDown, Plus, Minus, X } from 'lucide-react';
+import { Check, ChevronDown, Plus, Minus, X, Mic, MicOff } from 'lucide-react';
+import { useSpeechToText } from '@/hooks/useSpeechToText';
 
 interface ModalState {
   room: RoomCategory;
@@ -28,6 +29,13 @@ export default function Step2Page() {
   const roomItems = useWizardStore((state) => state.roomItems);
   const updateRoomItemQuantity = useWizardStore((state) => state.updateRoomItemQuantity);
   const changeItemVariant = useWizardStore((state) => state.changeItemVariant);
+  const handleSttResult = useCallback((text: string) => {
+    const currentNote = useWizardStore.getState().roomItems[activeTab]?.note || '';
+    useWizardStore.getState().updateRoomNote(activeTab, currentNote ? `${currentNote} ${text}` : text);
+  }, [activeTab]);
+
+  const { isListening, startListening, stopListening } = useSpeechToText(handleSttResult);
+
   const addRoomItemInstance = useWizardStore((state) => state.addRoomItemInstance);
   const removeRoomItemInstance = useWizardStore((state) => state.removeRoomItemInstance);
   const totalCbm = useWizardStore((state) => state.totalCbm);
@@ -360,36 +368,27 @@ export default function Step2Page() {
 
         {/* Note (STT) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">공간 특이사항 (음성/수기)</label>
-          <div className="flex gap-2 items-start">
-            <textarea 
-              value={roomItems[activeTab]?.note || ''}
-              onChange={(e) => useWizardStore.getState().updateRoomNote(activeTab, e.target.value)}
-              placeholder="예: 장롱 우측 하단 스크래치 있음, 문틀 파손 주의 등"
-              className="flex-1 border rounded-lg p-3 min-h-[80px] text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-            />
-            <button 
-              onClick={async () => {
-                if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-                  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                  const recognition = new SpeechRecognition();
-                  recognition.lang = 'ko-KR';
-                  recognition.interimResults = false;
-                  recognition.onresult = (e: any) => {
-                    const text = e.results[0][0].transcript;
-                    const currentNote = useWizardStore.getState().roomItems[activeTab]?.note || '';
-                    useWizardStore.getState().updateRoomNote(activeTab, currentNote ? `${currentNote} ${text}` : text);
-                  };
-                  recognition.start();
-                } else {
-                  alert('음성 인식을 지원하지 않는 브라우저입니다.');
-                }
-              }}
-              className="p-3 bg-blue-50 text-blue-600 rounded-lg shrink-0 border border-blue-100 hover:bg-blue-100 active:bg-blue-200"
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-sm font-medium text-gray-700">공간 특이사항 (음성/수기)</label>
+            <button
+              onClick={isListening ? stopListening : startListening}
+              className={clsx(
+                "flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-xs transition-colors",
+                isListening 
+                  ? "bg-red-100 text-red-600 hover:bg-red-200 animate-pulse" 
+                  : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+              )}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+              {isListening ? <MicOff size={14} /> : <Mic size={14} />}
+              {isListening ? "녹음 중지" : "음성 입력"}
             </button>
           </div>
+          <textarea 
+            value={roomItems[activeTab]?.note || ""}
+            onChange={(e) => useWizardStore.getState().updateRoomNote(activeTab, e.target.value)}
+            placeholder="예: 장롱 우측 하단 스크래치 있음, 문틀 파손 주의 등"
+            className="w-full border rounded-lg p-3 min-h-[80px] text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+          />
         </div>
       </div>
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40">
