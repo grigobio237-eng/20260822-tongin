@@ -160,13 +160,15 @@ export const useWizardStore = create<WizardState>()(
             defaultUnitCbm = defaultVariant.cbm;
           }
 
-          if (itemName === '옷' || itemName === '이불' || itemName === '생활물품/잔짐류(중박스용)' || itemName === '도서/소형물품(소박스용)') {
+          if (['옷', '이불', '생활물품/잔짐류(중박스용)', '도서/소형물품(소박스용)', '식기류', '신발류(중박스용)'].includes(itemName)) {
             const { useSettingsStore } = require('./settingsStore');
-            const materialSettings = useSettingsStore.getState().materialCbmSettings;
-            if (itemName === '옷') defaultUnitCbm = materialSettings['대박스(옷)'] || 0;
-            if (itemName === '이불') defaultUnitCbm = materialSettings['특대박스(이불)'] || 0;
-            if (itemName === '생활물품/잔짐류(중박스용)') defaultUnitCbm = materialSettings['중박스'] || 0;
-            if (itemName === '도서/소형물품(소박스용)') defaultUnitCbm = materialSettings['소박스'] || 0;
+            const materialCbmSettings = useSettingsStore.getState().materialCbmSettings;
+            if (itemName === '옷') defaultUnitCbm = materialCbmSettings['대박스(옷)'] || 0;
+            if (itemName === '이불') defaultUnitCbm = materialCbmSettings['특대박스(이불)'] || 0;
+            if (itemName === '생활물품/잔짐류(중박스용)') defaultUnitCbm = materialCbmSettings['중박스'] || 0;
+            if (itemName === '도서/소형물품(소박스용)') defaultUnitCbm = materialCbmSettings['소박스'] || 0;
+            if (itemName === '식기류') defaultUnitCbm = materialCbmSettings['바구니'] || 0;
+            if (itemName === '신발류(중박스용)') defaultUnitCbm = materialCbmSettings['중박스'] || 0;
           }
           
           const newInstance: RoomItemInstance = {
@@ -375,7 +377,7 @@ export const useWizardStore = create<WizardState>()(
         const { roomItems, resources } = get();
         const { useSettingsStore } = require('./settingsStore');
         const settings = useSettingsStore.getState();
-        const materialSettings = settings.materialCbmSettings;
+        const materialCbmSettings = settings.materialCbmSettings;
         
         const newRoomItems = JSON.parse(JSON.stringify(roomItems));
         let totalCbm = 0;
@@ -396,19 +398,19 @@ export const useWizardStore = create<WizardState>()(
               instances.forEach((item: any) => {
                 let cbm = item.cbm;
                 if (itemName === '옷') {
-                  cbm = (materialSettings['대박스(옷)'] || 0) * item.quantity;
+                  cbm = (materialCbmSettings['대박스(옷)'] || 0) * item.quantity;
                 } else if (itemName === '이불') {
-                  cbm = (materialSettings['특대박스(이불)'] || 0) * item.quantity;
+                  cbm = (materialCbmSettings['특대박스(이불)'] || 0) * item.quantity;
                 } else if (itemName === '생활물품/잔짐류(중박스용)') {
-                  cbm = (materialSettings['중박스'] || 0) * item.quantity;
+                  cbm = (materialCbmSettings['중박스'] || 0) * item.quantity;
                 } else if (itemName === '도서/소형물품(소박스용)') {
-                  cbm = (materialSettings['소박스'] || 0) * item.quantity;
+                  cbm = (materialCbmSettings['소박스'] || 0) * item.quantity;
                 } else if (itemName === '식기류') {
-                  cbm = (materialSettings['바구니'] || 0) * item.quantity;
+                  cbm = (materialCbmSettings['바구니'] || 0) * item.quantity;
                 } else if (itemName === '신발류(중박스용)') {
-                  cbm = (materialSettings['중박스'] || 0) * item.quantity;
+                  cbm = (materialCbmSettings['중박스'] || 0) * item.quantity;
                 } else if (itemName === '기타물품1' || itemName === '기타물품2') {
-                  cbm = (materialSettings[item.variantName] || 0) * item.quantity;
+                  cbm = (materialCbmSettings[item.variantName] || 0) * item.quantity;
                 } else {
                   const overrideKey = `${itemName}|${item.variantName}`;
                   if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
@@ -467,14 +469,14 @@ export const useWizardStore = create<WizardState>()(
               let cbm = item.cbm || 0;
               // Recalculate CBM on hydration to fix legacy corrupted data
               const settings = require('./settingsStore').useSettingsStore.getState();
-              if (settings && settings.materialSettings) {
-                if (itemName === '옷') cbm = (settings.materialSettings['대박스(옷)'] || 0) * item.quantity;
-                else if (itemName === '이불') cbm = (settings.materialSettings['특대박스(이불)'] || 0) * item.quantity;
-                else if (itemName === '생활물품/잔짐류(중박스용)') cbm = (settings.materialSettings['중박스'] || 0) * item.quantity;
-                else if (itemName === '도서/소형물품(소박스용)') cbm = (settings.materialSettings['소박스'] || 0) * item.quantity;
-                else if (itemName === '식기류') cbm = (settings.materialSettings['바구니'] || 0) * item.quantity;
-                else if (itemName === '신발류(중박스용)') cbm = (settings.materialSettings['중박스'] || 0) * item.quantity;
-                else if (itemName === '기타물품1' || itemName === '기타물품2') cbm = (settings.materialSettings[variantName] || 0) * item.quantity;
+              if (settings && settings.materialCbmSettings) {
+                if (itemName === '옷') cbm = (settings.materialCbmSettings['대박스(옷)'] || 0) * item.quantity;
+                else if (itemName === '이불') cbm = (settings.materialCbmSettings['특대박스(이불)'] || 0) * item.quantity;
+                else if (itemName === '생활물품/잔짐류(중박스용)') cbm = (settings.materialCbmSettings['중박스'] || 0) * item.quantity;
+                else if (itemName === '도서/소형물품(소박스용)') cbm = (settings.materialCbmSettings['소박스'] || 0) * item.quantity;
+                else if (itemName === '식기류') cbm = (settings.materialCbmSettings['바구니'] || 0) * item.quantity;
+                else if (itemName === '신발류(중박스용)') cbm = (settings.materialCbmSettings['중박스'] || 0) * item.quantity;
+                else if (itemName === '기타물품1' || itemName === '기타물품2') cbm = (settings.materialCbmSettings[variantName] || 0) * item.quantity;
                 else {
                   const overrideKey = `${itemName}|${variantName}`;
                   if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
