@@ -23,7 +23,7 @@ const getLadderTierKey = (floorStr: string) => {
 };
 
 export default function Step3Page() {
-  const isFirstMount = React.useRef(true);
+  const prevDeps = React.useRef({ roomItems: useWizardStore.getState().roomItems, vehicles: useWizardStore.getState().resources.vehicles });
   const { 
     options, updateOption, 
     sttMemo, setSttMemo, 
@@ -201,9 +201,13 @@ export default function Step3Page() {
       }
     });
     
-    // Prevent overriding hydrated materials on first mount
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
+    const currentRoomItems = useWizardStore.getState().roomItems;
+    const currentVehicles = useWizardStore.getState().resources.vehicles;
+    const depsChanged = prevDeps.current.roomItems !== currentRoomItems || prevDeps.current.vehicles !== currentVehicles;
+    prevDeps.current = { roomItems: currentRoomItems, vehicles: currentVehicles };
+
+    // Prevent overriding hydrated materials on mount (even in Strict Mode double-invocations)
+    if (!depsChanged && Object.keys(resources.materials).length > 0) {
       return;
     }
 

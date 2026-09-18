@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useRouter } from 'next/navigation';
 import { getRouteInfo } from '@/lib/kakaoApi';
@@ -12,6 +12,14 @@ export default function Step1Page() {
   
   const [isCalculating, setIsCalculating] = useState(false);
   const [routeError, setRouteError] = useState('');
+
+  useEffect(() => {
+    // If we loaded a contract that has addresses but no distance (e.g. legacy data), auto-calculate it
+    if (customerInfo.departureAddress && customerInfo.arrivalAddress && !customerInfo.distanceKm && !isCalculating) {
+      calculateRoute();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const calculateRoute = async () => {
     if (!customerInfo.departureAddress || !customerInfo.arrivalAddress) {
