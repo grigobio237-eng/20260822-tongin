@@ -18,7 +18,7 @@ export default function Step4Page() {
   
   const [deposit, setDeposit] = useState(0);
   const [includeVat, setIncludeVat] = useState(false);
-  const [editableBaseCost, setEditableBaseCost] = useState<number | null>(null);
+  const [editableBaseCost, setEditableBaseCost] = useState<number | null>(store.manualBaseCost || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedContract, setCompletedContract] = useState<{ id: string, pdfUrl: string } | null>(null);
 

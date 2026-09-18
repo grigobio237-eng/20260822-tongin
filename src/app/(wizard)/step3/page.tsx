@@ -23,6 +23,7 @@ const getLadderTierKey = (floorStr: string) => {
 };
 
 export default function Step3Page() {
+  const isFirstMount = React.useRef(true);
   const { 
     options, updateOption, 
     sttMemo, setSttMemo, 
@@ -199,6 +200,12 @@ export default function Step3Page() {
         baseCalculated[matName] = (baseCalculated[matName] || 0) + count;
       }
     });
+    
+    // Prevent overriding hydrated materials on first mount
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
 
     // We overwrite ONLY the keys that are supposed to be auto-calculated.
     // If a key was in resources.materials but NOT in baseCalculated, the user manually added it?

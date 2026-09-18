@@ -34,7 +34,7 @@ export default function Step2Page() {
     const recalculateCbm = useWizardStore((state) => state.recalculateCbm);
 
     useEffect(() => {
-      recalculateCbm();
+      // recalculateCbm(); removed to prevent overwriting hydrated vehicles on mount
     }, []);
   const calculatedVehicles = useWizardStore((state) => state.calculatedVehicles);
 

@@ -71,6 +71,7 @@ export interface WizardState {
   resources: ResourceState;
   surcharge: { noEvilSpirits: boolean; endOfMonth: boolean };
   discount: number;
+  manualBaseCost?: number;
 
   setContractId: (id: string | null) => void;
   setStep: (step: number) => void;
@@ -518,6 +519,10 @@ export const useWizardStore = create<WizardState>()(
           totalCbm: contract.total_cbm || 0,
           options: optionsState,
           sttMemo: contract.stt_memo || '',
+          manualBaseCost: contract.moving_cost,
+          calculatedVehicles: require('./settingsStore').useSettingsStore.getState()?.vehicleCbmLimits 
+            ? calculateVehicles(contract.total_cbm || 0, require('./settingsStore').useSettingsStore.getState().vehicleCbmLimits)
+            : { fiveTon: 0, twoHalfTon: 0, oneTon: 0 },
           resources: {
             vehicles: resources.vehicles || { fiveTon: 0, twoHalfTon: 0, oneTon: 0 },
             materials: resources.materials || {},
