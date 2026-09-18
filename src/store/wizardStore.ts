@@ -418,7 +418,9 @@ export const useWizardStore = create<WizardState>()(
                   }
                 }
                 item.cbm = cbm;
-                item.unitCbm = item.quantity > 0 ? cbm / item.quantity : 0;
+                if (item.quantity > 0) {
+                  item.unitCbm = cbm / item.quantity;
+                }
                 totalCbm += cbm;
               });
             });
@@ -490,7 +492,7 @@ export const useWizardStore = create<WizardState>()(
                 quantity: item.quantity,
                 variantName: variantName,
                 cbm: cbm,
-                unitCbm: item.quantity > 0 ? cbm / item.quantity : 0
+                unitCbm: item.quantity > 0 ? cbm / item.quantity : (item.unitCbm || 0.1)
               });
             });
           }
