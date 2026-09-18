@@ -403,6 +403,10 @@ export const useWizardStore = create<WizardState>()(
                   cbm = (materialSettings['중박스'] || 0) * item.quantity;
                 } else if (itemName === '도서/소형물품(소박스용)') {
                   cbm = (materialSettings['소박스'] || 0) * item.quantity;
+                } else if (itemName === '식기류') {
+                  cbm = (materialSettings['바구니'] || 0) * item.quantity;
+                } else if (itemName === '신발류(중박스용)') {
+                  cbm = (materialSettings['중박스'] || 0) * item.quantity;
                 } else if (itemName === '기타물품1' || itemName === '기타물품2') {
                   cbm = (materialSettings[item.variantName] || 0) * item.quantity;
                 } else {
@@ -460,12 +464,31 @@ export const useWizardStore = create<WizardState>()(
               if (!roomItems[rName].items[itemName]) {
                  roomItems[rName].items[itemName] = [];
               }
+              let cbm = item.cbm || 0;
+              // Recalculate CBM on hydration to fix legacy corrupted data
+              const settings = require('./settingsStore').useSettingsStore.getState();
+              if (settings && settings.materialSettings) {
+                if (itemName === '옷') cbm = (settings.materialSettings['대박스(옷)'] || 0) * item.quantity;
+                else if (itemName === '이불') cbm = (settings.materialSettings['특대박스(이불)'] || 0) * item.quantity;
+                else if (itemName === '생활물품/잔짐류(중박스용)') cbm = (settings.materialSettings['중박스'] || 0) * item.quantity;
+                else if (itemName === '도서/소형물품(소박스용)') cbm = (settings.materialSettings['소박스'] || 0) * item.quantity;
+                else if (itemName === '식기류') cbm = (settings.materialSettings['바구니'] || 0) * item.quantity;
+                else if (itemName === '신발류(중박스용)') cbm = (settings.materialSettings['중박스'] || 0) * item.quantity;
+                else if (itemName === '기타물품1' || itemName === '기타물품2') cbm = (settings.materialSettings[variantName] || 0) * item.quantity;
+                else {
+                  const overrideKey = `${itemName}|${variantName}`;
+                  if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
+                    cbm = settings.itemCbmSettings[overrideKey] * item.quantity;
+                  }
+                }
+              }
+
               roomItems[rName].items[itemName].push({
                 id: Math.random().toString(36).substring(7),
                 quantity: item.quantity,
                 variantName: variantName,
-                cbm: item.cbm || 0,
-                unitCbm: (item.cbm || 0) / Math.max(1, item.quantity || 1)
+                cbm: cbm,
+                unitCbm: item.quantity > 0 ? cbm / item.quantity : 0
               });
             });
           }
