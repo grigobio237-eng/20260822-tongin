@@ -22,6 +22,12 @@ export default function Step4Page() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedContract, setCompletedContract] = useState<{ id: string, pdfUrl: string } | null>(null);
 
+  useEffect(() => {
+    if (store.manualBaseCost !== undefined && store.manualBaseCost !== null) {
+      setEditableBaseCost(store.manualBaseCost);
+    }
+  }, [store.manualBaseCost]);
+
   const calculatedBaseCost = 
     (store.resources.vehicles.fiveTon * settingsStore.vehiclePrices.fiveTon) +
     (store.resources.vehicles.twoHalfTon * settingsStore.vehiclePrices.twoHalfTon) +
