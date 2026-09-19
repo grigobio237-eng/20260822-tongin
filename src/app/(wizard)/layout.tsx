@@ -3,7 +3,7 @@
 import React from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
-import { Settings, ChevronRight, CalendarDays } from 'lucide-react';
+import { Settings, ChevronRight, CalendarDays, FilePlus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import NotificationBell from '@/components/layout/NotificationBell';
@@ -72,6 +72,18 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
           
           {/* Right: Action Buttons */}
           <div className="flex items-center justify-end gap-2 w-1/4">
+            <button
+              onClick={() => {
+                if (window.confirm('새 계약서를 작성하시겠습니까? 현재 작성 중인 내용은 초기화됩니다.')) {
+                  useWizardStore.getState().reset();
+                  router.push('/step1');
+                }
+              }}
+              className="flex items-center gap-1.5 text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors mr-1 shrink-0"
+            >
+              <FilePlus size={14} />
+              <span className="hidden sm:inline">새 계약</span>
+            </button>
             <button 
               onClick={() => router.push('/schedule')}
               className="text-gray-500 hover:text-blue-600 p-2 bg-gray-50 hover:bg-blue-50 rounded-full border border-gray-200 transition-colors"
