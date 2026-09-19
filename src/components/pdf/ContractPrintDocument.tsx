@@ -117,7 +117,17 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
               </div>
               <div className="flex justify-between py-1">
                 <span>투입 차량 규격</span>
-                <span className="font-semibold">현장 견적 최적 배차</span>
+                <span className="font-semibold">
+                  {(() => {
+                    const v = r?.vehicles;
+                    if (!v) return '현장 견적 최적 배차';
+                    const parts = [];
+                    if (v.fiveTon) parts.push(`5톤 ${v.fiveTon}대`);
+                    if (v.twoHalfTon) parts.push(`2.5톤 ${v.twoHalfTon}대`);
+                    if (v.oneTon) parts.push(`1톤 ${v.oneTon}대`);
+                    return parts.length > 0 ? parts.join(' ') : '현장 견적 최적 배차';
+                  })()}
+                </span>
               </div>
             </div>
           </div>
