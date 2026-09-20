@@ -88,13 +88,27 @@ export default function SchedulePage() {
     return days;
   }, [currentDate, daysInMonth, firstDayOfMonth]);
 
-  // Group contracts by packing_date
-  const contractsByDate = useMemo(() => {
-    const map: Record<string, ContractOverview[]> = {};
+  // Group contracts by packing_date and moving_date
+  const eventsByDate = useMemo(() => {
+    const map: Record<string, { id: string, name: string, type: 'same-day' | 'packing' | 'moving' }[]> = {};
+    
+    const addEvent = (date: string, event: { id: string, name: string, type: 'same-day' | 'packing' | 'moving' }) => {
+      if (!map[date]) map[date] = [];
+      map[date].push(event);
+    };
+
     contracts.forEach(c => {
-      if (!c.packing_date) return;
-      if (!map[c.packing_date]) map[c.packing_date] = [];
-      map[c.packing_date].push(c);
+      const hasPacking = !!c.packing_date;
+      const hasMoving = !!c.moving_date;
+
+      if (hasPacking && hasMoving && c.packing_date !== c.moving_date) {
+        addEvent(c.packing_date, { id: c.id, name: c.customer_name, type: 'packing' });
+        addEvent(c.moving_date, { id: c.id, name: c.customer_name, type: 'moving' });
+      } else if (hasPacking) {
+        addEvent(c.packing_date, { id: c.id, name: c.customer_name, type: 'same-day' });
+      } else if (hasMoving) {
+        addEvent(c.moving_date, { id: c.id, name: c.customer_name, type: 'same-day' });
+      }
     });
     return map;
   }, [contracts]);
@@ -235,7 +249,7 @@ export default function SchedulePage() {
                   }
 
                   const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                  const dayContracts = contractsByDate[dateStr] || [];
+                  const dayEvents = eventsByDate[dateStr] || [];
                   
                   const isSunday = idx % 7 === 0;
                   const isSaturday = idx % 7 === 6;
@@ -246,15 +260,31 @@ export default function SchedulePage() {
                         {day}
                       </span>
                       <div className="flex flex-col gap-1">
-                        {dayContracts.map(c => (
-                          <button
-                            key={c.id}
-                            onClick={() => handleContractClick(c.id)}
-                            className="text-left w-full bg-blue-100 hover:bg-blue-200 text-blue-800 text-[10px] md:text-xs rounded px-1.5 py-1 truncate font-medium transition-colors"
-                          >
-                            {c.customer_name}
-                          </button>
-                        ))}
+                        {dayEvents.map(e => {
+                          let bgColor = 'bg-blue-100 hover:bg-blue-200';
+                          let textColor = 'text-blue-800';
+                          let prefix = '';
+
+                          if (e.type === 'packing') {
+                            bgColor = 'bg-orange-100 hover:bg-orange-200';
+                            textColor = 'text-orange-800';
+                            prefix = '[포장] ';
+                          } else if (e.type === 'moving') {
+                            bgColor = 'bg-green-100 hover:bg-green-200';
+                            textColor = 'text-green-800';
+                            prefix = '[운송] ';
+                          }
+
+                          return (
+                            <button
+                              key={`${e.id}-${e.type}`}
+                              onClick={() => handleContractClick(e.id)}
+                              className={`text-left w-full ${bgColor} ${textColor} text-[10px] md:text-xs rounded px-1.5 py-1 truncate font-medium transition-colors`}
+                            >
+                              {prefix}{e.name}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   );
