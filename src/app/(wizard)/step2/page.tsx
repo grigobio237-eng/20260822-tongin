@@ -105,17 +105,15 @@ export default function Step2Page() {
             if (!allowedNames.includes(itemName) && !itemName.startsWith('기타 ')) return totalAcc; // Skip hidden/ghost items
             return totalAcc + instances.reduce((acc, inst) => {
               let cbm = inst.cbm || 0;
-              if (itemName === '옷') cbm = (materialSettings['대박스(옷)'] || 0) * inst.quantity;
+              const overrideKey = `${itemName}|${inst.variantName}`;
+              if (itemName === '기타물품1' || itemName === '기타물품2') cbm = (materialSettings[inst.variantName] || 0) * inst.quantity;
+              else if (itemCbmSettings && itemCbmSettings[overrideKey] !== undefined) cbm = itemCbmSettings[overrideKey] * inst.quantity;
+              else if (itemName === '옷') cbm = (materialSettings['대박스(옷)'] || 0) * inst.quantity;
               else if (itemName === '이불') cbm = (materialSettings['특대박스(이불)'] || 0) * inst.quantity;
               else if (itemName === '생활물품/잔짐류(중박스용)') cbm = (materialSettings['중박스'] || 0) * inst.quantity;
               else if (itemName === '도서/소형물품(소박스용)') cbm = (materialSettings['소박스'] || 0) * inst.quantity;
-              else if (itemName === '기타물품1' || itemName === '기타물품2') cbm = (materialSettings[inst.variantName] || 0) * inst.quantity;
-              else {
-                const overrideKey = `${itemName}|${inst.variantName}`;
-                if (itemCbmSettings && itemCbmSettings[overrideKey] !== undefined) {
-                  cbm = itemCbmSettings[overrideKey] * inst.quantity;
-                }
-              }
+              else if (itemName === '식기류') cbm = (materialSettings['바구니'] || 0) * inst.quantity;
+              else if (itemName === '신발류(중박스용)') cbm = (materialSettings['중박스'] || 0) * inst.quantity;
               return acc + cbm;
             }, 0);
           }, 0).toFixed(1)} CBM
