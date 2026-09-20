@@ -79,7 +79,7 @@ export default function Step3Page() {
     if (isSelected) {
       updateOption(optName, 0, 0);
     } else {
-      let price = optionPrices[optName] ?? opt.defaultPrice ?? 0;
+      let price = manualPrices[optName] ?? optionPrices[optName] ?? opt.defaultPrice ?? 0;
       
       if (optName === '사다리·출발지' || optName === '사다리·도착지') {
         const ton = ladderTons[optName];
@@ -114,10 +114,12 @@ export default function Step3Page() {
   };
 
   const handleManualPriceChange = (optName: string, priceStr: string) => {
-    const price = parseInt(priceStr, 10) || 0;
+    // Only parse numbers
+    const numStr = priceStr.replace(/[^0-9]/g, '');
+    const price = parseInt(numStr, 10) || 0;
     setManualPrices(prev => ({ ...prev, [optName]: price }));
     if (options[optName]) {
-      updateOption(optName, 1, price);
+      updateOption(optName, options[optName].quantity || 1, price, options[optName].startDate, options[optName].endDate);
     }
   };
 
@@ -276,7 +278,7 @@ export default function Step3Page() {
             const isLadder = opt.name === '사다리·출발지' || opt.name === '사다리·도착지';
             const isSelected = !!options[opt.name];
             
-            let displayPrice = optionPrices[opt.name] ?? opt.defaultPrice;
+            let displayPrice = manualPrices[opt.name] ?? optionPrices[opt.name] ?? opt.defaultPrice;
             if (isLadder) {
               displayPrice = manualPrices[opt.name] ?? getCalculatedLadderPrice(opt.name, ladderTons[opt.name]);
             }
@@ -300,9 +302,17 @@ export default function Step3Page() {
                     <span className="font-medium text-sm">{opt.name}</span>
                   </div>
                   {!isLadder && (
-                    <span className="text-sm text-gray-500 font-semibold">
-                      {displayPrice.toLocaleString()}원{opt.isPerDay ? ' / 1일' : ''}
-                    </span>
+                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      <input 
+                        type="text"
+                        value={displayPrice.toLocaleString()}
+                        onChange={(e) => handleManualPriceChange(opt.name, e.target.value)}
+                        className="w-20 text-right text-sm text-gray-700 font-bold bg-white border border-gray-300 rounded px-1 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-500 font-semibold">
+                        원{opt.isPerDay ? ' / 1일' : ''}
+                      </span>
+                    </div>
                   )}
                 </div>
 
