@@ -103,7 +103,9 @@ export default function CustomerSignPage() {
         arrivalDetailAddress: contract.arrival_detail_address,
         arrivalFloor: contract.arrival_floor,
         serviceType: contract.service_type,
-        arrivalStatus: contract.arrival_status
+        arrivalStatus: contract.arrival_status,
+        departureConditions: contract.departure_conditions ? contract.departure_conditions.split(',') : undefined,
+        arrivalConditions: contract.arrival_conditions ? contract.arrival_conditions.split(',') : undefined,
       },
       rooms: contract.rooms_json ? JSON.parse(contract.rooms_json) : [],
       options: contract.options_json ? JSON.parse(contract.options_json) : [],

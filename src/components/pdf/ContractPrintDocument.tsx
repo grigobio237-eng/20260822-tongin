@@ -17,6 +17,8 @@ export interface ContractPrintData {
     serviceType: string;
     arrivalStatus: string;
     departureConditions?: string[];
+    departureLadderCount?: number;
+    arrivalLadderCount?: number;
     arrivalConditions?: string[];
   };
   rooms?: Array<{

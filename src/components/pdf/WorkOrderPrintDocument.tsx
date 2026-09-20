@@ -7,7 +7,7 @@ export interface WorkOrderPrintData extends ContractPrintData {
 }
 
 export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({ data }) => {
-  const { customerInfo: c, resources: r, rooms, sttMemo, materials, deposit, balance, options } = data;
+  const { customerInfo: c, resources: r, rooms, sttMemo, materials, deposit, middlePayment, balance, options } = data;
 
   const totalWorkers = (r?.workerMale || 0) + (r?.workerFemale || 0);
   
