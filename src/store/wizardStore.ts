@@ -160,15 +160,27 @@ export const useWizardStore = create<WizardState>()(
             defaultUnitCbm = defaultVariant.cbm;
           }
 
-          if (['옷', '이불', '생활물품/잔짐류(중박스용)', '도서/소형물품(소박스용)', '식기류', '신발류(중박스용)'].includes(itemName)) {
-            const { useSettingsStore } = require('./settingsStore');
-            const materialCbmSettings = useSettingsStore.getState().materialCbmSettings;
-            if (itemName === '옷') defaultUnitCbm = materialCbmSettings['대박스(옷)'] || 0;
-            if (itemName === '이불') defaultUnitCbm = materialCbmSettings['특대박스(이불)'] || 0;
-            if (itemName === '생활물품/잔짐류(중박스용)') defaultUnitCbm = materialCbmSettings['중박스'] || 0;
-            if (itemName === '도서/소형물품(소박스용)') defaultUnitCbm = materialCbmSettings['소박스'] || 0;
-            if (itemName === '식기류') defaultUnitCbm = materialCbmSettings['바구니'] || 0;
-            if (itemName === '신발류(중박스용)') defaultUnitCbm = materialCbmSettings['중박스'] || 0;
+          const { useSettingsStore } = require('./settingsStore');
+          const settings = useSettingsStore.getState();
+          const materialCbmSettings = settings.materialCbmSettings;
+          const overrideKey = `${itemName}|${defaultVariantName}`;
+
+          if (itemName === '기타물품1' || itemName === '기타물품2') {
+            defaultUnitCbm = materialCbmSettings[defaultVariantName] || 0;
+          } else if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
+            defaultUnitCbm = settings.itemCbmSettings[overrideKey];
+          } else if (itemName === '옷') {
+            defaultUnitCbm = materialCbmSettings['대박스(옷)'] || 0;
+          } else if (itemName === '이불') {
+            defaultUnitCbm = materialCbmSettings['특대박스(이불)'] || 0;
+          } else if (itemName === '생활물품/잔짐류(중박스용)') {
+            defaultUnitCbm = materialCbmSettings['중박스'] || 0;
+          } else if (itemName === '도서/소형물품(소박스용)') {
+            defaultUnitCbm = materialCbmSettings['소박스'] || 0;
+          } else if (itemName === '식기류') {
+            defaultUnitCbm = materialCbmSettings['바구니'] || 0;
+          } else if (itemName === '신발류(중박스용)') {
+            defaultUnitCbm = materialCbmSettings['중박스'] || 0;
           }
           
           const newInstance: RoomItemInstance = {
@@ -397,7 +409,13 @@ export const useWizardStore = create<WizardState>()(
               const instances = newRoomItems[roomName as RoomCategory].items[itemName];
               instances.forEach((item: any) => {
                 let cbm = item.cbm;
-                if (itemName === '옷') {
+                const overrideKey = `${itemName}|${item.variantName}`;
+                
+                if (itemName === '기타물품1' || itemName === '기타물품2') {
+                  cbm = (materialCbmSettings[item.variantName] || 0) * item.quantity;
+                } else if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
+                  cbm = settings.itemCbmSettings[overrideKey] * item.quantity;
+                } else if (itemName === '옷') {
                   cbm = (materialCbmSettings['대박스(옷)'] || 0) * item.quantity;
                 } else if (itemName === '이불') {
                   cbm = (materialCbmSettings['특대박스(이불)'] || 0) * item.quantity;
@@ -409,13 +427,6 @@ export const useWizardStore = create<WizardState>()(
                   cbm = (materialCbmSettings['바구니'] || 0) * item.quantity;
                 } else if (itemName === '신발류(중박스용)') {
                   cbm = (materialCbmSettings['중박스'] || 0) * item.quantity;
-                } else if (itemName === '기타물품1' || itemName === '기타물품2') {
-                  cbm = (materialCbmSettings[item.variantName] || 0) * item.quantity;
-                } else {
-                  const overrideKey = `${itemName}|${item.variantName}`;
-                  if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
-                    cbm = settings.itemCbmSettings[overrideKey] * item.quantity;
-                  }
                 }
                 item.cbm = cbm;
                 if (item.quantity > 0) {
@@ -472,19 +483,17 @@ export const useWizardStore = create<WizardState>()(
               // Recalculate CBM on hydration to fix legacy corrupted data
               const settings = require('./settingsStore').useSettingsStore.getState();
               if (settings && settings.materialCbmSettings) {
-                if (itemName === '옷') cbm = (settings.materialCbmSettings['대박스(옷)'] || 0) * item.quantity;
+                const overrideKey = `${itemName}|${variantName}`;
+                if (itemName === '기타물품1' || itemName === '기타물품2') {
+                  cbm = (settings.materialCbmSettings[variantName] || 0) * item.quantity;
+                } else if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
+                  cbm = settings.itemCbmSettings[overrideKey] * item.quantity;
+                } else if (itemName === '옷') cbm = (settings.materialCbmSettings['대박스(옷)'] || 0) * item.quantity;
                 else if (itemName === '이불') cbm = (settings.materialCbmSettings['특대박스(이불)'] || 0) * item.quantity;
                 else if (itemName === '생활물품/잔짐류(중박스용)') cbm = (settings.materialCbmSettings['중박스'] || 0) * item.quantity;
                 else if (itemName === '도서/소형물품(소박스용)') cbm = (settings.materialCbmSettings['소박스'] || 0) * item.quantity;
                 else if (itemName === '식기류') cbm = (settings.materialCbmSettings['바구니'] || 0) * item.quantity;
                 else if (itemName === '신발류(중박스용)') cbm = (settings.materialCbmSettings['중박스'] || 0) * item.quantity;
-                else if (itemName === '기타물품1' || itemName === '기타물품2') cbm = (settings.materialCbmSettings[variantName] || 0) * item.quantity;
-                else {
-                  const overrideKey = `${itemName}|${variantName}`;
-                  if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
-                    cbm = settings.itemCbmSettings[overrideKey] * item.quantity;
-                  }
-                }
               }
 
               roomItems[rName].items[itemName].push({
