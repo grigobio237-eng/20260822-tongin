@@ -17,6 +17,7 @@ export default function Step4Page() {
   const router = useRouter();
   
   const [deposit, setDeposit] = useState(0);
+  const [middlePayment, setMiddlePayment] = useState(0);
   const [includeVat, setIncludeVat] = useState(false);
   const [editableBaseCost, setEditableBaseCost] = useState<number | null>(store.manualBaseCost || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -118,7 +119,8 @@ export default function Step4Page() {
   const vatAmount = includeVat ? Math.round(totalCost * 0.1) : 0;
   const finalTotal = totalCost + vatAmount;
   const autoDeposit = Math.round(finalTotal * 0.1);
-  const balance = finalTotal - deposit;
+  const isStorageMove = customerInfo.packingDate && customerInfo.movingDate && customerInfo.packingDate !== customerInfo.movingDate;
+  const balance = finalTotal - deposit - (isStorageMove ? middlePayment : 0);
 
 
   const handlePrev = () => {
@@ -317,6 +319,7 @@ export default function Step4Page() {
       optionCost: optionsCost,
       totalCost: totalCost,
       deposit: deposit,
+      middlePayment,
       balance: balance,
       sttMemo: store.sttMemo
     };
@@ -621,7 +624,7 @@ export default function Step4Page() {
           )}
 
           {/* 계약금 / 잔금 */}
-          <div className="grid grid-cols-2 gap-4 mt-2">
+          <div className={`grid gap-4 mt-2 ${isStorageMove ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-2"}`}>
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">
                 계약금 <span className="text-xs text-gray-400 font-normal">(10% 자동계산: {autoDeposit.toLocaleString()}원)</span>

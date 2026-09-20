@@ -46,6 +46,7 @@ export async function POST(req: Request) {
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN distance_km TEXT").run(); } catch (e) {}
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN duration_min TEXT").run(); } catch (e) {}
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN apply_distance_price INTEGER").run(); } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN middle_payment INTEGER").run(); } catch (e) {}
 
     const sql = `
       INSERT OR REPLACE INTO contracts (
@@ -57,8 +58,8 @@ export async function POST(req: Request) {
         moving_cost, option_cost, total_cost, deposit, balance,
         stt_memo, signature_url, pdf_url, status, created_at, updated_at,
         rooms_json, options_json, resources_json, departure_detail_address, arrival_detail_address,
-        distance_km, duration_min, apply_distance_price
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        distance_km, duration_min, apply_distance_price, middle_payment
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const result = await (db as any).prepare(sql).bind(
@@ -98,7 +99,8 @@ export async function POST(req: Request) {
       String(customer.arrivalDetailAddress || ''),
       String(customer.distanceKm || ''),
       String(customer.durationMin || ''),
-      customer.applyDistancePrice ? 1 : 0
+      customer.applyDistancePrice ? 1 : 0,
+      Number(body.middlePayment) || 0
     ).run();
 
     if (!result.success) {

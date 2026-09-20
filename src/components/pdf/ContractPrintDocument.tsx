@@ -38,6 +38,7 @@ export interface ContractPrintData {
   totalCost: number;
   deposit: number;
   balance: number;
+  middlePayment?: number;
   signatureBase64?: string;
   sttMemo?: string;
 }
@@ -152,8 +153,14 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
                 <span>계약금 (선납)</span>
                 <span className="font-semibold text-emerald-700">{Number(data.deposit || 0).toLocaleString()} 원</span>
               </div>
+              {data.middlePayment ? (
+                <div className="flex justify-between py-0.5">
+                  <span className="font-semibold text-emerald-700">포장일 결제액 (중도금)</span>
+                  <span className="font-semibold text-emerald-700">{Number(data.middlePayment).toLocaleString()} 원</span>
+                </div>
+              ) : null}
               <div className="flex justify-between py-0.5">
-                <span className="font-bold text-rose-700">잔금 (작업완료 시)</span>
+                <span className="font-bold text-rose-700">잔금 ({data.middlePayment ? '운송일 결제' : '작업완료 시'})</span>
                 <span className="font-bold text-rose-700 text-xs">{Number(data.balance || 0).toLocaleString()} 원</span>
               </div>
             </div>
