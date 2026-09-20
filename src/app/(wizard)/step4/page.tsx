@@ -159,6 +159,7 @@ export default function Step4Page() {
           })),
           totalCost,
           deposit,
+          middlePayment,
           balance,
           totalCbm: store.totalCbm,
           resources: {
