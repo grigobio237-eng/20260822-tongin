@@ -6,6 +6,7 @@ import { calculateVehicles, VehicleRecommendation } from '../lib/cbm';
 export interface CustomerInfo {
   name: string;
   phone: string;
+  secondaryPhone?: string;
   contractDate: string;
   packingDate: string;
   movingDate: string;
@@ -55,6 +56,7 @@ export interface ResourceState {
   workerFemale: number;
   materials: Record<string, number>;
   tvBoxInches?: string;
+  lastCalculatedSource?: string;
 }
 
 export interface WizardState {
@@ -103,7 +105,7 @@ export interface WizardState {
 }
 
 const initialCustomerInfo: CustomerInfo = {
-  name: '', phone: '', contractDate: '', packingDate: '', movingDate: '',
+  name: '', phone: '', secondaryPhone: '', contractDate: '', packingDate: '', movingDate: '',
   departureAddress: '', departureDetailAddress: '', departureFloor: '', departureConditions: [], departureLadderCount: 1,
   arrivalAddress: '', arrivalDetailAddress: '', arrivalFloor: '', arrivalConditions: [], arrivalLadderCount: 1, arrivalStatus: '',
   applyDistancePrice: false,
@@ -336,13 +338,13 @@ export const useWizardStore = create<WizardState>()(
               [itemName]: newInstances
             };
           } else if (id === '') {
-            // Create a new empty instance with quantity 0
+            // Create a new instance with quantity 1 when variant is selected from empty state
             const newInstance: RoomItemInstance = {
                id: Math.random().toString(36).substring(2, 9),
-               quantity: 0,
+               quantity: 1,
                variantName,
                unitCbm: customCbm,
-               cbm: 0,
+               cbm: customCbm,
             };
             newRoomItems[room].items = {
               ...newRoomItems[room].items,
@@ -446,7 +448,7 @@ export const useWizardStore = create<WizardState>()(
                 let cbm = item.cbm;
                 const overrideKey = `${itemName}|${item.variantName}`;
                 
-                if (itemName === '기타물품1' || itemName === '기타물품2') {
+                if (item.variantName === '직접 입력') { cbm = item.unitCbm * item.quantity; } else if (itemName === '기타물품1' || itemName === '기타물품2') {
                   cbm = (materialCbmSettings[item.variantName] || 0) * item.quantity;
                 } else if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
                   cbm = settings.itemCbmSettings[overrideKey] * item.quantity;
@@ -519,7 +521,7 @@ export const useWizardStore = create<WizardState>()(
               const settings = require('./settingsStore').useSettingsStore.getState();
               if (settings && settings.materialCbmSettings) {
                 const overrideKey = `${itemName}|${variantName}`;
-                if (itemName === '기타물품1' || itemName === '기타물품2') {
+                if (variantName === '직접 입력') { /* keep cbm */ } else if (itemName === '기타물품1' || itemName === '기타물품2') {
                   cbm = (settings.materialCbmSettings[variantName] || 0) * item.quantity;
                 } else if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
                   cbm = settings.itemCbmSettings[overrideKey] * item.quantity;
@@ -570,6 +572,7 @@ export const useWizardStore = create<WizardState>()(
           customerInfo: {
             name: contract.customer_name || '',
             phone: contract.customer_phone || '',
+            secondaryPhone: contract.secondary_phone || '',
             contractDate: contract.contract_date || '',
             packingDate: contract.packing_date || '',
             movingDate: contract.moving_date || '',

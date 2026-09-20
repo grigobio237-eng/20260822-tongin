@@ -11,6 +11,7 @@ interface ContractOverview {
   id: string;
   customer_name: string;
   customer_phone: string;
+  secondary_phone?: string;
   packing_date: string;
   moving_date: string;
   total_cost: number;
@@ -127,6 +128,7 @@ export default function SchedulePage() {
           customerInfo: {
             name: contract.customer_name,
             phone: contract.customer_phone,
+            secondaryPhone: contract.secondary_phone,
             contractDate: contract.contract_date,
             packingDate: contract.packing_date,
             movingDate: contract.moving_date,
@@ -324,7 +326,7 @@ export default function SchedulePage() {
                   </div>
                   <div>
                     <label className="text-xs font-bold text-gray-500">연락처</label>
-                    <p className="text-base font-medium">{detailData.customerInfo.phone}</p>
+                    <p className="text-base font-medium">{detailData.customerInfo.phone}{detailData.customerInfo.secondaryPhone ? ` / ${detailData.customerInfo.secondaryPhone}` : ''}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>

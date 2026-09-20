@@ -106,7 +106,7 @@ export default function Step2Page() {
             return totalAcc + instances.reduce((acc, inst) => {
               let cbm = inst.cbm || 0;
               const overrideKey = `${itemName}|${inst.variantName}`;
-              if (itemName === '기타물품1' || itemName === '기타물품2') cbm = (materialSettings[inst.variantName] || 0) * inst.quantity;
+              if (inst.variantName === '직접 입력') cbm = inst.unitCbm * inst.quantity; else if (itemName === '기타물품1' || itemName === '기타물품2') cbm = (materialSettings[inst.variantName] || 0) * inst.quantity;
               else if (itemCbmSettings && itemCbmSettings[overrideKey] !== undefined) cbm = itemCbmSettings[overrideKey] * inst.quantity;
               else if (itemName === '옷') cbm = (materialSettings['대박스(옷)'] || 0) * inst.quantity;
               else if (itemName === '이불') cbm = (materialSettings['특대박스(이불)'] || 0) * inst.quantity;
@@ -153,7 +153,7 @@ export default function Step2Page() {
                     const def = item.variants.find(v => v.isDefault) || item.variants[1] || item.variants[0];
                     let defCbm = def.cbm;
                     const overrideKey = `${item.name}|${def.name}`;
-                    if (item.name === '기타물품1' || item.name === '기타물품2') defCbm = materialSettings[def.name] || 0;
+                    if (def.name === '직접 입력') {} else if (item.name === '기타물품1' || item.name === '기타물품2') defCbm = materialSettings[def.name] || 0;
                     else if (itemCbmSettings && itemCbmSettings[overrideKey] !== undefined) defCbm = itemCbmSettings[overrideKey];
                     else if (item.name === '옷') defCbm = materialSettings['대박스(옷)'] || 0;
                     else if (item.name === '이불') defCbm = materialSettings['특대박스(이불)'] || 0;
@@ -196,7 +196,7 @@ export default function Step2Page() {
                   instances.map((inst, idx) => {
                     let displayCbm = inst.unitCbm;
                     const overrideKey = `${item.name}|${inst.variantName}`;
-                    if (item.name === '기타물품1' || item.name === '기타물품2') displayCbm = materialSettings[inst.variantName] || 0;
+                    if (inst.variantName === '직접 입력') displayCbm = inst.unitCbm; else if (item.name === '기타물품1' || item.name === '기타물품2') displayCbm = materialSettings[inst.variantName] || 0;
                     else if (itemCbmSettings && itemCbmSettings[overrideKey] !== undefined) displayCbm = itemCbmSettings[overrideKey];
                     else if (item.name === '옷') displayCbm = materialSettings['대박스(옷)'] || 0;
                     else if (item.name === '이불') displayCbm = materialSettings['특대박스(이불)'] || 0;

@@ -5,6 +5,7 @@ export interface ContractPrintData {
   customerInfo: {
     name: string;
     phone: string;
+    secondaryPhone?: string;
     contractDate: string;
     packingDate: string;
     movingDate: string;
@@ -14,6 +15,9 @@ export interface ContractPrintData {
     arrivalAddress: string;
     arrivalDetailAddress?: string;
     arrivalFloor: number;
+    distanceKm?: string;
+    durationMin?: string;
+    applyDistancePrice?: boolean;
     serviceType: string;
     arrivalStatus: string;
     departureConditions?: string[];
@@ -76,13 +80,13 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
                 <th className="border border-slate-300 p-1.5 w-20 text-center font-bold">고객명</th>
                 <td className="border border-slate-300 p-1.5 font-semibold">{c?.name || '-'}</td>
                 <th className="border border-slate-300 p-1.5 w-20 text-center font-bold">연락처</th>
-                <td className="border border-slate-300 p-1.5 font-semibold">{c?.phone || '-'}</td>
+                <td className="border border-slate-300 p-1.5 font-semibold">{c?.phone || '-'}{c?.secondaryPhone ? ` / ${c.secondaryPhone}` : ''}</td>
               </tr>
               <tr>
                 <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">출발지</th>
                 <td className="border border-slate-300 p-1.5">{c?.departureAddress || '-'} {c?.departureDetailAddress || ''} ({c?.departureFloor || 1}층{c?.departureConditions?.length ? `, ${c.departureConditions.map(cond => cond === '사다리' ? `사다리 (${c.departureLadderCount || 1}대)` : cond).join(', ')}` : ''})</td>
                 <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">도착지</th>
-                <td className="border border-slate-300 p-1.5">{c?.arrivalAddress || '-'} {c?.arrivalDetailAddress || ''} ({c?.arrivalFloor || 1}층{c?.arrivalConditions?.length ? `, ${c.arrivalConditions.map(cond => cond === '사다리' ? `사다리 (${c.arrivalLadderCount || 1}대)` : cond).join(', ')}` : ''})</td>
+                <td className="border border-slate-300 p-1.5">{c?.arrivalAddress || '-'} {c?.arrivalDetailAddress || ''} ({c?.arrivalFloor || 1}층{c?.arrivalConditions?.length ? `, ${c.arrivalConditions.map(cond => cond === '사다리' ? `사다리 (${c.arrivalLadderCount || 1}대)` : cond).join(', ')}` : ''}){c?.distanceKm ? ` / 예상 이동: ${c.distanceKm}km` : ''}</td>
               </tr>
               <tr>
                 <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">포장일시</th>
@@ -109,7 +113,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
               </div>
               <div className="flex justify-between py-1">
                 <span>작업 구역 구성</span>
-                <span className="font-semibold">{data.rooms?.length || 0} 개 구역 (룸/거실/주방 등)</span>
+                <span className="font-semibold">{data.rooms?.filter(r => (r.items || []).some(i => i.quantity > 0) || r.memo).length || 0} 개 구역 (룸/거실/주방 등)</span>
               </div>
             </div>
             <div className="border border-slate-300 p-2.5 rounded bg-slate-50/50">

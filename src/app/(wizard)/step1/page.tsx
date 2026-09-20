@@ -65,6 +65,16 @@ export default function Step1Page() {
     updateCustomerInfo({ [key]: updated });
   };
 
+  const handleSecondaryPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/[^0-9]/g, '');
+    if (val.length > 3 && val.length <= 7) {
+      val = val.slice(0, 3) + '-' + val.slice(3);
+    } else if (val.length > 7) {
+      val = val.slice(0, 3) + '-' + val.slice(3, 7) + '-' + val.slice(7, 11);
+    }
+    updateCustomerInfo({ secondaryPhone: val });
+  };
+
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 남기기
     if (value.length > 3 && value.length <= 7) {
@@ -80,7 +90,7 @@ export default function Step1Page() {
       <h2 className="text-xl font-bold">고객 및 기본 정보</h2>
       
       <div className="bg-white p-4 rounded-xl shadow-sm border space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">고객명</label>
             <div className="flex items-center gap-2">
@@ -103,6 +113,17 @@ export default function Step1Page() {
               className="w-full border rounded-lg p-2.5"
               value={customerInfo.phone}
               onChange={handlePhoneChange}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">예비 연락처</label>
+            <input 
+              type="tel" 
+              maxLength={13}
+              placeholder="010-0000-0000"
+              className="w-full border rounded-lg p-2.5"
+              value={customerInfo.secondaryPhone || ''}
+              onChange={handleSecondaryPhoneChange}
             />
           </div>
         </div>

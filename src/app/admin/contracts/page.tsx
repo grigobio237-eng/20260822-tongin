@@ -59,7 +59,7 @@ export default function AdminContractsPage() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <h2 className="text-lg font-bold text-slate-800">{contract.customer_name} 고객님</h2>
-                  <span className="text-xs text-gray-400">({contract.customer_phone})</span>
+                  <span className="text-xs text-gray-400">({contract.customer_phone}{contract.secondary_phone ? ` / ${contract.secondary_phone}` : ''})</span>
                 </div>
                 <div className="text-sm text-gray-600">
                   <p>이사 예정일: {contract.moving_date}</p>
