@@ -428,10 +428,10 @@ export default function Step3Page() {
                       <span className="text-xs text-gray-500">금액 (수동조정)</span>
                       <div className="flex items-center gap-1">
                         <input 
-                          type="number" 
-                          value={manualPrices[opt.name] ?? getCalculatedLadderPrice(opt.name, ladderTons[opt.name])}
+                          type="text" 
+                          value={(manualPrices[opt.name] ?? getCalculatedLadderPrice(opt.name, ladderTons[opt.name])).toLocaleString()}
                           onChange={(e) => handleManualPriceChange(opt.name, e.target.value)}
-                          className="w-24 border rounded px-2 py-1 text-sm text-right font-bold text-blue-700"
+                          className="w-24 border rounded px-2 py-1 text-sm text-right font-bold text-blue-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                         />
                         <span className="text-sm text-gray-500">원</span>
                       </div>
