@@ -34,7 +34,7 @@ export default function SettingsPage() {
   const sortedMasterItems = useMemo(() => {
     return localCustomMasterItems.map(item => ({
       ...item,
-      variants: [...item.variants].sort((v1, v2) => v1.name > v2.name ? 1 : v1.name < v2.name ? -1 : 0)
+      variants: [...item.variants].sort((v1, v2) => v1.name.localeCompare(v2.name, undefined, { numeric: true }))
     })).sort((a, b) => {
       if (a.name.startsWith('기타물품') && !b.name.startsWith('기타물품')) return 1;
       if (!a.name.startsWith('기타물품') && b.name.startsWith('기타물품')) return -1;

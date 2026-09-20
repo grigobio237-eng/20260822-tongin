@@ -426,7 +426,7 @@ export default function Step2Page() {
             </div>
             
             <div className="p-4 overflow-y-auto space-y-3">
-              {modalState.item.variants.map((v) => {
+              {[...modalState.item.variants].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })).map((v) => {
                 let modalVariantCbm = v.cbm;
                 const overrideKey = `${modalState.item.name}|${v.name}`;
                 if (modalState.item.name === '기타물품1' || modalState.item.name === '기타물품2') modalVariantCbm = materialSettings[v.name] || 0;
