@@ -116,6 +116,7 @@ export default function CustomerSignPage() {
       optionCost: contract.option_cost,
       totalCost: contract.total_cost,
       deposit: contract.deposit,
+      middlePayment: contract.middle_payment,
       balance: contract.balance,
       sttMemo: contract.stt_memo,
       signatureBase64: contract.signature_url || undefined,
