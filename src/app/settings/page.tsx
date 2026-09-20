@@ -30,6 +30,7 @@ export default function SettingsPage() {
   const [localWorkerPrices, setLocalWorkerPrices] = useState(store.workerPrices || { male: 200000, female: 150000 });
     const [localCustomMasterItems, setLocalCustomMasterItems] = useState<MasterItem[]>([]);
   const [localCustomPackingMaterials, setLocalCustomPackingMaterials] = useState<string[]>([]);
+  const [localFixedPackingMaterials, setLocalFixedPackingMaterials] = useState<string[]>([]);
   const sortedMasterItems = useMemo(() => {
     return localCustomMasterItems.map(item => ({
       ...item,
@@ -199,6 +200,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
     }
     if (store.roomItemMapping) setLocalRoomItemMapping(store.roomItemMapping);
     if (store.customPackingMaterials) setLocalCustomPackingMaterials(store.customPackingMaterials);
+    if (store.fixedPackingMaterials) setLocalFixedPackingMaterials(store.fixedPackingMaterials);
     if (store.materialCbmSettings) setLocalMaterialCbm(store.materialCbmSettings);
     if (store.ladderRates) {
       if (!store.ladderRates.tier_14) {
@@ -229,6 +231,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
       customMasterItems: localCustomMasterItems,
       roomItemMapping: localRoomItemMapping,
       customPackingMaterials: [...localCustomPackingMaterials].sort((a, b) => a.localeCompare(b)),
+      fixedPackingMaterials: localFixedPackingMaterials,
       distanceRates: localDistanceRates,
     });
     router.back();
@@ -624,7 +627,8 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                 <thead className="bg-gray-100 text-gray-700">
                   <tr>
                     <th className="px-4 py-3 border-b font-bold w-1/2">포장재료 이름</th>
-                    <th className="px-4 py-3 border-b font-bold w-1/3 text-right pr-12">CBM (체적)</th>
+                    <th className="px-4 py-3 border-b font-bold w-1/4 text-right pr-12">CBM (체적)</th>
+                    <th className="px-4 py-3 border-b font-bold w-1/6 text-center" title="작업지시서 및 요약본의 포장재료 목록에 수량과 상관없이 항상 노출됩니다">상단 고정</th>
                     <th className="px-4 py-3 border-b font-bold w-1/6 text-center">관리</th>
                   </tr>
                 </thead>
@@ -647,13 +651,27 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                         </div>
                       </td>
                       <td className="px-4 py-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={localFixedPackingMaterials.includes(mat)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setLocalFixedPackingMaterials(prev => [...prev, mat]);
+                            } else {
+                              setLocalFixedPackingMaterials(prev => prev.filter(m => m !== mat));
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                        />
+                      </td>
+                      <td className="px-4 py-3 text-center">
                         <button onClick={() => handleDeletePackingMaterial(mat)} className="text-red-400 hover:text-white font-bold px-3 py-1 rounded hover:bg-red-500 transition-colors">삭제</button>
                       </td>
                     </tr>
                   ))}
                   {localCustomPackingMaterials.length === 0 && (
                     <tr>
-                      <td colSpan={3} className="text-center py-8 text-gray-500">등록된 포장재료가 없습니다.</td>
+                      <td colSpan={4} className="text-center py-8 text-gray-500">등록된 포장재료가 없습니다.</td>
                     </tr>
                   )}
                 </tbody>

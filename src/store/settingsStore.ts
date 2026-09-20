@@ -60,6 +60,7 @@ export interface SettingsState {
   itemPackingSettings: Record<string, { materialName: string, count: number, materialName2?: string, count2?: number }>;
   customMasterItems: MasterItem[];
   customPackingMaterials: string[];
+  fixedPackingMaterials: string[];
   roomItemMapping: Record<RoomCategory, string[]>;
   
   // 사다리차 층수/톤수별 단가 테이블 (단위: 원)
@@ -171,6 +172,7 @@ const defaultValues = {
   itemPackingSettings: {},
   customMasterItems: allMasterItems,
   customPackingMaterials: PACKING_MATERIALS,
+  fixedPackingMaterials: ['특대박스(이불)', '대박스(옷)', '중대박스', '중박스', '소박스', '바구니', '아이스박스', '담요(대)', '담요(중)', '에어캡', '랩', '깔판', '속지(백색)', '속지(노랑색)'],
   roomItemMapping: generateDefaultRoomMapping()
 };
 
@@ -200,6 +202,8 @@ export const useSettingsStore = create<SettingsState>()(
               ladderRates: (data.ladderRates && data.ladderRates.tier_14) ? data.ladderRates : (get().ladderRates?.tier_14 ? get().ladderRates : DEFAULT_LADDER_RATES),
               partnerContacts: data.partnerContacts || get().partnerContacts,
               customMasterItems: data.customMasterItems ? Array.from(new Map(data.customMasterItems.map(i => [i.name, i])).values()) : get().customMasterItems,
+              customPackingMaterials: data.customPackingMaterials || get().customPackingMaterials,
+              fixedPackingMaterials: data.fixedPackingMaterials || get().fixedPackingMaterials,
               roomItemMapping: data.roomItemMapping || get().roomItemMapping,
             });
           }

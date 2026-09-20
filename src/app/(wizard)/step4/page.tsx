@@ -457,11 +457,7 @@ export default function Step4Page() {
                 <span className="block text-xs text-gray-500 mb-1">포장 재료</span>
                 <div className="flex gap-2 flex-wrap">
                   {(() => {
-                    const fixedItems = [
-                      '특대박스(이불)', '대박스(옷)', '중대박스', '중박스', '소박스',
-                      '바구니', '아이스박스', '담요(대)', '담요(중)', '에어캡', '랩', '깔판',
-                      '속지(백색)', '속지(노랑색)'
-                    ];
+                    const fixedItems = useSettingsStore.getState().fixedPackingMaterials || [];
                     const mats: [string, number][] = [];
                     fixedItems.forEach(item => {
                       if (store.resources.materials[item] > 0) {

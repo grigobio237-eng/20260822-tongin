@@ -1,5 +1,6 @@
 import React from 'react';
 import { ContractPrintData } from './ContractPrintDocument';
+import { useSettingsStore } from '@/store/settingsStore';
 
 export interface WorkOrderPrintData extends ContractPrintData {
   materials?: Record<string, number>;
@@ -138,11 +139,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
                 </thead>
                 <tbody>
                   {(() => {
-                    const fixedItems = [
-                      '특대박스(이불)', '대박스(옷)', '중대박스', '중박스', '소박스',
-                      '바구니', '아이스박스', '담요(대)', '담요(중)', '에어캡', '랩', '깔판',
-                      '속지(백색)', '속지(노랑색)'
-                    ];
+                    const fixedItems = useSettingsStore.getState().fixedPackingMaterials || [];
                     const mats: [string, number][] = [];
                     // Add fixed items first, regardless of quantity
                     fixedItems.forEach(item => {
