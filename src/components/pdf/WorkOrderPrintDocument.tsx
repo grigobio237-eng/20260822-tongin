@@ -140,19 +140,19 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
                   {(() => {
                     const fixedItems = [
                       '특대박스(이불)', '대박스(옷)', '중대박스', '중박스', '소박스',
-                      '바구니', '아이스박스', '담요(대)', '담요(중)', '에어캡', '랩', '깔판'
+                      '바구니', '아이스박스', '담요(대)', '담요(중)', '에어캡', '랩', '깔판',
+                      '속지(백색)', '속지(노랑색)'
                     ];
                     const mats: [string, number][] = [];
                     // Add fixed items first, regardless of quantity
                     fixedItems.forEach(item => {
                       mats.push([item, materials[item] || 0]);
                     });
-                    // Add remaining items that have quantity > 0
-                    Object.entries(materials).forEach(([k, v]) => {
-                      if (!fixedItems.includes(k) && v > 0) {
-                        mats.push([k, v]);
-                      }
-                    });
+                    // Add remaining items that have quantity > 0, sorted alphabetically
+                    const remainingMats = Object.entries(materials)
+                      .filter(([k, v]) => !fixedItems.includes(k) && v > 0)
+                      .sort((a, b) => a[0].localeCompare(b[0]));
+                    mats.push(...remainingMats);
                     
                     const rows = [];
                     for (let i = 0; i < mats.length; i += 2) {

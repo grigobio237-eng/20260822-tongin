@@ -456,10 +456,27 @@ export default function Step4Page() {
               <div className="col-span-2 border-t pt-3 mt-1">
                 <span className="block text-xs text-gray-500 mb-1">포장 재료</span>
                 <div className="flex gap-2 flex-wrap">
-                  {Object.entries(store.resources.materials).map(([mat, qty]) => {
-                    if (!qty) return null;
-                    return <span key={mat} className="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">{mat} : {qty}</span>;
-                  })}
+                  {(() => {
+                    const fixedItems = [
+                      '특대박스(이불)', '대박스(옷)', '중대박스', '중박스', '소박스',
+                      '바구니', '아이스박스', '담요(대)', '담요(중)', '에어캡', '랩', '깔판',
+                      '속지(백색)', '속지(노랑색)'
+                    ];
+                    const mats: [string, number][] = [];
+                    fixedItems.forEach(item => {
+                      if (store.resources.materials[item] > 0) {
+                        mats.push([item, store.resources.materials[item]]);
+                      }
+                    });
+                    const remainingMats = Object.entries(store.resources.materials)
+                      .filter(([k, v]) => !fixedItems.includes(k) && v > 0)
+                      .sort((a, b) => a[0].localeCompare(b[0]));
+                    mats.push(...remainingMats);
+                    
+                    return mats.map(([mat, qty]) => (
+                      <span key={mat} className="px-2 py-1 bg-gray-100 rounded text-xs font-semibold">{mat} : {qty}</span>
+                    ));
+                  })()}
                 </div>
               </div>
             )}

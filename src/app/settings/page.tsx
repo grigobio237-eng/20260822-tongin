@@ -228,7 +228,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
       itemPackingSettings: localItemPacking,
       customMasterItems: localCustomMasterItems,
       roomItemMapping: localRoomItemMapping,
-      customPackingMaterials: localCustomPackingMaterials,
+      customPackingMaterials: [...localCustomPackingMaterials].sort((a, b) => a.localeCompare(b)),
       distanceRates: localDistanceRates,
     });
     router.back();
@@ -528,7 +528,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                               className="border rounded px-1 py-1 w-24 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none"
                             >
                               <option value="">재료선택</option>
-                              {localCustomPackingMaterials.map(m => <option key={m} value={m}>{m}</option>)}
+                              {[...localCustomPackingMaterials].sort((a, b) => a.localeCompare(b)).map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                             <input
                               type="text"
@@ -544,7 +544,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                               className="border rounded px-1 py-1 w-24 text-xs bg-white focus:ring-1 focus:ring-blue-500 outline-none"
                             >
                               <option value="">재료선택2</option>
-                              {localCustomPackingMaterials.map(m => <option key={m} value={m}>{m}</option>)}
+                              {[...localCustomPackingMaterials].sort((a, b) => a.localeCompare(b)).map(m => <option key={m} value={m}>{m}</option>)}
                             </select>
                             <input
                               type="text"
@@ -629,7 +629,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {localCustomPackingMaterials.map(mat => (
+                  {[...localCustomPackingMaterials].sort((a, b) => a.localeCompare(b)).map(mat => (
                     <tr key={mat} className="hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
