@@ -649,8 +649,28 @@ export default function Step4Page() {
                 10% 자동입력
               </button>
             </div>
+            {isStorageMove && (
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">잔금 (자동계산)</label>
+              <label className="block text-sm font-bold text-gray-700 mb-1">
+                포장일 결제액 (중도금)
+              </label>
+              <div className="relative">
+                <input 
+                  type="text"
+                  className="w-full border rounded-lg p-3 pr-8 text-right font-bold focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={middlePayment ? middlePayment.toLocaleString() : ''}
+                  onChange={e => {
+                    const val = Number(e.target.value.replace(/,/g, ''));
+                    if (!isNaN(val)) setMiddlePayment(val);
+                  }}
+                  placeholder="0"
+                />
+                <span className="absolute right-3 top-3.5 text-gray-500">원</span>
+              </div>
+            </div>
+            )}
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-1">잔금 ({isStorageMove ? '운송일 결제액' : '자동계산'})</label>
               <div className="w-full border bg-gray-50 rounded-lg p-3 text-right font-bold text-red-600">
                 {balance.toLocaleString()} 원
               </div>
