@@ -129,6 +129,38 @@ export default function Step3Page() {
   const defaultPackingMaterials = useSettingsStore(state => state.defaultPackingMaterials);
   
   // Auto-sync storage options dates from step 1
+  // Auto-sync ladder tons based on total vehicles
+  useEffect(() => {
+    const v = resources.vehicles;
+    const totalTons = (v.fiveTon || 0) * 5 + (v.twoHalfTon || 0) * 2.5 + (v.oneTon || 0) * 1;
+    
+    let targetLadderTon: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' = 'fiveTon';
+    if (totalTons <= 5) targetLadderTon = 'fiveTon';
+    else if (totalTons <= 6) targetLadderTon = 'sixTon';
+    else if (totalTons <= 7.5) targetLadderTon = 'sevenHalfTon';
+    else targetLadderTon = 'tenTon';
+
+    setLadderTons(prev => {
+      if (prev['사다리·출발지'] === targetLadderTon && prev['사다리·도착지'] === targetLadderTon) {
+        return prev;
+      }
+      
+      const currentOptions = useWizardStore.getState().options;
+      ['사다리·출발지', '사다리·도착지'].forEach(optName => {
+        if (currentOptions[optName] && prev[optName] !== targetLadderTon) {
+           const price = manualPrices[optName] ?? getCalculatedLadderPrice(optName, targetLadderTon);
+           updateOption(optName, currentOptions[optName].quantity || 1, price);
+        }
+      });
+      
+      return {
+        ...prev,
+        '사다리·출발지': targetLadderTon,
+        '사다리·도착지': targetLadderTon
+      };
+    });
+  }, [resources.vehicles, manualPrices, updateOption]);
+
   useEffect(() => {
     const { packingDate, movingDate } = customerInfo;
     if (packingDate && movingDate && packingDate !== movingDate) {
