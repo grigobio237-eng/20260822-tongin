@@ -153,7 +153,7 @@ export const useWizardStore = create<WizardState>()(
           if (!newRoomItems[room]) newRoomItems[room] = { items: {}, note: '', images: [] };
           const currentInstances = newRoomItems[room].items[itemName] || [];
           
-          const masterItem = ROOM_CATEGORIES[room]?.find(i => i.name === itemName) || ROOM_CATEGORIES['안방']?.find(i => i.name === itemName);
+          const masterItem = Object.values(ROOM_CATEGORIES).flat().find(i => i.name === itemName);
           
           let defaultVariantName = itemName;
           let defaultUnitCbm = 0.1;
@@ -239,7 +239,7 @@ export const useWizardStore = create<WizardState>()(
           const currentInstances = newRoomItems[room].items[itemName] || [];
           
           if (currentInstances.length === 0) {
-             const masterItem = ROOM_CATEGORIES[room]?.find(i => i.name === itemName) || ROOM_CATEGORIES['안방']?.find(i => i.name === itemName);
+             const masterItem = Object.values(ROOM_CATEGORIES).flat().find(i => i.name === itemName);
              
              let defaultVariantName = itemName;
              let defaultUnitCbm = 0.1;
@@ -248,6 +248,29 @@ export const useWizardStore = create<WizardState>()(
                const defaultVariant = masterItem.variants.find(v => v.isDefault) || masterItem.variants[1] || masterItem.variants[0];
                defaultVariantName = defaultVariant.name;
                defaultUnitCbm = defaultVariant.cbm;
+             }
+
+             const { useSettingsStore } = require('./settingsStore');
+             const settings = useSettingsStore.getState();
+             const materialCbmSettings = settings.materialCbmSettings;
+             const overrideKey = `${itemName}|${defaultVariantName}`;
+
+             if (itemName === '기타물품1' || itemName === '기타물품2') {
+               defaultUnitCbm = materialCbmSettings[defaultVariantName] || 0;
+             } else if (settings.itemCbmSettings && settings.itemCbmSettings[overrideKey] !== undefined) {
+               defaultUnitCbm = settings.itemCbmSettings[overrideKey];
+             } else if (itemName === '옷') {
+               defaultUnitCbm = materialCbmSettings['대박스(옷)'] || 0;
+             } else if (itemName === '이불') {
+               defaultUnitCbm = materialCbmSettings['특대박스(이불)'] || 0;
+             } else if (itemName === '생활물품/잔짐류(중박스용)') {
+               defaultUnitCbm = materialCbmSettings['중박스'] || 0;
+             } else if (itemName === '도서/소형물품(소박스용)') {
+               defaultUnitCbm = materialCbmSettings['소박스'] || 0;
+             } else if (itemName === '식기류') {
+               defaultUnitCbm = materialCbmSettings['바구니'] || 0;
+             } else if (itemName === '신발류(중박스용)') {
+               defaultUnitCbm = materialCbmSettings['중박스'] || 0;
              }
              
              const newInstance: RoomItemInstance = {
