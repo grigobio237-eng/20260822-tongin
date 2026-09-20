@@ -72,6 +72,8 @@ export interface WizardState {
   surcharge: { noEvilSpirits: boolean; endOfMonth: boolean };
   discount: number;
   manualBaseCost?: number;
+  deposit?: number;
+  middlePayment?: number;
 
   setContractId: (id: string | null) => void;
   setStep: (step: number) => void;
@@ -93,6 +95,8 @@ export interface WizardState {
   updateMaterial: (materialName: string, quantity: number) => void;
   updateSurcharge: (key: 'noEvilSpirits' | 'endOfMonth', value: boolean) => void;
   setDiscount: (amount: number) => void;
+  setDeposit: (amount: number) => void;
+  setMiddlePayment: (amount: number) => void;
   recalculateCbm: () => void;
   reset: () => void;
   hydrateContract: (contract: any) => void;
@@ -384,6 +388,8 @@ export const useWizardStore = create<WizardState>()(
       })),
 
       setDiscount: (amount) => set({ discount: amount }),
+      setDeposit: (amount) => set({ deposit: amount }),
+      setMiddlePayment: (amount) => set({ middlePayment: amount }),
       
       recalculateCbm: () => {
         const { roomItems, resources } = get();
@@ -556,6 +562,8 @@ export const useWizardStore = create<WizardState>()(
           options: optionsState,
           sttMemo: contract.stt_memo || '',
           manualBaseCost: contract.moving_cost,
+          deposit: contract.deposit || 0,
+          middlePayment: contract.middle_payment || 0,
           calculatedVehicles: require('./settingsStore').useSettingsStore.getState()?.vehicleCbmLimits 
             ? calculateVehicles(contract.total_cbm || 0, require('./settingsStore').useSettingsStore.getState().vehicleCbmLimits)
             : { fiveTon: 0, twoHalfTon: 0, oneTon: 0 },

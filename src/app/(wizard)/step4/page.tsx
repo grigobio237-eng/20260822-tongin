@@ -16,8 +16,8 @@ export default function Step4Page() {
   const { partnerContacts } = settingsStore;
   const router = useRouter();
   
-  const [deposit, setDeposit] = useState(0);
-  const [middlePayment, setMiddlePayment] = useState(0);
+  const [deposit, setDeposit] = useState(store.deposit || 0);
+  const [middlePayment, setMiddlePayment] = useState(store.middlePayment || 0);
   const [includeVat, setIncludeVat] = useState(false);
   const [editableBaseCost, setEditableBaseCost] = useState<number | null>(store.manualBaseCost || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -606,7 +606,7 @@ export default function Step4Page() {
                 checked={includeVat}
                 onChange={(e) => {
                   setIncludeVat(e.target.checked);
-                  setDeposit(0); // VAT 변경 시 계약금 초기화
+                  setDeposit(0); store.setDeposit(0); // VAT 변경 시 계약금 초기화
                 }}
               />
               <span className="text-sm font-medium text-gray-700">부가가치세(VAT 10%) 별도 적용</span>
@@ -637,7 +637,7 @@ export default function Step4Page() {
                   value={deposit ? deposit.toLocaleString() : ''}
                   onChange={e => {
                     const val = Number(e.target.value.replace(/,/g, ''));
-                    if (!isNaN(val)) setDeposit(val);
+                    if (!isNaN(val)) setDeposit(val); store.setDeposit(val);
                   }}
                   placeholder={autoDeposit.toLocaleString()}
                 />
@@ -645,7 +645,7 @@ export default function Step4Page() {
               </div>
               <button
                 className="mt-1 text-xs text-blue-500 underline"
-                onClick={() => setDeposit(autoDeposit)}
+                onClick={() => { setDeposit(autoDeposit); store.setDeposit(autoDeposit); }}
               >
                 10% 자동입력
               </button>
@@ -662,7 +662,7 @@ export default function Step4Page() {
                   value={middlePayment ? middlePayment.toLocaleString() : ''}
                   onChange={e => {
                     const val = Number(e.target.value.replace(/,/g, ''));
-                    if (!isNaN(val)) setMiddlePayment(val);
+                    if (!isNaN(val)) setMiddlePayment(val); store.setMiddlePayment(val);
                   }}
                   placeholder="0"
                 />
