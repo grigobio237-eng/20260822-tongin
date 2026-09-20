@@ -93,6 +93,7 @@ export default function CustomerSignPage() {
       customerInfo: {
         name: contract.customer_name,
         phone: contract.customer_phone,
+        secondaryPhone: contract.secondary_phone,
         contractDate: contract.contract_date,
         packingDate: contract.packing_date,
         movingDate: contract.moving_date,
@@ -108,6 +109,9 @@ export default function CustomerSignPage() {
         departureLadderCount: contract.departure_ladder_count || 1,
         arrivalConditions: contract.arrival_conditions ? contract.arrival_conditions.split(',') : undefined,
         arrivalLadderCount: contract.arrival_ladder_count || 1,
+        distanceKm: contract.distance_km,
+        durationMin: contract.duration_min,
+        applyDistancePrice: contract.apply_distance_price === 1,
       },
       rooms: contract.rooms_json ? JSON.parse(contract.rooms_json) : [],
       options: contract.options_json ? JSON.parse(contract.options_json) : [],

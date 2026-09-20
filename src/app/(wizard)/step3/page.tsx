@@ -34,6 +34,7 @@ export default function Step3Page() {
   const optionPrices = useSettingsStore(state => state.optionPrices);
   const customPackingMaterials = useSettingsStore(state => state.customPackingMaterials || PACKING_MATERIALS);
   const itemPackingSettings = useSettingsStore(state => state.itemPackingSettings);
+  const roomItemMapping = useSettingsStore(state => state.roomItemMapping);
   const ladderRates = useSettingsStore(state => state.ladderRates);
   const vehicleLimits = useSettingsStore(state => state.vehicleCbmLimits);
   const router = useRouter();
@@ -204,7 +205,7 @@ export default function Step3Page() {
 
 
     Object.entries(roomItems).forEach(([roomName, room]) => {
-      const allowedNames = (useSettingsStore.getState().roomItemMapping as any)?.[roomName];
+      const allowedNames = (roomItemMapping as any)?.[roomName];
       if (!allowedNames) return; // Ghost room prevention
       if (!room || !room.items) return;
       
@@ -217,16 +218,24 @@ export default function Step3Page() {
           const packSetting = itemPackingSettings?.[settingKey];
           const q = inst.quantity;
           
-          let hasCustomMaterial = false;
+          let hasDedicatedCover = false;
+          
+          const checkDedicated = (matName: string) => {
+            if (!matName) return false;
+            const normMat = matName.replace(/장농/g, '장롱').replace(/\s+/g, '');
+            const normItem = itemName.replace(/장농/g, '장롱').replace(/\s+/g, '');
+            return normMat.includes(normItem) || normItem.includes(normMat);
+          };
+
           if (packSetting && (packSetting.materialName || packSetting.materialName2)) {
             // DB 우선
             if (packSetting.materialName && packSetting.count > 0) {
               customCounts[packSetting.materialName] = (customCounts[packSetting.materialName] || 0) + (packSetting.count * q);
-              hasCustomMaterial = true;
+              if (checkDedicated(packSetting.materialName)) hasDedicatedCover = true;
             }
             if (packSetting.materialName2 && packSetting.count2 && packSetting.count2 > 0) {
               customCounts[packSetting.materialName2] = (customCounts[packSetting.materialName2] || 0) + (packSetting.count2 * q);
-              hasCustomMaterial = true;
+              if (checkDedicated(packSetting.materialName2)) hasDedicatedCover = true;
             }
           } 
           
@@ -238,8 +247,8 @@ export default function Step3Page() {
           else if (itemName === '도서/소형물품(소박스용)') customCounts['소박스'] = (customCounts['소박스'] || 0) + q;
           else if (!['기타물품1', '기타물품2', '식기류'].includes(itemName) && !itemName.startsWith('기타물품')) {
             // 가전/가구 등은 포장재료 목록에 노출하되, 이미 DB에서 전용 포장재료(예: TV(65인치))가 설정된 경우 중복 노출 방지
-            if (!hasCustomMaterial) {
-              const label = inst.variantName.includes(itemName) || itemName.length > 5 ? inst.variantName : `${itemName}(${inst.variantName})`;
+            if (!hasDedicatedCover) {
+              const label = inst.variantName.includes(itemName) ? inst.variantName : `${itemName}(${inst.variantName})`;
               dynamicCounts[label] = (dynamicCounts[label] || 0) + q;
             }
           }
@@ -264,41 +273,16 @@ export default function Step3Page() {
       }
     });
     
-    const currentRoomItems = useWizardStore.getState().roomItems;
-    const currentVehicles = useWizardStore.getState().resources.vehicles;
-    const depsChanged = prevDeps.current.roomItems !== currentRoomItems || prevDeps.current.vehicles !== currentVehicles;
-    prevDeps.current = { roomItems: currentRoomItems, vehicles: currentVehicles };
 
-    // Prevent overriding hydrated materials on mount (even in Strict Mode double-invocations)
-    if (!depsChanged && Object.keys(resources.materials).length > 0) {
+    const sourceString = JSON.stringify({ roomItems, vehicles: resources.vehicles, roomItemMapping });
+    if ((resources as any).lastCalculatedSource === sourceString) {
       return;
     }
-
-    // We overwrite ONLY the keys that are supposed to be auto-calculated.
-    // If a key was in resources.materials but NOT in baseCalculated, the user manually added it?
-    // Actually, to make it robust against vehicle changes, we just assign baseCalculated, 
-    // BUT we must also keep user's manual increments! This is tricky without tracking pristine state.
-    // Let's just SET newMaterials = baseCalculated, plus any items the user manually clicked '+' on that aren't in baseCalculated.
-    // To simplify: we just overwrite with baseCalculated. The user should apply recommendations BEFORE tweaking manually.
-    Object.keys(baseCalculated).forEach(k => {
-      newMaterials[k] = baseCalculated[k];
-    });
-    // Remove keys that dropped to 0 in calculation
-    Object.keys(newMaterials).forEach(k => {
-       if (baseCalculated[k] === 0 || (baseCalculated[k] === undefined && !resources.materials[k])) {
-          // Keep it if user manually set it > 0, otherwise it might be stale autoMaterial. 
-          // Actually, if we change vehicles from 2 to 1, autoMaterials will drop from 30 to 15.
-          // `newMaterials[k] = baseCalculated[k]` handles this drop!
-       }
-    });
-
-    const hasChanges = Object.keys(newMaterials).some(key => newMaterials[key] !== resources.materials[key]);
-
-    if (hasChanges) {
-      updateResources({ materials: newMaterials });
-    }
+    const finalMaterials = { ...baseCalculated };
+    
+    updateResources({ materials: finalMaterials, lastCalculatedSource: sourceString } as any);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomItems, updateResources, itemPackingSettings, defaultPackingMaterials, resources.vehicles]);
+  }, [roomItems, updateResources, itemPackingSettings, defaultPackingMaterials, resources.vehicles, roomItemMapping]);
 
   return (
     <div className="space-y-8 pb-24">
@@ -558,13 +542,28 @@ export default function Step3Page() {
                   const activeExtraMaterials = Object.keys(resources.materials).filter(k => (resources.materials[k] || 0) > 0 && !baseMaterials.includes(k));
                   const allMaterialsToRender = [...baseMaterials, ...activeExtraMaterials];
                   
-                  return allMaterialsToRender.filter(mat => {
+                  const PREFERRED_ORDER = [
+                    '깔판', '담요(대)', '담요(중)', '특대박스(이불)', '대박스(옷)', 
+                    '중대박스', '중박스', '소박스', '바구니', '아이스박스', 
+                    '속지(노랑색)', '속지(백색)', '테이프', '에어캡', '랩'
+                  ];
+
+                  const renderedMaterials = allMaterialsToRender.filter(mat => {
                     const hideWhenZero = ['TV(', '침대', '서랍장', '냉장고', '김치냉장고', '세탁기', '건조기', '쇼파', '분해장농', '피아노'];
                     if (hideWhenZero.some(prefix => mat.startsWith(prefix)) || !baseMaterials.includes(mat)) {
                       return (resources.materials[mat] || 0) > 0;
                     }
                     return true;
-                  }).map(mat => {
+                  }).sort((a, b) => {
+                    const idxA = PREFERRED_ORDER.indexOf(a);
+                    const idxB = PREFERRED_ORDER.indexOf(b);
+                    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                    if (idxA !== -1) return -1;
+                    if (idxB !== -1) return 1;
+                    return 0;
+                  });
+
+                  return renderedMaterials.map(mat => {
                   const val = resources.materials[mat] || 0;
                   return (
                     <div key={mat} className="flex flex-col gap-1 border rounded p-2 bg-gray-50">

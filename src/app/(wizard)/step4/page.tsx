@@ -438,6 +438,11 @@ export default function Step4Page() {
                     <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs">{customerInfo.arrivalStatus}</span>
                   </div>
                 )}
+                {customerInfo.distanceKm && (
+                  <div className="mt-2 pt-2 border-t flex flex-col gap-1">
+                    <span className="text-xs text-gray-600 font-medium">예상 이동: {customerInfo.distanceKm} km {customerInfo.durationMin ? `(${customerInfo.durationMin}분)` : ''}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
