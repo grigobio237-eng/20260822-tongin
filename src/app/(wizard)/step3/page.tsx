@@ -95,7 +95,7 @@ export default function Step3Page() {
          endDate = customerInfo.movingDate || '';
          if (startDate && endDate) {
            const diffTime = new Date(endDate).getTime() - new Date(startDate).getTime();
-           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
            if (diffDays >= 0) initialDays = Math.max(1, diffDays);
          }
       }
@@ -133,7 +133,7 @@ export default function Step3Page() {
     const { packingDate, movingDate } = customerInfo;
     if (packingDate && movingDate && packingDate !== movingDate) {
       const diffTime = new Date(movingDate).getTime() - new Date(packingDate).getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
       const initialDays = diffDays >= 0 ? Math.max(1, diffDays) : 1;
 
       const currentOptions = useWizardStore.getState().options;
@@ -144,7 +144,7 @@ export default function Step3Page() {
       } else {
         ['컨테이너보관료 (1일)', '실내보관료 (1일)'].forEach(optName => {
           if (currentOptions[optName]) {
-             if (currentOptions[optName].startDate !== packingDate || currentOptions[optName].endDate !== movingDate) {
+             if (currentOptions[optName].startDate !== packingDate || currentOptions[optName].endDate !== movingDate || currentOptions[optName].quantity !== initialDays) {
                updateOption(optName, initialDays, optionPrices[optName] ?? currentOptions[optName].totalPrice / Math.max(1, currentOptions[optName].quantity), packingDate, movingDate);
              }
           }
@@ -330,7 +330,7 @@ export default function Step3Page() {
                             let days = options[opt.name]?.quantity || 1;
                             if (newStart && currentEnd) {
                               const diffTime = new Date(currentEnd).getTime() - new Date(newStart).getTime();
-                              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
                               if (diffDays >= 0) days = Math.max(1, diffDays);
                             }
                             updateOption(opt.name, days, displayPrice, newStart, currentEnd);
@@ -349,7 +349,7 @@ export default function Step3Page() {
                             let days = options[opt.name]?.quantity || 1;
                             if (currentStart && newEnd) {
                               const diffTime = new Date(newEnd).getTime() - new Date(currentStart).getTime();
-                              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
                               if (diffDays >= 0) days = Math.max(1, diffDays);
                             }
                             updateOption(opt.name, days, displayPrice, currentStart, newEnd);
