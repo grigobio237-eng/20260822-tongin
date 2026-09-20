@@ -153,19 +153,22 @@ export const useWizardStore = create<WizardState>()(
           if (!newRoomItems[room]) newRoomItems[room] = { items: {}, note: '', images: [] };
           const currentInstances = newRoomItems[room].items[itemName] || [];
           
-          const masterItem = Object.values(ROOM_CATEGORIES).flat().find(i => i.name === itemName);
+          const { useSettingsStore } = require('./settingsStore');
+          const settings = useSettingsStore.getState();
+          
+          let masterItem = settings.customMasterItems?.find((i: any) => i.name === itemName);
+          if (!masterItem) {
+            masterItem = Object.values(ROOM_CATEGORIES).flat().find((i: any) => i.name === itemName);
+          }
           
           let defaultVariantName = itemName;
           let defaultUnitCbm = 0.1;
 
           if (masterItem) {
-            const defaultVariant = masterItem.variants.find(v => v.isDefault) || masterItem.variants[1] || masterItem.variants[0];
+            const defaultVariant = masterItem.variants.find((v: any) => v.isDefault) || masterItem.variants[1] || masterItem.variants[0];
             defaultVariantName = defaultVariant.name;
             defaultUnitCbm = defaultVariant.cbm;
           }
-
-          const { useSettingsStore } = require('./settingsStore');
-          const settings = useSettingsStore.getState();
           const materialCbmSettings = settings.materialCbmSettings;
           const overrideKey = `${itemName}|${defaultVariantName}`;
 
@@ -239,19 +242,22 @@ export const useWizardStore = create<WizardState>()(
           const currentInstances = newRoomItems[room].items[itemName] || [];
           
           if (currentInstances.length === 0) {
-             const masterItem = Object.values(ROOM_CATEGORIES).flat().find(i => i.name === itemName);
+             const { useSettingsStore } = require('./settingsStore');
+             const settings = useSettingsStore.getState();
+             
+             let masterItem = settings.customMasterItems?.find((i: any) => i.name === itemName);
+             if (!masterItem) {
+               masterItem = Object.values(ROOM_CATEGORIES).flat().find((i: any) => i.name === itemName);
+             }
              
              let defaultVariantName = itemName;
              let defaultUnitCbm = 0.1;
 
              if (masterItem) {
-               const defaultVariant = masterItem.variants.find(v => v.isDefault) || masterItem.variants[1] || masterItem.variants[0];
+               const defaultVariant = masterItem.variants.find((v: any) => v.isDefault) || masterItem.variants[1] || masterItem.variants[0];
                defaultVariantName = defaultVariant.name;
                defaultUnitCbm = defaultVariant.cbm;
              }
-
-             const { useSettingsStore } = require('./settingsStore');
-             const settings = useSettingsStore.getState();
              const materialCbmSettings = settings.materialCbmSettings;
              const overrideKey = `${itemName}|${defaultVariantName}`;
 
