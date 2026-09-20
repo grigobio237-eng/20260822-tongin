@@ -80,9 +80,9 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
               </tr>
               <tr>
                 <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">출발지</th>
-                <td className="border border-slate-300 p-1.5">{c?.departureAddress || '-'} {c?.departureDetailAddress || ''} ({c?.departureFloor || 1}층)</td>
+                <td className="border border-slate-300 p-1.5">{c?.departureAddress || '-'} {c?.departureDetailAddress || ''} ({c?.departureFloor || 1}층{c?.departureConditions?.length ? `, ${c.departureConditions.map(cond => cond === '사다리' ? `사다리 (${c.departureLadderCount || 1}대)` : cond).join(', ')}` : ''})</td>
                 <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">도착지</th>
-                <td className="border border-slate-300 p-1.5">{c?.arrivalAddress || '-'} {c?.arrivalDetailAddress || ''} ({c?.arrivalFloor || 1}층)</td>
+                <td className="border border-slate-300 p-1.5">{c?.arrivalAddress || '-'} {c?.arrivalDetailAddress || ''} ({c?.arrivalFloor || 1}층{c?.arrivalConditions?.length ? `, ${c.arrivalConditions.map(cond => cond === '사다리' ? `사다리 (${c.arrivalLadderCount || 1}대)` : cond).join(', ')}` : ''})</td>
               </tr>
               <tr>
                 <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">포장일시</th>

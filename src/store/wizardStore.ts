@@ -530,6 +530,8 @@ export const useWizardStore = create<WizardState>()(
             quantity: opt.quantity || 1,
             price: opt.unitPrice || opt.price || opt.totalPrice || 0,
             totalPrice: opt.totalPrice || opt.price || 0,
+            startDate: opt.startDate || undefined,
+            endDate: opt.endDate || undefined
           };
         });
 

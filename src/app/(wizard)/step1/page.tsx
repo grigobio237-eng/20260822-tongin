@@ -21,6 +21,15 @@ export default function Step1Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (customerInfo.packingDate && customerInfo.movingDate && customerInfo.packingDate !== customerInfo.movingDate) {
+      if (customerInfo.arrivalStatus !== '보관이사') {
+        updateCustomerInfo({ arrivalStatus: '보관이사' });
+      }
+    }
+  }, [customerInfo.packingDate, customerInfo.movingDate, updateCustomerInfo]);
+
+
   const calculateRoute = async () => {
     if (!customerInfo.departureAddress || !customerInfo.arrivalAddress) {
       setRouteError('출발지와 도착지 주소를 모두 입력해주세요.');
@@ -266,7 +275,7 @@ export default function Step1Page() {
           <div className="pt-2 border-t mt-2">
             <label className="block text-sm font-medium mb-2 text-gray-600">도착지 상황</label>
             <div className="flex gap-2">
-              {['빈집', '당일이사', '도배대기'].map(status => (
+              {['빈집', '당일이사', '도배대기', '보관이사'].map(status => (
                 <button
                   key={status}
                   onClick={() => updateCustomerInfo({ arrivalStatus: status })}

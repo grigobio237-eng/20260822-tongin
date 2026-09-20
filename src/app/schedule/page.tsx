@@ -137,7 +137,11 @@ export default function SchedulePage() {
             arrivalDetailAddress: contract.arrival_detail_address,
             arrivalFloor: contract.arrival_floor,
             serviceType: contract.service_type,
-            arrivalStatus: contract.arrival_status
+            arrivalStatus: contract.arrival_status,
+            departureConditions: contract.departure_conditions ? contract.departure_conditions.split(',').filter(Boolean) : [],
+            departureLadderCount: contract.departure_ladder_count || 1,
+            arrivalConditions: contract.arrival_conditions ? contract.arrival_conditions.split(',').filter(Boolean) : [],
+            arrivalLadderCount: contract.arrival_ladder_count || 1
           },
           rooms: contract.rooms_json ? JSON.parse(contract.rooms_json) : [],
           options: contract.options_json ? JSON.parse(contract.options_json) : [],
@@ -150,6 +154,7 @@ export default function SchedulePage() {
           optionCost: contract.option_cost,
           totalCost: contract.total_cost,
           deposit: contract.deposit,
+          middlePayment: contract.middle_payment || 0,
           balance: contract.balance,
           sttMemo: contract.stt_memo,
           signatureBase64: contract.signature_url || undefined,

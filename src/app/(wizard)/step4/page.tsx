@@ -138,12 +138,17 @@ export default function Step4Page() {
         body: JSON.stringify({
           id: newContractId,
           customerInfo,
-          options: calculatedOptions.map(opt => ({
-            name: opt.name,
-            quantity: 1,
-            unitPrice: opt.price,
-            totalPrice: opt.price
-          })),
+          options: Object.entries(store.options).map(([originalName, optInfo]) => {
+            const calcOpt = calculatedOptions.find(co => co.name.includes(originalName.split(' ')[0]));
+            return {
+              name: calcOpt ? calcOpt.name : originalName,
+              quantity: optInfo.quantity || 1,
+              unitPrice: optInfo.totalPrice / Math.max(1, optInfo.quantity),
+              totalPrice: calcOpt ? calcOpt.price : optInfo.totalPrice,
+              startDate: optInfo.startDate,
+              endDate: optInfo.endDate
+            };
+          }),
           rooms: Object.entries(store.roomItems || {}).map(([name, data]: [string, any]) => ({
             id: name,
             name: name,

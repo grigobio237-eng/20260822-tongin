@@ -126,6 +126,31 @@ export default function Step3Page() {
   // 동적 포장재료 연동 (DB 설정 우선, 없을 시 레거시 하드코딩 폴백)
   const defaultPackingMaterials = useSettingsStore(state => state.defaultPackingMaterials);
   
+  // Auto-sync storage options dates from step 1
+  useEffect(() => {
+    const { packingDate, movingDate } = customerInfo;
+    if (packingDate && movingDate && packingDate !== movingDate) {
+      const diffTime = new Date(movingDate).getTime() - new Date(packingDate).getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const initialDays = diffDays >= 0 ? Math.max(1, diffDays) : 1;
+
+      const currentOptions = useWizardStore.getState().options;
+      
+      if (!currentOptions['컨테이너보관료 (1일)'] && !currentOptions['실내보관료 (1일)']) {
+        const defaultPrice = optionPrices['컨테이너보관료 (1일)'] ?? 8000;
+        updateOption('컨테이너보관료 (1일)', initialDays, defaultPrice, packingDate, movingDate);
+      } else {
+        ['컨테이너보관료 (1일)', '실내보관료 (1일)'].forEach(optName => {
+          if (currentOptions[optName]) {
+             if (currentOptions[optName].startDate !== packingDate || currentOptions[optName].endDate !== movingDate) {
+               updateOption(optName, initialDays, optionPrices[optName] ?? currentOptions[optName].totalPrice / Math.max(1, currentOptions[optName].quantity), packingDate, movingDate);
+             }
+          }
+        });
+      }
+    }
+  }, [customerInfo.packingDate, customerInfo.movingDate, optionPrices, updateOption]);
+
   useEffect(() => {
     let customCounts: Record<string, number> = {};
     let dynamicCounts: Record<string, number> = {};

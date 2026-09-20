@@ -62,11 +62,19 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
               <tbody>
                 <tr>
                   <th className="border border-slate-300 p-1.5 w-24 text-center bg-slate-50 font-bold">출발지 조건</th>
-                  <td className="border border-slate-300 p-1.5">{c?.departureConditions?.join(', ') || '-'}</td>
+                  <td className="border border-slate-300 p-1.5">{
+                    c?.departureConditions && c.departureConditions.length > 0 
+                      ? c.departureConditions.map(cond => cond === '사다리' ? `사다리 (${c.departureLadderCount || 1}대)` : cond).join(', ') 
+                      : '-'
+                  }</td>
                 </tr>
                 <tr>
                   <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">도착지 조건</th>
-                  <td className="border border-slate-300 p-1.5">{c?.arrivalConditions?.join(', ') || '-'}</td>
+                  <td className="border border-slate-300 p-1.5">{
+                    c?.arrivalConditions && c.arrivalConditions.length > 0
+                      ? c.arrivalConditions.map(cond => cond === '사다리' ? `사다리 (${c.arrivalLadderCount || 1}대)` : cond).join(', ')
+                      : '-'
+                  }</td>
                 </tr>
                 <tr>
                   <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold">작업 인원</th>
@@ -95,8 +103,14 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
                   <th className="border border-slate-300 p-1.5 w-24 text-center bg-slate-50 font-bold text-blue-700">계약금</th>
                   <td className="border border-slate-300 p-1.5 text-blue-700 font-bold text-right">{deposit?.toLocaleString()}원</td>
                 </tr>
+                {middlePayment ? (
+                  <tr>
+                    <th className="border border-slate-300 p-1.5 w-24 text-center bg-slate-50 font-bold text-blue-700">포장일 수금액<br/>(중도금)</th>
+                    <td className="border border-slate-300 p-1.5 text-blue-700 font-bold text-right">{middlePayment?.toLocaleString()}원</td>
+                  </tr>
+                ) : null}
                 <tr>
-                  <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold text-red-700">현장수금액 (잔금)</th>
+                  <th className="border border-slate-300 p-1.5 text-center bg-slate-50 font-bold text-red-700">{middlePayment ? '운송일 수금액' : '현장 수금액'}<br/>(잔금)</th>
                   <td className="border border-slate-300 p-1.5 text-red-700 font-bold text-right">{balance?.toLocaleString()}원</td>
                 </tr>
               </tbody>
