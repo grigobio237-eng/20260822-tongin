@@ -556,7 +556,21 @@ export default function Step4Page() {
         <div className="bg-white rounded-xl shadow-sm border p-5 space-y-4">
           {/* 이사 기본비용 — 수정 가능 */}
           <div className="flex justify-between items-center py-2 border-b">
-            <span className="text-gray-600">이사 기본비용</span>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-600">이사 기본비용</span>
+              {editableBaseCost !== null && (
+                <button 
+                  onClick={() => {
+                    setEditableBaseCost(null);
+                    // store.manualBaseCost is not easily cleared since there's no action,
+                    // but we can clear it from local state so it recalculates.
+                  }}
+                  className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full hover:bg-gray-300"
+                >
+                  초기화
+                </button>
+              )}
+            </div>
             <div className="relative">
               <input
                 type="text"

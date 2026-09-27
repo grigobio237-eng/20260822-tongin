@@ -74,6 +74,7 @@ export interface WizardState {
   surcharge: { noEvilSpirits: boolean; endOfMonth: boolean };
   discount: number;
   manualBaseCost?: number;
+  updateManualBaseCost: (cost?: number) => void;
   deposit?: number;
   middlePayment?: number;
 
@@ -142,7 +143,8 @@ export const useWizardStore = create<WizardState>()(
       setContractId: (id) => set({ contractId: id }),
       setStep: (step) => set({ currentStep: step }),
       
-      updateCustomerInfo: (info) => set((state) => ({ 
+      updateManualBaseCost: (cost) => set({ manualBaseCost: cost }),
+  updateCustomerInfo: (info) => set((state) => ({ 
         customerInfo: { ...state.customerInfo, ...info } 
       })),
       
