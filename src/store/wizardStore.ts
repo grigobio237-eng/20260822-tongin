@@ -625,6 +625,9 @@ export const useWizardStore = create<WizardState>()(
         resources: initialResources,
         surcharge: { noEvilSpirits: false, endOfMonth: false },
         discount: 0,
+        manualBaseCost: undefined,
+        deposit: undefined,
+        middlePayment: undefined,
       })
     }),
     {
