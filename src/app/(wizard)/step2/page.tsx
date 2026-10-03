@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
-import { ROOM_CATEGORIES, RoomCategory, MasterItem } from '@/lib/constants/items';
+import { ROOM_CATEGORIES, RoomCategory, MasterItem, ItemCategory, ITEM_CATEGORIES, getDefaultItemCategory } from '@/lib/constants/items';
 import clsx from 'clsx';
 import { Check, ChevronDown, Plus, Minus, X, Mic, MicOff } from 'lucide-react';
 import { useSpeechToText } from '@/hooks/useSpeechToText';
@@ -20,6 +20,7 @@ export default function Step2Page() {
   const materialSettings = useSettingsStore(state => state.materialCbmSettings);
   const itemCbmSettings = useSettingsStore(state => state.itemCbmSettings);
   const [activeTab, setActiveTab] = useState<RoomCategory>('안방');
+  const [selectedCategory, setSelectedCategory] = useState<'전체' | ItemCategory>('전체');
   const customMasterItems = useSettingsStore(state => state.customMasterItems);
   const roomItemMapping = useSettingsStore(state => state.roomItemMapping);
   const [modalState, setModalState] = useState<ModalState | null>(null);
@@ -119,13 +120,47 @@ export default function Step2Page() {
           }, 0).toFixed(1)} CBM
         </div>
       </div>
+
+        {/* Sub-Category Filter Chips */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pt-2 pb-0.5 scrollbar-hide">
+          {(['전체', ...ITEM_CATEGORIES] as const).map((cat) => {
+            const isSelected = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={clsx(
+                  "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all border shrink-0 flex items-center gap-1 shadow-sm",
+                  isSelected
+                    ? "bg-slate-800 text-white border-slate-800 shadow-slate-200"
+                    : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                )}
+              >
+                {cat === '가구' && <span>🛋️</span>}
+                {cat === '가전' && <span>📺</span>}
+                {cat === '생활/잔짐' && <span>📦</span>}
+                {cat === '기타/특수' && <span>🪴</span>}
+                <span>{cat}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Items Grid */}
       <div className="bg-white rounded-xl shadow-sm border p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         {(() => {
           const allowedNames = roomItemMapping[activeTab] || [];
-          const items = (customMasterItems || []).filter(item => allowedNames.includes(item.name));
+          let items = (customMasterItems || []).filter(item => allowedNames.includes(item.name));
+          
+          if (selectedCategory !== '전체') {
+            items = items.filter(item => {
+              const cat = item.category || getDefaultItemCategory(item.name);
+              return cat === selectedCategory;
+            });
+          }
+
           return items.sort((a, b) => {
             if (a.name.startsWith('기타물품') && !b.name.startsWith('기타물품')) return 1;
             if (!a.name.startsWith('기타물품') && b.name.startsWith('기타물품')) return -1;
@@ -251,7 +286,7 @@ export default function Step2Page() {
         })}
 
         {/* 기타 항목 2개 추가 */}
-        {[1, 2].map(num => {
+        {(selectedCategory === '전체' || selectedCategory === '기타/특수') && [1, 2].map(num => {
           const customKey = `기타 ${num}`;
           const instances = roomItems[activeTab]?.items?.[customKey] || [];
           const itemState = instances[0];

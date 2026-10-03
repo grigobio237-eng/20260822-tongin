@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSettingsStore, LadderRateTier, PartnerContact, DEFAULT_LADDER_RATES } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowLeft, Save } from 'lucide-react';
-import { OPTION_ITEMS, PACKING_MATERIALS, ROOM_ITEMS, LIVING_ROOM_ITEMS, KITCHEN_ITEMS, VERANDA_ITEMS, REAR_BALCONY_ITEMS, UTILITY_ROOM_ITEMS, MasterItem, RoomCategory, ROOM_CATEGORIES } from '@/lib/constants/items';
+import { OPTION_ITEMS, PACKING_MATERIALS, ROOM_ITEMS, LIVING_ROOM_ITEMS, KITCHEN_ITEMS, VERANDA_ITEMS, REAR_BALCONY_ITEMS, UTILITY_ROOM_ITEMS, MasterItem, RoomCategory, ROOM_CATEGORIES, ItemCategory, ITEM_CATEGORIES, getDefaultItemCategory } from '@/lib/constants/items';
 
 // 모든 가전/가구 리스트 병합 (중복 제거)
 const allMasterItems = [
@@ -61,8 +61,12 @@ const parseNum = (str: string) => Number(str.replace(/,/g, ''));
   const handleAddMasterItem = () => {
     const name = prompt('새로운 품목명(큰 타이틀)을 입력하세요:');
     if (name) {
-      setLocalCustomMasterItems(prev => [...prev, { name, variants: [] }]);
+      setLocalCustomMasterItems(prev => [...prev, { name, category: '가구', variants: [] }]);
     }
+  };
+
+  const handleItemCategoryChange = (itemName: string, category: ItemCategory) => {
+    setLocalCustomMasterItems(prev => prev.map(i => i.name === itemName ? { ...i, category } : i));
   };
 
   const handleDeleteMasterItem = (itemName: string) => {
@@ -503,7 +507,18 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
               {sortedMasterItems.map(item => (
                 <div key={item.name} className="border rounded-xl p-4 bg-gray-50">
                   <div className="flex justify-between items-center mb-3 border-b pb-2">
-                    <h4 className="font-bold text-gray-800 cursor-pointer hover:text-blue-600" onClick={() => handleEditMasterItemName(item.name)} title="이름 수정하기">{item.name} ✏️</h4>
+                    <div className="flex items-center gap-3">
+                      <h4 className="font-bold text-gray-800 cursor-pointer hover:text-blue-600" onClick={() => handleEditMasterItemName(item.name)} title="이름 수정하기">{item.name} ✏️</h4>
+                      <select
+                        value={item.category || getDefaultItemCategory(item.name)}
+                        onChange={(e) => handleItemCategoryChange(item.name, e.target.value as ItemCategory)}
+                        className="text-xs border border-gray-300 rounded px-2 py-1 bg-white font-medium text-gray-700 shadow-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                      >
+                        {ITEM_CATEGORIES.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    </div>
                     <button onClick={() => handleDeleteMasterItem(item.name)} className="text-red-500 text-xs px-2 py-1 border border-red-200 rounded hover:bg-red-50">삭제</button>
                   </div>
                   <div className="space-y-2">

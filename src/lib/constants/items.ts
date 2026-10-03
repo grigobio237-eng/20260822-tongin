@@ -6,10 +6,37 @@ export interface ItemVariant {
   isDefault?: boolean;
 }
 
+export type ItemCategory = '가구' | '가전' | '생활/잔짐' | '기타/특수';
+export const ITEM_CATEGORIES: ItemCategory[] = ['가구', '가전', '생활/잔짐', '기타/특수'];
+
 export interface MasterItem {
   name: string;
+  category?: ItemCategory;
   variants: ItemVariant[];
 }
+
+export const getDefaultItemCategory = (name: string): ItemCategory => {
+  const appliances = [
+    'TV', '냉장고', '김치냉장고', '세탁기', '건조기', '워시타워', 
+    '에어컨', '에어드레서/스타일러', '공기청정기', '식기세척기', 
+    '가스렌지', '정수기', '컴퓨터'
+  ];
+  if (appliances.includes(name)) return '가전';
+
+  const household = [
+    '옷', '이불', '도서/소형물품(소박스용)', '생활물품/잔짐류(중박스용)', 
+    '신발류(중박스용)', '식기류', '공간박스'
+  ];
+  if (household.includes(name)) return '생활/잔짐';
+
+  const etc = [
+    '피아노', '자전거', '앵글/선반', '화분', '항아리', '쌀통', 
+    '기타물품1', '기타물품2'
+  ];
+  if (etc.includes(name) || name.startsWith('기타물품')) return '기타/특수';
+
+  return '가구';
+};
 
 // 공통 규격 생성 유틸 (소형/기본/대형)
 const createStandardVariants = (small: number, normal: number, large: number): ItemVariant[] => [
