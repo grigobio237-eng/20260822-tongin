@@ -12,6 +12,7 @@ export default function CustomerSignPage() {
   const [agreed, setAgreed] = useState(false);
   const [isSigned, setIsSigned] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [isPadActive, setIsPadActive] = useState(false);
   const sigPad = useRef<any>(null);
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export default function CustomerSignPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!loading && !isSigned && sigPad.current) {
+    if (!loading && !isSigned && isPadActive && sigPad.current) {
       const canvas = sigPad.current.getCanvas();
       if (canvas) {
         const preventScroll = (e: TouchEvent) => {
@@ -47,7 +48,7 @@ export default function CustomerSignPage() {
         };
       }
     }
-  }, [loading, isSigned]);
+  }, [loading, isSigned, isPadActive]);
 
   const handleSubmitSignature = async () => {
     if (!agreed) {
@@ -225,16 +226,81 @@ export default function CustomerSignPage() {
               </div>
             ) : (
               <div>
-                <div className="border border-dashed border-gray-300 rounded-lg bg-slate-50 overflow-hidden mb-3 touch-none">
-                  <SignatureCanvas canvasProps={{ className: 'w-full h-48 touch-none', style: { touchAction: 'none' } }} backgroundColor="rgb(248, 250, 252)" ref={sigPad} />
+                <div className="relative border border-dashed border-gray-300 rounded-lg bg-slate-50 overflow-hidden mb-3">
+                  <SignatureCanvas
+                    canvasProps={{
+                      className: `w-full h-48 ${isPadActive ? 'touch-none' : 'pointer-events-none'}`,
+                      style: { touchAction: isPadActive ? 'none' : 'auto' }
+                    }}
+                    backgroundColor="rgb(248, 250, 252)"
+                    ref={sigPad}
+                  />
+
+                  {!isPadActive && (
+                    <div 
+                      className="absolute inset-0 bg-slate-100/95 backdrop-blur-[1px] flex flex-col items-center justify-center p-4 text-center cursor-pointer transition-all hover:bg-slate-100/90 z-10"
+                      onClick={() => setIsPadActive(true)}
+                    >
+                      <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-2 shadow-sm">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-bold text-gray-800 mb-1">화면 스크롤 보호를 위해 패드가 잠겨있습니다</p>
+                      <p className="text-xs text-gray-500 mb-3">서명하시려면 아래 버튼을 눌러주세요</p>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsPadActive(true);
+                        }}
+                        className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 active:scale-95"
+                      >
+                        <span>✍️ 서명하기 (패드 활성화)</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {isPadActive && (
+                    <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        서명 작성 중
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsPadActive(false)}
+                        className="px-2 py-0.5 rounded text-[11px] font-semibold bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors"
+                        title="화면 스크롤을 위해 패드를 다시 잠급니다"
+                      >
+                        패드 잠금
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => sigPad.current?.clear()}
-                  className="text-sm text-gray-500 underline mb-4 block"
-                >
-                  다시 서명하기
-                </button>
+
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sigPad.current?.clear();
+                      setIsPadActive(true);
+                    }}
+                    className="text-xs text-gray-500 hover:text-gray-700 underline"
+                  >
+                    다시 서명하기 (지우기)
+                  </button>
+                  {isPadActive && (
+                    <button
+                      type="button"
+                      onClick={() => setIsPadActive(false)}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      서명 완료 (패드 잠금)
+                    </button>
+                  )}
+                </div>
+
                 <button
                   type="button"
                   onClick={handleSubmitSignature}
