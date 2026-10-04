@@ -144,7 +144,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
             <h4 className="font-bold text-blue-900 border-b border-blue-200 pb-1 mb-1.5 text-[11px]">최종 비용 정산 (VAT 별도)</h4>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
               <div className="flex justify-between border-b border-slate-200 py-0.5">
-                <span>이사 기본 운송료</span>
+                <span>이사 기본 운송료 {data.customerInfo.arrivalStatus === '보관이사' || (data.customerInfo.packingDate && data.customerInfo.movingDate && data.customerInfo.packingDate !== data.customerInfo.movingDate) ? '(보관이사 2회)' : ''}</span>
                 <span className="font-semibold">{Number(data.movingCost || 0).toLocaleString()} 원</span>
               </div>
               <div className="flex justify-between border-b border-slate-200 py-0.5">

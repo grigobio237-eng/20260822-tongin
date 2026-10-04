@@ -68,7 +68,13 @@ export default function Step4Page() {
   const currentDistanceTier = getDistanceTier(distanceValue);
   const distanceMatrixPrice = (settingsStore.distanceRates?.[currentDistanceTier] as any)?.[tonnageKey] || 0;
 
-  const finalBaseCost = customerInfo.applyDistancePrice ? distanceMatrixPrice : calculatedBaseCost;
+  const isStorageMove = Boolean(
+    (customerInfo.packingDate && customerInfo.movingDate && customerInfo.packingDate !== customerInfo.movingDate) ||
+    customerInfo.arrivalStatus === '보관이사'
+  );
+
+  const singleBaseCost = customerInfo.applyDistancePrice ? distanceMatrixPrice : calculatedBaseCost;
+  const finalBaseCost = singleBaseCost * (isStorageMove ? 2 : 1);
 
   // editableBaseCost가 null이면 자동계산값, 아니면 수정된 값 사용
   const baseCost = editableBaseCost !== null ? editableBaseCost : finalBaseCost;
@@ -119,7 +125,6 @@ export default function Step4Page() {
   const vatAmount = includeVat ? Math.round(totalCost * 0.1) : 0;
   const finalTotal = totalCost + vatAmount;
   const autoDeposit = Math.round(finalTotal * 0.1);
-  const isStorageMove = customerInfo.packingDate && customerInfo.movingDate && customerInfo.packingDate !== customerInfo.movingDate;
   const balance = finalTotal - deposit - (isStorageMove ? middlePayment : 0);
 
 
@@ -558,12 +563,16 @@ export default function Step4Page() {
           <div className="flex justify-between items-center py-2 border-b">
             <div className="flex items-center gap-2">
               <span className="text-gray-600">이사 기본비용</span>
+              {isStorageMove && (
+                <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                  보관이사 2회 작업 (×2)
+                </span>
+              )}
               {editableBaseCost !== null && (
                 <button 
                   onClick={() => {
                     setEditableBaseCost(null);
-                    // store.manualBaseCost is not easily cleared since there's no action,
-                    // but we can clear it from local state so it recalculates.
+                    store.updateManualBaseCost(undefined);
                   }}
                   className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full hover:bg-gray-300"
                 >
