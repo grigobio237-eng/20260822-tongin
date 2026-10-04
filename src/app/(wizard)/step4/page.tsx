@@ -13,13 +13,12 @@ import { checkSpecialDate } from '@/lib/dateUtils';
 export default function Step4Page() {
   const store = useWizardStore();
   const settingsStore = useSettingsStore();
-  const { contractId, setContractId, customerInfo, options, reset, setStep } = store;
+  const { contractId, setContractId, customerInfo, options, reset, setStep, includeVat, setIncludeVat } = store;
   const { partnerContacts } = settingsStore;
   const router = useRouter();
   
   const [deposit, setDeposit] = useState(store.deposit || 0);
   const [middlePayment, setMiddlePayment] = useState(store.middlePayment || 0);
-  const [includeVat, setIncludeVat] = useState(false);
   const [editableBaseCost, setEditableBaseCost] = useState<number | null>(store.manualBaseCost || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedContract, setCompletedContract] = useState<{ id: string, pdfUrl: string } | null>(null);
@@ -178,7 +177,10 @@ export default function Step4Page() {
             memo: data?.note || '',
             images: data?.images || []
           })),
-          totalCost,
+          movingCost: baseCost,
+          totalCost: finalTotal,
+          includeVat,
+          vatAmount,
           deposit,
           middlePayment,
           balance,
@@ -339,7 +341,9 @@ export default function Step4Page() {
       totalCbm: store.totalCbm,
       movingCost: baseCost,
       optionCost: optionsCost,
-      totalCost: totalCost,
+      totalCost: finalTotal,
+      includeVat: includeVat,
+      vatAmount: vatAmount,
       deposit: deposit,
       middlePayment,
       balance: balance,

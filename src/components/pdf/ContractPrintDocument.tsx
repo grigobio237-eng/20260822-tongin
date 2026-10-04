@@ -47,6 +47,8 @@ export interface ContractPrintData {
   middlePayment?: number;
   signatureBase64?: string;
   sttMemo?: string;
+  includeVat?: boolean;
+  vatAmount?: number;
 }
 
 export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ data }) => {
@@ -140,37 +142,64 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
           </div>
 
           {/* 3. 비용 정산 내역 */}
-          <div className="border-2 border-blue-900 rounded p-2.5 bg-blue-50/20 mb-3">
-            <h4 className="font-bold text-blue-900 border-b border-blue-200 pb-1 mb-1.5 text-[11px]">최종 비용 정산 (VAT 별도)</h4>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-              <div className="flex justify-between border-b border-slate-200 py-0.5">
-                <span>이사 기본 운송료 {data.customerInfo.arrivalStatus === '보관이사' || (data.customerInfo.packingDate && data.customerInfo.movingDate && data.customerInfo.packingDate !== data.customerInfo.movingDate) ? '(보관이사 2회)' : ''}</span>
-                <span className="font-semibold">{Number(data.movingCost || 0).toLocaleString()} 원</span>
-              </div>
-              <div className="flex justify-between border-b border-slate-200 py-0.5">
-                <span>선택 부대 옵션 비용</span>
-                <span className="font-semibold">{Number(data.optionCost || 0).toLocaleString()} 원</span>
-              </div>
-              <div className="flex justify-between border-b border-blue-400 py-1 text-blue-950 font-bold col-span-2 text-xs">
-                <span>총 계약 합계 금액</span>
-                <span>{Number(data.totalCost || 0).toLocaleString()} 원</span>
-              </div>
-              <div className="flex justify-between py-0.5">
-                <span>계약금 (선납)</span>
-                <span className="font-semibold text-emerald-700">{Number(data.deposit || 0).toLocaleString()} 원</span>
-              </div>
-              {data.middlePayment ? (
-                <div className="flex justify-between py-0.5">
-                  <span className="font-semibold text-emerald-700">포장일 결제액 (중도금)</span>
-                  <span className="font-semibold text-emerald-700">{Number(data.middlePayment).toLocaleString()} 원</span>
+          {(() => {
+            const totalSettled = Number(data.deposit || 0) + Number(data.balance || 0) + Number(data.middlePayment || 0);
+            const isVatIncluded = Boolean(
+              data.includeVat || 
+              (data.vatAmount && data.vatAmount > 0) || 
+              (totalSettled > Number(data.totalCost || 0) && totalSettled === Math.round(Number(data.totalCost || 0) * 1.1))
+            );
+
+            const computedVatAmount = data.vatAmount !== undefined
+              ? data.vatAmount 
+              : (isVatIncluded ? (totalSettled > Number(data.totalCost || 0) ? totalSettled - Number(data.totalCost || 0) : Math.round(Number(data.totalCost || 0) * 0.1)) : 0);
+
+            const computedTotalCost = isVatIncluded
+              ? (Number(data.totalCost || 0) >= totalSettled ? Number(data.totalCost || 0) : totalSettled)
+              : Number(data.totalCost || 0);
+
+            return (
+              <div className="border-2 border-blue-900 rounded p-2.5 bg-blue-50/20 mb-3">
+                <h4 className="font-bold text-blue-900 border-b border-blue-200 pb-1 mb-1.5 text-[11px]">
+                  {isVatIncluded ? '최종 비용 정산 (VAT 포함)' : '최종 비용 정산 (VAT 별도)'}
+                </h4>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                  <div className="flex justify-between border-b border-slate-200 py-0.5">
+                    <span>이사 기본 운송료 {data.customerInfo.arrivalStatus === '보관이사' || (data.customerInfo.packingDate && data.customerInfo.movingDate && data.customerInfo.packingDate !== data.customerInfo.movingDate) ? '(보관이사 2회)' : ''}</span>
+                    <span className="font-semibold">{Number(data.movingCost || 0).toLocaleString()} 원</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-200 py-0.5">
+                    <span>선택 부대 옵션 비용</span>
+                    <span className="font-semibold">{Number(data.optionCost || 0).toLocaleString()} 원</span>
+                  </div>
+                  {isVatIncluded && (
+                    <div className="flex justify-between border-b border-slate-200 py-0.5 text-blue-900 col-span-2">
+                      <span className="font-medium">부가가치세 (VAT 10%)</span>
+                      <span className="font-semibold text-blue-700">+{Number(computedVatAmount).toLocaleString()} 원</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between border-b border-blue-400 py-1 text-blue-950 font-bold col-span-2 text-xs">
+                    <span>총 계약 합계 금액 {isVatIncluded ? '(VAT 포함)' : '(VAT 별도)'}</span>
+                    <span className="text-blue-900">{Number(computedTotalCost).toLocaleString()} 원</span>
+                  </div>
+                  <div className="flex justify-between py-0.5">
+                    <span>계약금 (선납)</span>
+                    <span className="font-semibold text-emerald-700">{Number(data.deposit || 0).toLocaleString()} 원</span>
+                  </div>
+                  {data.middlePayment ? (
+                    <div className="flex justify-between py-0.5">
+                      <span className="font-semibold text-emerald-700">포장일 결제액 (중도금)</span>
+                      <span className="font-semibold text-emerald-700">{Number(data.middlePayment).toLocaleString()} 원</span>
+                    </div>
+                  ) : null}
+                  <div className="flex justify-between py-0.5">
+                    <span className="font-bold text-rose-700">잔금 ({data.middlePayment ? '운송일 결제' : '작업완료 시'})</span>
+                    <span className="font-bold text-rose-700 text-xs">{Number(data.balance || 0).toLocaleString()} 원</span>
+                  </div>
                 </div>
-              ) : null}
-              <div className="flex justify-between py-0.5">
-                <span className="font-bold text-rose-700">잔금 ({data.middlePayment ? '운송일 결제' : '작업완료 시'})</span>
-                <span className="font-bold text-rose-700 text-xs">{Number(data.balance || 0).toLocaleString()} 원</span>
               </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* 4. 고지사항 안내 */}
           <div className="border border-slate-200 bg-slate-50 p-2 rounded text-[9.5px] text-slate-600 leading-relaxed mb-3">

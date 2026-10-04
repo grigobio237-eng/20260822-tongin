@@ -129,6 +129,8 @@ export default function CustomerSignPage() {
       balance: contract.balance,
       sttMemo: contract.stt_memo,
       signatureBase64: contract.signature_url || undefined,
+      includeVat: contract.include_vat === 1 || Boolean(contract.vat_amount && contract.vat_amount > 0),
+      vatAmount: contract.vat_amount,
     };
   } catch (e) {
     console.error("데이터 파싱 에러", e);

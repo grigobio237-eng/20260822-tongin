@@ -48,6 +48,8 @@ export async function POST(req: Request) {
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN apply_distance_price INTEGER").run(); } catch (e) {}
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN middle_payment INTEGER").run(); } catch (e) {}
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN secondary_phone TEXT").run(); } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN include_vat INTEGER").run(); } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN vat_amount INTEGER").run(); } catch (e) {}
 
     const sql = `
       INSERT OR REPLACE INTO contracts (
@@ -59,8 +61,9 @@ export async function POST(req: Request) {
         moving_cost, option_cost, total_cost, deposit, balance,
         stt_memo, signature_url, pdf_url, status, created_at, updated_at,
         rooms_json, options_json, resources_json, departure_detail_address, arrival_detail_address,
-        distance_km, duration_min, apply_distance_price, middle_payment, secondary_phone
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        distance_km, duration_min, apply_distance_price, middle_payment, secondary_phone,
+        include_vat, vat_amount
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const result = await (db as any).prepare(sql).bind(
@@ -82,7 +85,7 @@ export async function POST(req: Request) {
       '{}',
       Number(resources.workerMale) || 0,
       Number(resources.workerFemale) || 0,
-      Number(body.totalCost || 0) - Number(body.optionCost || 0),
+      Number(body.movingCost || (Number(body.totalCost || 0) - Number(body.optionCost || 0) - Number(body.vatAmount || 0))),
       Number(body.optionCost) || 0,
       Number(body.totalCost) || 0,
       Number(body.deposit) || 0,
@@ -102,7 +105,9 @@ export async function POST(req: Request) {
       String(customer.durationMin || ''),
       customer.applyDistancePrice ? 1 : 0,
       Number(body.middlePayment) || 0,
-      String(customer.secondaryPhone || '')
+      String(customer.secondaryPhone || ''),
+      body.includeVat ? 1 : 0,
+      Number(body.vatAmount) || 0
     ).run();
 
     if (!result.success) {

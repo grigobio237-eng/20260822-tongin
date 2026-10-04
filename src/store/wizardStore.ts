@@ -77,6 +77,8 @@ export interface WizardState {
   updateManualBaseCost: (cost?: number) => void;
   deposit?: number;
   middlePayment?: number;
+  includeVat: boolean;
+  setIncludeVat: (include: boolean) => void;
 
   setContractId: (id: string | null) => void;
   setStep: (step: number) => void;
@@ -139,6 +141,8 @@ export const useWizardStore = create<WizardState>()(
       resources: initialResources,
       surcharge: { noEvilSpirits: false, friday: false, endOfMonth: false },
       discount: 0,
+      includeVat: false,
+      setIncludeVat: (include) => set({ includeVat: include }),
       
       setContractId: (id) => set({ contractId: id }),
       setStep: (step) => set({ currentStep: step }),
@@ -610,7 +614,8 @@ export const useWizardStore = create<WizardState>()(
             workerFemale: contract.worker_count_female || 0
           },
           discount: 0,
-          surcharge: { noEvilSpirits: false, friday: false, endOfMonth: false }
+          surcharge: { noEvilSpirits: false, friday: false, endOfMonth: false },
+          includeVat: contract.include_vat === 1 || Boolean(contract.vat_amount && contract.vat_amount > 0)
         });
       },
       reset: () => set({
@@ -625,6 +630,7 @@ export const useWizardStore = create<WizardState>()(
         resources: initialResources,
         surcharge: { noEvilSpirits: false, friday: false, endOfMonth: false },
         discount: 0,
+        includeVat: false,
         manualBaseCost: undefined,
         deposit: undefined,
         middlePayment: undefined,
