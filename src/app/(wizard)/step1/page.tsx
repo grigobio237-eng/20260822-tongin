@@ -4,12 +4,13 @@ import { checkSpecialDate } from '@/lib/dateUtils';
 
 import React, { useState, useEffect } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { getRouteInfo } from '@/lib/kakaoApi';
 import { MapPin, Loader2 } from 'lucide-react';
 
 export default function Step1Page() {
-  const { customerInfo, updateCustomerInfo, setStep } = useWizardStore();
+  const { customerInfo, updateCustomerInfo, setStep, updateOption } = useWizardStore();
   const router = useRouter();
   
   const [isCalculating, setIsCalculating] = useState(false);
@@ -66,11 +67,37 @@ export default function Step1Page() {
   const handleConditionToggle = (type: 'departure' | 'arrival', condition: string) => {
     const key = type === 'departure' ? 'departureConditions' : 'arrivalConditions';
     const current = customerInfo[key];
-    const updated = current.includes(condition)
-      ? current.filter(c => c !== condition)
-      : [...current, condition];
+    const isAdding = !current.includes(condition);
+    const updated = isAdding
+      ? [...current, condition]
+      : current.filter(c => c !== condition);
     
     updateCustomerInfo({ [key]: updated });
+
+    if (condition === '사다리') {
+      const optName = type === 'departure' ? '사다리·출발지' : '사다리·도착지';
+      if (isAdding) {
+        const floorStr = String(type === 'departure' ? customerInfo.departureFloor : customerInfo.arrivalFloor);
+        const match = floorStr ? floorStr.match(/\d+/) : null;
+        const floor = match ? parseInt(match[0], 10) : NaN;
+        let tierKey = 'tier_2_5';
+        if (!isNaN(floor)) {
+          if (floor <= 5) tierKey = 'tier_2_5';
+          else if (floor <= 7) tierKey = 'tier_6_7';
+          else if (floor <= 9) tierKey = 'tier_8_9';
+          else if (floor <= 11) tierKey = 'tier_10_11';
+          else if (floor <= 13) tierKey = 'tier_12_13';
+          else if (floor <= 24) tierKey = `tier_${floor}`;
+          else tierKey = 'tier_25_plus';
+        }
+        const ladderRates = useSettingsStore.getState().ladderRates;
+        const optionPrices = useSettingsStore.getState().optionPrices;
+        const price = ladderRates?.[tierKey]?.fiveTon ?? optionPrices?.[optName] ?? 150000;
+        updateOption(optName, 1, price);
+      } else {
+        updateOption(optName, 0, 0);
+      }
+    }
   };
 
   const handleSecondaryPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {

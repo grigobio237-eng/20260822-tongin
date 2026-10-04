@@ -155,15 +155,13 @@ export default function Step3Page() {
     else targetLadderTon = 'tenTon';
 
     setLadderTons(prev => {
-      if (prev['사다리·출발지'] === targetLadderTon && prev['사다리·도착지'] === targetLadderTon) {
-        return prev;
-      }
-      
       const currentOptions = useWizardStore.getState().options;
       ['사다리·출발지', '사다리·도착지'].forEach(optName => {
-        if (currentOptions[optName] && prev[optName] !== targetLadderTon) {
-           const price = manualPrices[optName] ?? getCalculatedLadderPrice(optName, targetLadderTon);
-           updateOption(optName, currentOptions[optName].quantity || 1, price);
+        if (currentOptions[optName] && !manualPrices[optName]) {
+           const price = getCalculatedLadderPrice(optName, targetLadderTon);
+           if (currentOptions[optName].totalPrice !== price) {
+             updateOption(optName, currentOptions[optName].quantity || 1, price);
+           }
         }
       });
       
@@ -173,7 +171,60 @@ export default function Step3Page() {
         '사다리·도착지': targetLadderTon
       };
     });
-  }, [resources.vehicles, manualPrices, updateOption]);
+  }, [resources.vehicles, customerInfo.departureFloor, customerInfo.arrivalFloor, ladderRates, manualPrices, updateOption]);
+
+  // Auto-sync ladder options based on Step 1 conditions (사다리 선택 여부)
+  const prevLadderConditionsRef = React.useRef<{ departure: boolean; arrival: boolean } | null>(null);
+
+  useEffect(() => {
+    const isDepartureLadder = customerInfo.departureConditions?.includes('사다리');
+    const isArrivalLadder = customerInfo.arrivalConditions?.includes('사다리');
+    const currentOptions = useWizardStore.getState().options;
+    const prev = prevLadderConditionsRef.current;
+
+    const v = resources.vehicles;
+    const totalTons = (v.fiveTon || 0) * 5 + (v.twoHalfTon || 0) * 2.5 + (v.oneTon || 0) * 1;
+    let targetLadderTon: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' = 'fiveTon';
+    if (totalTons <= 5) targetLadderTon = 'fiveTon';
+    else if (totalTons <= 6) targetLadderTon = 'sixTon';
+    else if (totalTons <= 7.5) targetLadderTon = 'sevenHalfTon';
+    else targetLadderTon = 'tenTon';
+
+    if (prev === null) {
+      // 최초 진입 시: Step 1에서 사다리가 선택되어 있는데 옵션에 아직 없는 경우 자동 활성화
+      if (isDepartureLadder && !currentOptions['사다리·출발지']) {
+        const price = manualPrices['사다리·출발지'] ?? getCalculatedLadderPrice('사다리·출발지', targetLadderTon);
+        updateOption('사다리·출발지', 1, price);
+      }
+      if (isArrivalLadder && !currentOptions['사다리·도착지']) {
+        const price = manualPrices['사다리·도착지'] ?? getCalculatedLadderPrice('사다리·도착지', targetLadderTon);
+        updateOption('사다리·도착지', 1, price);
+      }
+    } else {
+      // Step 1 조건 변경 시:
+      if (prev.departure !== isDepartureLadder) {
+        if (isDepartureLadder) {
+          const price = manualPrices['사다리·출발지'] ?? getCalculatedLadderPrice('사다리·출발지', targetLadderTon);
+          updateOption('사다리·출발지', 1, price);
+        } else {
+          updateOption('사다리·출발지', 0, 0);
+        }
+      }
+      if (prev.arrival !== isArrivalLadder) {
+        if (isArrivalLadder) {
+          const price = manualPrices['사다리·도착지'] ?? getCalculatedLadderPrice('사다리·도착지', targetLadderTon);
+          updateOption('사다리·도착지', 1, price);
+        } else {
+          updateOption('사다리·도착지', 0, 0);
+        }
+      }
+    }
+
+    prevLadderConditionsRef.current = {
+      departure: !!isDepartureLadder,
+      arrival: !!isArrivalLadder
+    };
+  }, [customerInfo.departureConditions, customerInfo.arrivalConditions, resources.vehicles, manualPrices, updateOption]);
 
   useEffect(() => {
     const { packingDate, movingDate } = customerInfo;
