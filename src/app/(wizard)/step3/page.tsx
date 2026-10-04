@@ -375,33 +375,59 @@ export default function Step3Page() {
                         />
                       </div>
                     </div>
-                    <div className="flex justify-between items-center bg-blue-50 p-2 rounded">
-                      <span className="text-xs text-gray-500 flex items-center gap-1">
-                        보관일수(일)
-                        {opt.name === '컨테이너보관료 (1일)' && (
-                          <span className="text-[11px] text-blue-600 font-semibold">(5일 단위 적용)</span>
-                        )}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <input 
-                          type="number"
-                          min={opt.name === '컨테이너보관료 (1일)' ? '5' : '1'}
-                          step={opt.name === '컨테이너보관료 (1일)' ? '5' : '1'}
-                          value={options[opt.name]?.quantity || (opt.name === '컨테이너보관료 (1일)' ? 5 : 1)}
-                          onChange={(e) => {
-                            const days = parseInt(e.target.value, 10) || 0;
-                            updateOption(opt.name, days, displayPrice, options[opt.name]?.startDate, options[opt.name]?.endDate);
-                          }}
-                          onBlur={(e) => {
-                            const raw = parseInt(e.target.value, 10) || 0;
-                            const days = normalizeStorageDays(opt.name, raw);
-                            updateOption(opt.name, days, displayPrice, options[opt.name]?.startDate, options[opt.name]?.endDate);
-                          }}
-                          className="w-16 border rounded px-2 py-1 text-sm text-center focus:outline-blue-500 font-semibold"
-                        />
-                        <span className="text-xs font-semibold text-blue-700 w-24 text-right">총 {(displayPrice * (options[opt.name]?.quantity || 1)).toLocaleString()}원</span>
-                      </div>
-                    </div>
+                    {(() => {
+                      const currentStart = options[opt.name]?.startDate;
+                      const currentEnd = options[opt.name]?.endDate;
+                      let rawActualDays: number | null = null;
+                      if (currentStart && currentEnd) {
+                        const diffTime = new Date(currentEnd).getTime() - new Date(currentStart).getTime();
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                        if (diffDays >= 0) rawActualDays = Math.max(1, diffDays);
+                      }
+
+                      return (
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-blue-50 p-2.5 rounded gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs text-gray-600 font-medium">보관일수:</span>
+                            {opt.name === '컨테이너보관료 (1일)' && rawActualDays !== null ? (
+                              <div className="flex items-center gap-1.5 text-xs flex-wrap">
+                                <span className="bg-white border border-gray-300 px-2 py-0.5 rounded text-gray-700 shadow-sm">
+                                  원래 계산: <strong className="text-gray-900 font-bold">{rawActualDays}일</strong>
+                                </span>
+                                <span className="text-blue-500 font-bold">➔</span>
+                                <span className="bg-blue-100 text-blue-800 border border-blue-200 px-2 py-0.5 rounded font-bold shadow-sm">
+                                  5일 단위 적용: {options[opt.name]?.quantity || 5}일
+                                </span>
+                              </div>
+                            ) : (
+                              opt.name === '컨테이너보관료 (1일)' && (
+                                <span className="text-[11px] text-blue-600 font-semibold">(5일 단위 적용)</span>
+                              )
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 self-end sm:self-auto">
+                            <input 
+                              type="number"
+                              min={opt.name === '컨테이너보관료 (1일)' ? '5' : '1'}
+                              step={opt.name === '컨테이너보관료 (1일)' ? '5' : '1'}
+                              value={options[opt.name]?.quantity || (opt.name === '컨테이너보관료 (1일)' ? 5 : 1)}
+                              onChange={(e) => {
+                                const days = parseInt(e.target.value, 10) || 0;
+                                updateOption(opt.name, days, displayPrice, options[opt.name]?.startDate, options[opt.name]?.endDate);
+                              }}
+                              onBlur={(e) => {
+                                const raw = parseInt(e.target.value, 10) || 0;
+                                const days = normalizeStorageDays(opt.name, raw);
+                                updateOption(opt.name, days, displayPrice, options[opt.name]?.startDate, options[opt.name]?.endDate);
+                              }}
+                              className="w-16 border rounded px-2 py-1 text-sm text-center focus:outline-blue-500 font-bold bg-white"
+                            />
+                            <span className="text-xs text-gray-500">일</span>
+                            <span className="text-xs font-bold text-blue-700 w-24 text-right">총 {(displayPrice * (options[opt.name]?.quantity || 1)).toLocaleString()}원</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
 
