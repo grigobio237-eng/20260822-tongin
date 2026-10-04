@@ -1,5 +1,7 @@
 'use client';
 
+import { checkSpecialDate } from '@/lib/dateUtils';
+
 import React, { useState, useEffect } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
 import { useRouter } from 'next/navigation';
@@ -152,6 +154,24 @@ export default function Step1Page() {
               value={customerInfo.packingDate}
               onChange={(e) => updateCustomerInfo({ packingDate: e.target.value })}
             />
+            {customerInfo.packingDate && (() => {
+              const info = checkSpecialDate(customerInfo.packingDate);
+              const badges: { label: string; color: string }[] = [];
+              if (info.isSonDay) badges.push({ label: '🔮 손없는 날', color: 'bg-amber-100 text-amber-800 border-amber-300' });
+              if (info.isFriday) badges.push({ label: '📅 금요일', color: 'bg-indigo-100 text-indigo-800 border-indigo-300' });
+              if (info.isEndOfMonth) badges.push({ label: '🗓️ 월말', color: 'bg-rose-100 text-rose-800 border-rose-300' });
+
+              if (badges.length === 0) return null;
+              return (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {badges.map((b, idx) => (
+                    <span key={idx} className={`text-[11px] font-bold px-2 py-0.5 rounded-full border shadow-sm ${b.color}`}>
+                      {b.label}
+                    </span>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">운송일</label>
@@ -161,6 +181,24 @@ export default function Step1Page() {
               value={customerInfo.movingDate}
               onChange={(e) => updateCustomerInfo({ movingDate: e.target.value })}
             />
+            {customerInfo.movingDate && (() => {
+              const info = checkSpecialDate(customerInfo.movingDate);
+              const badges: { label: string; color: string }[] = [];
+              if (info.isSonDay) badges.push({ label: '🔮 손없는 날', color: 'bg-amber-100 text-amber-800 border-amber-300' });
+              if (info.isFriday) badges.push({ label: '📅 금요일', color: 'bg-indigo-100 text-indigo-800 border-indigo-300' });
+              if (info.isEndOfMonth) badges.push({ label: '🗓️ 월말', color: 'bg-rose-100 text-rose-800 border-rose-300' });
+
+              if (badges.length === 0) return null;
+              return (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {badges.map((b, idx) => (
+                    <span key={idx} className={`text-[11px] font-bold px-2 py-0.5 rounded-full border shadow-sm ${b.color}`}>
+                      {b.label}
+                    </span>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>

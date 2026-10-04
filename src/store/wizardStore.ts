@@ -71,7 +71,7 @@ export interface WizardState {
   sttMemo: string;          // Step 3 종합 협의사항
   
   resources: ResourceState;
-  surcharge: { noEvilSpirits: boolean; endOfMonth: boolean };
+  surcharge: { noEvilSpirits: boolean; friday: boolean; endOfMonth: boolean };
   discount: number;
   manualBaseCost?: number;
   updateManualBaseCost: (cost?: number) => void;
@@ -96,7 +96,7 @@ export interface WizardState {
   
   updateResources: (info: Partial<ResourceState>) => void;
   updateMaterial: (materialName: string, quantity: number) => void;
-  updateSurcharge: (key: 'noEvilSpirits' | 'endOfMonth', value: boolean) => void;
+  updateSurcharge: (key: 'noEvilSpirits' | 'friday' | 'endOfMonth', value: boolean) => void;
   setDiscount: (amount: number) => void;
   setDeposit: (amount: number) => void;
   setMiddlePayment: (amount: number) => void;
@@ -137,7 +137,7 @@ export const useWizardStore = create<WizardState>()(
       options: {},
       sttMemo: '',
       resources: initialResources,
-      surcharge: { noEvilSpirits: false, endOfMonth: false },
+      surcharge: { noEvilSpirits: false, friday: false, endOfMonth: false },
       discount: 0,
       
       setContractId: (id) => set({ contractId: id }),
@@ -610,7 +610,7 @@ export const useWizardStore = create<WizardState>()(
             workerFemale: contract.worker_count_female || 0
           },
           discount: 0,
-          surcharge: { noEvilSpirits: false, endOfMonth: false }
+          surcharge: { noEvilSpirits: false, friday: false, endOfMonth: false }
         });
       },
       reset: () => set({
@@ -623,7 +623,7 @@ export const useWizardStore = create<WizardState>()(
         options: {},
         sttMemo: '',
         resources: initialResources,
-        surcharge: { noEvilSpirits: false, endOfMonth: false },
+        surcharge: { noEvilSpirits: false, friday: false, endOfMonth: false },
         discount: 0,
         manualBaseCost: undefined,
         deposit: undefined,

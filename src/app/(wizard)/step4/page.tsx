@@ -8,6 +8,7 @@ import { ContractPrintDocument, ContractPrintData } from '@/components/pdf/Contr
 import { WorkOrderPrintDocument } from '@/components/pdf/WorkOrderPrintDocument';
 import { Loader2, CheckCircle, FileText } from 'lucide-react';
 import clsx from 'clsx';
+import { checkSpecialDate } from '@/lib/dateUtils';
 
 export default function Step4Page() {
   const store = useWizardStore();
@@ -118,7 +119,17 @@ export default function Step4Page() {
   
   const subTotal = baseCost + optionsCost;
   
-  const surchargeRatio = (store.surcharge?.noEvilSpirits ? 0.2 : 0) + (store.surcharge?.endOfMonth ? 0.6 : 0);
+  // 이사 일정(포장일 / 운송일) 특수일 감지
+  const packingSpecial = checkSpecialDate(customerInfo.packingDate);
+  const movingSpecial = checkSpecialDate(customerInfo.movingDate);
+  const isSonDayMatch = Boolean(packingSpecial.isSonDay || movingSpecial.isSonDay);
+  const isFridayMatch = Boolean(packingSpecial.isFriday || movingSpecial.isFriday);
+  const isEndOfMonthMatch = Boolean(packingSpecial.isEndOfMonth || movingSpecial.isEndOfMonth);
+
+  const surchargeRatio = 
+    (store.surcharge?.noEvilSpirits ? 0.2 : 0) + 
+    (store.surcharge?.friday ? 0.15 : 0) + 
+    (store.surcharge?.endOfMonth ? 0.6 : 0);
   const surchargeAmount = subTotal * surchargeRatio;
   
   const totalCost = subTotal + surchargeAmount - (store.discount || 0);
@@ -510,29 +521,97 @@ export default function Step4Page() {
           </div>
           
           {/* 할증 적용 */}
-          <div className="p-4 border-t bg-gray-50 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="p-4 border-t bg-gray-50 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             <div>
-              <span className="block text-sm font-bold text-gray-800">이사 특수일 할증</span>
-              <p className="text-xs text-gray-500">손없는 날이나 월말의 경우 기본 비용 및 옵션에 할증이 붙습니다.</p>
+              <div className="flex items-center gap-2">
+                <span className="block text-sm font-bold text-gray-800">이사 특수일 할증</span>
+                {(isSonDayMatch || isFridayMatch || isEndOfMonthMatch) && (
+                  <span className="text-[11px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full border border-amber-300">
+                    특수일 감지됨
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-0.5">
+                이사 일정에 해당하는 특수일 카드가 색반전(강조) 표시됩니다. 견적에 적용을 원하시면 체크박스를 선택하세요.
+              </p>
             </div>
-            <div className="flex gap-3">
-              <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 border rounded-lg hover:bg-blue-50 transition-colors">
+            <div className="flex flex-wrap gap-2.5">
+              {/* 손없는 날 */}
+              <label className={clsx(
+                "flex items-center gap-2 cursor-pointer px-3.5 py-2.5 rounded-xl border transition-all select-none shadow-sm",
+                isSonDayMatch 
+                  ? "bg-slate-900 text-white border-slate-900 ring-2 ring-amber-400" 
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-100"
+              )}>
                 <input 
                   type="checkbox" 
-                  className="w-4 h-4 text-blue-600"
+                  className={clsx(
+                    "w-4 h-4 rounded cursor-pointer",
+                    isSonDayMatch ? "accent-amber-400" : "text-blue-600"
+                  )}
                   checked={store.surcharge?.noEvilSpirits || false}
                   onChange={(e) => store.updateSurcharge('noEvilSpirits', e.target.checked)}
                 />
-                <span className="text-sm font-medium">손없는 날 (20%)</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-semibold">손없는 날 (20%)</span>
+                  {isSonDayMatch && (
+                    <span className="text-[10px] font-bold bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded">
+                      해당일
+                    </span>
+                  )}
+                </div>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 border rounded-lg hover:bg-blue-50 transition-colors">
+
+              {/* 금요일 */}
+              <label className={clsx(
+                "flex items-center gap-2 cursor-pointer px-3.5 py-2.5 rounded-xl border transition-all select-none shadow-sm",
+                isFridayMatch 
+                  ? "bg-slate-900 text-white border-slate-900 ring-2 ring-indigo-400" 
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-100"
+              )}>
                 <input 
                   type="checkbox" 
-                  className="w-4 h-4 text-blue-600"
+                  className={clsx(
+                    "w-4 h-4 rounded cursor-pointer",
+                    isFridayMatch ? "accent-indigo-400" : "text-blue-600"
+                  )}
+                  checked={store.surcharge?.friday || false}
+                  onChange={(e) => store.updateSurcharge('friday', e.target.checked)}
+                />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-semibold">금요일 (15%)</span>
+                  {isFridayMatch && (
+                    <span className="text-[10px] font-bold bg-indigo-400 text-white px-1.5 py-0.5 rounded">
+                      해당일
+                    </span>
+                  )}
+                </div>
+              </label>
+
+              {/* 월말 */}
+              <label className={clsx(
+                "flex items-center gap-2 cursor-pointer px-3.5 py-2.5 rounded-xl border transition-all select-none shadow-sm",
+                isEndOfMonthMatch 
+                  ? "bg-slate-900 text-white border-slate-900 ring-2 ring-rose-400" 
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-100"
+              )}>
+                <input 
+                  type="checkbox" 
+                  className={clsx(
+                    "w-4 h-4 rounded cursor-pointer",
+                    isEndOfMonthMatch ? "accent-rose-400" : "text-blue-600"
+                  )}
                   checked={store.surcharge?.endOfMonth || false}
                   onChange={(e) => store.updateSurcharge('endOfMonth', e.target.checked)}
                 />
-                <span className="text-sm font-medium">월말 (60%)</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-semibold">월말 (60%)</span>
+                  {isEndOfMonthMatch && (
+                    <span className="text-[10px] font-bold bg-rose-400 text-white px-1.5 py-0.5 rounded">
+                      해당일
+                    </span>
+                  )}
+                </div>
               </label>
             </div>
           </div>
@@ -600,7 +679,7 @@ export default function Step4Page() {
           </div>
           {surchargeAmount > 0 && (
             <div className="flex justify-between items-center py-2 border-b text-red-600">
-              <span>특수일 할증 (+{surchargeRatio * 100}%)</span>
+              <span>특수일 할증 (+{Math.round(surchargeRatio * 100)}%)</span>
               <span className="font-semibold">+{surchargeAmount.toLocaleString()}원</span>
             </div>
           )}
