@@ -87,14 +87,15 @@ export default function AdminContractsPage() {
                     <Edit size={16} />
                     견적 수정하기
                   </button>
-                  <Link 
+                  <a 
                     href={`/sign/${contract.id}`} 
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-1 text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-semibold transition-colors"
                   >
                     <FileText size={16} />
                     문서 열람하기
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
