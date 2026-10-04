@@ -10,6 +10,23 @@ import { useSpeechToText } from '@/hooks/useSpeechToText';
 import { Mic, MicOff, Edit2 } from 'lucide-react';
 import clsx from 'clsx';
 
+const calculateStorageDays = (optName: string, startStr?: string, endStr?: string) => {
+  if (!startStr || !endStr) {
+    return optName === '컨테이너보관료 (1일)' ? 5 : 1;
+  }
+  const diffTime = new Date(endStr).getTime() - new Date(startStr).getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  const rawDays = diffDays >= 0 ? Math.max(1, diffDays) : 1;
+  return optName === '컨테이너보관료 (1일)' ? Math.max(5, Math.ceil(rawDays / 5) * 5) : rawDays;
+};
+
+const normalizeStorageDays = (optName: string, days: number) => {
+  if (optName === '컨테이너보관료 (1일)') {
+    return Math.max(5, Math.ceil(days / 5) * 5);
+  }
+  return Math.max(1, days);
+};
+
 const getLadderTierKey = (floorStr: string) => {
   const match = floorStr.match(/\d+/);
   const floor = match ? parseInt(match[0], 10) : NaN;
@@ -94,11 +111,7 @@ export default function Step3Page() {
       if (opt.isPerDay) {
          startDate = customerInfo.packingDate || '';
          endDate = customerInfo.movingDate || '';
-         if (startDate && endDate) {
-           const diffTime = new Date(endDate).getTime() - new Date(startDate).getTime();
-           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-           if (diffDays >= 0) initialDays = Math.max(1, diffDays);
-         }
+         initialDays = calculateStorageDays(optName, startDate, endDate);
       }
       
       updateOption(optName, initialDays, price, startDate, endDate);
@@ -165,20 +178,18 @@ export default function Step3Page() {
   useEffect(() => {
     const { packingDate, movingDate } = customerInfo;
     if (packingDate && movingDate && packingDate !== movingDate) {
-      const diffTime = new Date(movingDate).getTime() - new Date(packingDate).getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-      const initialDays = diffDays >= 0 ? Math.max(1, diffDays) : 1;
-
       const currentOptions = useWizardStore.getState().options;
       
       if (!currentOptions['컨테이너보관료 (1일)'] && !currentOptions['실내보관료 (1일)']) {
         const defaultPrice = optionPrices['컨테이너보관료 (1일)'] ?? 8000;
+        const initialDays = calculateStorageDays('컨테이너보관료 (1일)', packingDate, movingDate);
         updateOption('컨테이너보관료 (1일)', initialDays, defaultPrice, packingDate, movingDate);
       } else {
         ['컨테이너보관료 (1일)', '실내보관료 (1일)'].forEach(optName => {
           if (currentOptions[optName]) {
-             if (currentOptions[optName].startDate !== packingDate || currentOptions[optName].endDate !== movingDate || currentOptions[optName].quantity !== initialDays) {
-               updateOption(optName, initialDays, optionPrices[optName] ?? currentOptions[optName].totalPrice / Math.max(1, currentOptions[optName].quantity), packingDate, movingDate);
+             const targetDays = calculateStorageDays(optName, packingDate, movingDate);
+             if (currentOptions[optName].startDate !== packingDate || currentOptions[optName].endDate !== movingDate || currentOptions[optName].quantity !== targetDays) {
+               updateOption(optName, targetDays, optionPrices[optName] ?? currentOptions[optName].totalPrice / Math.max(1, currentOptions[optName].quantity), packingDate, movingDate);
              }
           }
         });
@@ -343,12 +354,7 @@ export default function Step3Page() {
                           onChange={(e) => {
                             const newStart = e.target.value;
                             const currentEnd = options[opt.name]?.endDate;
-                            let days = options[opt.name]?.quantity || 1;
-                            if (newStart && currentEnd) {
-                              const diffTime = new Date(currentEnd).getTime() - new Date(newStart).getTime();
-                              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                              if (diffDays >= 0) days = Math.max(1, diffDays);
-                            }
+                            const days = calculateStorageDays(opt.name, newStart, currentEnd);
                             updateOption(opt.name, days, displayPrice, newStart, currentEnd);
                           }}
                           className="flex-1 border rounded px-2 py-1 text-sm focus:outline-blue-500"
@@ -362,12 +368,7 @@ export default function Step3Page() {
                           onChange={(e) => {
                             const newEnd = e.target.value;
                             const currentStart = options[opt.name]?.startDate;
-                            let days = options[opt.name]?.quantity || 1;
-                            if (currentStart && newEnd) {
-                              const diffTime = new Date(newEnd).getTime() - new Date(currentStart).getTime();
-                              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                              if (diffDays >= 0) days = Math.max(1, diffDays);
-                            }
+                            const days = calculateStorageDays(opt.name, currentStart, newEnd);
                             updateOption(opt.name, days, displayPrice, currentStart, newEnd);
                           }}
                           className="flex-1 border rounded px-2 py-1 text-sm focus:outline-blue-500"
@@ -375,17 +376,28 @@ export default function Step3Page() {
                       </div>
                     </div>
                     <div className="flex justify-between items-center bg-blue-50 p-2 rounded">
-                      <span className="text-xs text-gray-500">보관일수(일)</span>
+                      <span className="text-xs text-gray-500 flex items-center gap-1">
+                        보관일수(일)
+                        {opt.name === '컨테이너보관료 (1일)' && (
+                          <span className="text-[11px] text-blue-600 font-semibold">(5일 단위 적용)</span>
+                        )}
+                      </span>
                       <div className="flex items-center gap-2">
                         <input 
                           type="number"
-                          min="1"
-                          value={options[opt.name]?.quantity || 1}
+                          min={opt.name === '컨테이너보관료 (1일)' ? '5' : '1'}
+                          step={opt.name === '컨테이너보관료 (1일)' ? '5' : '1'}
+                          value={options[opt.name]?.quantity || (opt.name === '컨테이너보관료 (1일)' ? 5 : 1)}
                           onChange={(e) => {
-                            const days = parseInt(e.target.value, 10) || 1;
+                            const days = parseInt(e.target.value, 10) || 0;
                             updateOption(opt.name, days, displayPrice, options[opt.name]?.startDate, options[opt.name]?.endDate);
                           }}
-                          className="w-16 border rounded px-2 py-1 text-sm text-center focus:outline-blue-500"
+                          onBlur={(e) => {
+                            const raw = parseInt(e.target.value, 10) || 0;
+                            const days = normalizeStorageDays(opt.name, raw);
+                            updateOption(opt.name, days, displayPrice, options[opt.name]?.startDate, options[opt.name]?.endDate);
+                          }}
+                          className="w-16 border rounded px-2 py-1 text-sm text-center focus:outline-blue-500 font-semibold"
                         />
                         <span className="text-xs font-semibold text-blue-700 w-24 text-right">총 {(displayPrice * (options[opt.name]?.quantity || 1)).toLocaleString()}원</span>
                       </div>
