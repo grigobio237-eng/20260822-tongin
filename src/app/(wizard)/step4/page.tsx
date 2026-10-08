@@ -20,6 +20,8 @@ export default function Step4Page() {
   const [deposit, setDeposit] = useState(store.deposit || 0);
   const [middlePayment, setMiddlePayment] = useState(store.middlePayment || 0);
   const [editableBaseCost, setEditableBaseCost] = useState<number | null>(store.manualBaseCost || null);
+  const [packingCost, setPackingCost] = useState<number | null>(store.resources.packingMovingCost ?? null);
+  const [deliveryCost, setDeliveryCost] = useState<number | null>(store.resources.deliveryMovingCost ?? null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedContract, setCompletedContract] = useState<{ id: string, pdfUrl: string } | null>(null);
 
@@ -27,7 +29,13 @@ export default function Step4Page() {
     if (store.manualBaseCost !== undefined && store.manualBaseCost !== null) {
       setEditableBaseCost(store.manualBaseCost);
     }
-  }, [store.manualBaseCost]);
+    if (store.resources.packingMovingCost !== undefined && store.resources.packingMovingCost !== null) {
+      setPackingCost(store.resources.packingMovingCost);
+    }
+    if (store.resources.deliveryMovingCost !== undefined && store.resources.deliveryMovingCost !== null) {
+      setDeliveryCost(store.resources.deliveryMovingCost);
+    }
+  }, [store.manualBaseCost, store.resources.packingMovingCost, store.resources.deliveryMovingCost]);
 
   const calculatedBaseCost = 
     (store.resources.vehicles.fiveTon * settingsStore.vehiclePrices.fiveTon) +
@@ -74,14 +82,29 @@ export default function Step4Page() {
   );
 
   const singleBaseCost = customerInfo.applyDistancePrice ? distanceMatrixPrice : calculatedBaseCost;
-  const finalBaseCost = singleBaseCost * (isStorageMove ? 2 : 1);
+  
+  // 보관이사 시 포장일 / 운송일 작업비
+  const effectivePackingCost = packingCost !== null 
+    ? packingCost 
+    : (editableBaseCost !== null ? Math.round(editableBaseCost / 2) : singleBaseCost);
+
+  const effectiveDeliveryCost = deliveryCost !== null 
+    ? deliveryCost 
+    : (editableBaseCost !== null ? editableBaseCost - (packingCost !== null ? packingCost : Math.round(editableBaseCost / 2)) : singleBaseCost);
+
+  const finalBaseCost = isStorageMove ? (effectivePackingCost + effectiveDeliveryCost) : singleBaseCost;
 
   // editableBaseCost가 null이면 자동계산값, 아니면 수정된 값 사용
-  const baseCost = editableBaseCost !== null ? editableBaseCost : finalBaseCost;
+  const baseCost = isStorageMove 
+    ? (effectivePackingCost + effectiveDeliveryCost)
+    : (editableBaseCost !== null ? editableBaseCost : finalBaseCost);
 
-
-
-  const totalWorkers = store.resources.workerMale + store.resources.workerFemale;
+  const totalWorkers = isStorageMove
+    ? Math.max(
+        (store.resources.packingWorkerMale ?? store.resources.workerMale) + (store.resources.packingWorkerFemale ?? 0),
+        (store.resources.movingWorkerMale ?? store.resources.workerMale) + (store.resources.movingWorkerFemale ?? store.resources.workerFemale)
+      )
+    : store.resources.workerMale + store.resources.workerFemale;
 
   let optionsCost = 0;
 
@@ -186,10 +209,13 @@ export default function Step4Page() {
           balance,
           totalCbm: store.totalCbm,
           resources: {
+            ...store.resources,
             vehicles: store.resources?.vehicles || {},
             workerMale: store.resources?.workerMale || 0,
             workerFemale: store.resources?.workerFemale || 0,
-            materials: store.resources?.materials || {}
+            materials: store.resources?.materials || {},
+            packingMovingCost: isStorageMove ? effectivePackingCost : undefined,
+            deliveryMovingCost: isStorageMove ? effectiveDeliveryCost : undefined
           },
           sttMemo: store.sttMemo,
           optionCost: optionsCost
@@ -337,7 +363,11 @@ export default function Step4Page() {
         unitPrice: opt.price,
         totalPrice: opt.price
       })),
-      resources: store.resources as any,
+      resources: {
+        ...store.resources,
+        packingMovingCost: isStorageMove ? effectivePackingCost : undefined,
+        deliveryMovingCost: isStorageMove ? effectiveDeliveryCost : undefined
+      } as any,
       totalCbm: store.totalCbm,
       movingCost: baseCost,
       optionCost: optionsCost,
@@ -642,41 +672,130 @@ export default function Step4Page() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border p-5 space-y-4">
-          {/* 이사 기본비용 — 수정 가능 */}
-          <div className="flex justify-between items-center py-2 border-b">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">이사 기본비용</span>
-              {isStorageMove && (
-                <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
-                  보관이사 2회 작업 (×2)
+          {/* 이사 기본비용 — 보관이사 2회 작업 시 포장일/운송일 분리 */}
+          {isStorageMove ? (
+            <div className="py-2.5 border-b space-y-2">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-gray-800 text-sm">이사 기본비용 (보관이사 2회)</span>
+                  <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                    포장일 / 운송일 분리
+                  </span>
+                  {(packingCost !== null || deliveryCost !== null || editableBaseCost !== null) && (
+                    <button 
+                      onClick={() => {
+                        setEditableBaseCost(null);
+                        setPackingCost(null);
+                        setDeliveryCost(null);
+                        store.updateManualBaseCost(undefined);
+                        store.updateResources({ packingMovingCost: undefined, deliveryMovingCost: undefined });
+                      }}
+                      className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full hover:bg-gray-300 transition-colors"
+                    >
+                      초기화
+                    </button>
+                  )}
+                </div>
+                <span className="font-extrabold text-blue-900 text-base">
+                  {(effectivePackingCost + effectiveDeliveryCost).toLocaleString()}원
                 </span>
-              )}
-              {editableBaseCost !== null && (
-                <button 
-                  onClick={() => {
-                    setEditableBaseCost(null);
-                    store.updateManualBaseCost(undefined);
+              </div>
+
+              {/* 포장일 & 운송일 개별 입력 박스 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                <div className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                  <div>
+                    <span className="block text-xs font-bold text-slate-800">
+                      • 포장일 작업비 {customerInfo.packingDate ? `(${customerInfo.packingDate.slice(5)})` : ''}
+                    </span>
+                    <span className="text-[11px] text-slate-500">
+                      인원: 남 {store.resources.packingWorkerMale ?? store.resources.workerMale}명 / 여 {store.resources.packingWorkerFemale ?? 0}명
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      className="border rounded px-2 py-1 w-28 pr-5 text-right font-bold text-sm outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                      value={effectivePackingCost.toLocaleString()}
+                      onChange={(e) => {
+                        const val = Number(e.target.value.replace(/,/g, ''));
+                        if (!isNaN(val)) {
+                          setPackingCost(val);
+                          const newTotal = val + effectiveDeliveryCost;
+                          setEditableBaseCost(newTotal);
+                          store.updateManualBaseCost(newTotal);
+                          store.updateResources({ packingMovingCost: val, deliveryMovingCost: effectiveDeliveryCost });
+                        }
+                      }}
+                    />
+                    <span className="absolute right-1.5 top-1.5 text-xs text-gray-400">원</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                  <div>
+                    <span className="block text-xs font-bold text-slate-800">
+                      • 운송일 작업비 {customerInfo.movingDate ? `(${customerInfo.movingDate.slice(5)})` : ''}
+                    </span>
+                    <span className="text-[11px] text-slate-500">
+                      인원: 남 {store.resources.movingWorkerMale ?? Math.max(1, store.resources.workerMale - 1)}명 / 여 {store.resources.movingWorkerFemale ?? (store.resources.workerFemale > 0 ? store.resources.workerFemale : 1)}명
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      className="border rounded px-2 py-1 w-28 pr-5 text-right font-bold text-sm outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                      value={effectiveDeliveryCost.toLocaleString()}
+                      onChange={(e) => {
+                        const val = Number(e.target.value.replace(/,/g, ''));
+                        if (!isNaN(val)) {
+                          setDeliveryCost(val);
+                          const newTotal = effectivePackingCost + val;
+                          setEditableBaseCost(newTotal);
+                          store.updateManualBaseCost(newTotal);
+                          store.updateResources({ packingMovingCost: effectivePackingCost, deliveryMovingCost: val });
+                        }
+                      }}
+                    />
+                    <span className="absolute right-1.5 top-1.5 text-xs text-gray-400">원</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-between items-center py-2 border-b">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">이사 기본비용</span>
+                {editableBaseCost !== null && (
+                  <button 
+                    onClick={() => {
+                      setEditableBaseCost(null);
+                      store.updateManualBaseCost(undefined);
+                    }}
+                    className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full hover:bg-gray-300"
+                  >
+                    초기화
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  className="border rounded px-2 py-1 w-36 pr-6 text-right font-semibold outline-none focus:ring-1 focus:ring-blue-500"
+                  value={(editableBaseCost !== null ? editableBaseCost : finalBaseCost).toLocaleString()}
+                  onChange={(e) => {
+                    const val = Number(e.target.value.replace(/,/g, ''));
+                    if (!isNaN(val)) {
+                      setEditableBaseCost(val);
+                      store.updateManualBaseCost(val);
+                    }
                   }}
-                  className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full hover:bg-gray-300"
-                >
-                  초기화
-                </button>
-              )}
+                  onFocus={(e) => { if (editableBaseCost === null) setEditableBaseCost(finalBaseCost); }}
+                />
+                <span className="absolute right-2 top-1.5 text-xs text-gray-400">원</span>
+              </div>
             </div>
-            <div className="relative">
-              <input
-                type="text"
-                className="border rounded px-2 py-1 w-36 pr-6 text-right font-semibold outline-none focus:ring-1 focus:ring-blue-500"
-                value={(editableBaseCost !== null ? editableBaseCost : finalBaseCost).toLocaleString()}
-                onChange={(e) => {
-                  const val = Number(e.target.value.replace(/,/g, ''));
-                  if (!isNaN(val)) setEditableBaseCost(val);
-                }}
-                onFocus={(e) => { if (editableBaseCost === null) setEditableBaseCost(finalBaseCost); }}
-              />
-              <span className="absolute right-2 top-1.5 text-xs text-gray-400">원</span>
-            </div>
-          </div>
+          )}
           <div className="flex justify-between items-center py-2 border-b">
             <span className="text-gray-600">옵션 추가비용</span>
             <span className="font-semibold">{optionsCost.toLocaleString()}원</span>

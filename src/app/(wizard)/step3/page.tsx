@@ -346,6 +346,11 @@ export default function Step3Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomItems, updateResources, itemPackingSettings, defaultPackingMaterials, resources.vehicles, roomItemMapping]);
 
+  const isStorageMove = Boolean(
+    (customerInfo.packingDate && customerInfo.movingDate && customerInfo.packingDate !== customerInfo.movingDate) ||
+    customerInfo.arrivalStatus === '보관이사'
+  );
+
   return (
     <div className="space-y-8 pb-24">
       {/* 1. 투입 차량 및 작업 인원 */}
@@ -408,25 +413,116 @@ export default function Step3Page() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">작업 인원</label>
-              <div className="flex gap-2">
-                <div className="flex-1 flex items-center border rounded overflow-hidden">
-                  <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600">남</span>
-                  <input type="number" min="0" 
-                    className="w-full p-2 outline-none text-center font-bold" 
-                    value={resources.workerMale} 
-                    onChange={e => updateResources({ workerMale: Number(e.target.value) })}
-                  />
+              {!isStorageMove ? (
+                <>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">작업 인원</label>
+                  <div className="flex gap-2">
+                    <div className="flex-1 flex items-center border rounded overflow-hidden">
+                      <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600">남</span>
+                      <input type="number" min="0" 
+                        className="w-full p-2 outline-none text-center font-bold" 
+                        value={resources.workerMale} 
+                        onChange={e => updateResources({ workerMale: Number(e.target.value) })}
+                      />
+                    </div>
+                    <div className="flex-1 flex items-center border rounded overflow-hidden">
+                      <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600">여</span>
+                      <input type="number" min="0" 
+                        className="w-full p-2 outline-none text-center font-bold" 
+                        value={resources.workerFemale} 
+                        onChange={e => updateResources({ workerFemale: Number(e.target.value) })}
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-bold text-gray-700">작업 인원 (보관이사 2회)</label>
+                    <span className="text-[11px] text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                      포장일 / 운송일 분리
+                    </span>
+                  </div>
+
+                  {/* 포장일 인원 */}
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                        포장일 인원 {customerInfo.packingDate ? `(${customerInfo.packingDate})` : ''}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="flex-1 flex items-center border rounded bg-white overflow-hidden shadow-xs">
+                        <span className="bg-slate-100 px-2.5 py-1.5 text-xs text-gray-600 font-medium">남</span>
+                        <input 
+                          type="number" min="0" 
+                          className="w-full p-1.5 outline-none text-center font-bold text-sm" 
+                          value={resources.packingWorkerMale !== undefined ? resources.packingWorkerMale : resources.workerMale} 
+                          onChange={e => {
+                            const val = Number(e.target.value);
+                            updateResources({ 
+                              packingWorkerMale: val,
+                              workerMale: val
+                            });
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1 flex items-center border rounded bg-white overflow-hidden shadow-xs">
+                        <span className="bg-slate-100 px-2.5 py-1.5 text-xs text-gray-600 font-medium">여</span>
+                        <input 
+                          type="number" min="0" 
+                          className="w-full p-1.5 outline-none text-center font-bold text-sm" 
+                          value={resources.packingWorkerFemale !== undefined ? resources.packingWorkerFemale : 0} 
+                          onChange={e => {
+                            const val = Number(e.target.value);
+                            updateResources({ packingWorkerFemale: val });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 운송일 인원 */}
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
+                        운송일 인원 {customerInfo.movingDate ? `(${customerInfo.movingDate})` : ''}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="flex-1 flex items-center border rounded bg-white overflow-hidden shadow-xs">
+                        <span className="bg-slate-100 px-2.5 py-1.5 text-xs text-gray-600 font-medium">남</span>
+                        <input 
+                          type="number" min="0" 
+                          className="w-full p-1.5 outline-none text-center font-bold text-sm" 
+                          value={resources.movingWorkerMale !== undefined ? resources.movingWorkerMale : Math.max(1, resources.workerMale - 1)} 
+                          onChange={e => {
+                            const val = Number(e.target.value);
+                            updateResources({ movingWorkerMale: val });
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1 flex items-center border rounded bg-white overflow-hidden shadow-xs">
+                        <span className="bg-slate-100 px-2.5 py-1.5 text-xs text-gray-600 font-medium">여</span>
+                        <input 
+                          type="number" min="0" 
+                          className="w-full p-1.5 outline-none text-center font-bold text-sm" 
+                          value={resources.movingWorkerFemale !== undefined ? resources.movingWorkerFemale : (resources.workerFemale > 0 ? resources.workerFemale : 1)} 
+                          onChange={e => {
+                            const val = Number(e.target.value);
+                            updateResources({ 
+                              movingWorkerFemale: val,
+                              workerFemale: val
+                            });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex-1 flex items-center border rounded overflow-hidden">
-                  <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600">여</span>
-                  <input type="number" min="0" 
-                    className="w-full p-2 outline-none text-center font-bold" 
-                    value={resources.workerFemale} 
-                    onChange={e => updateResources({ workerFemale: Number(e.target.value) })}
-                  />
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

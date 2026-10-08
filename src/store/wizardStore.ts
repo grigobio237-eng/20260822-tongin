@@ -54,6 +54,12 @@ export interface ResourceState {
   vehicles: VehicleRecommendation;
   workerMale: number;
   workerFemale: number;
+  packingWorkerMale?: number;
+  packingWorkerFemale?: number;
+  movingWorkerMale?: number;
+  movingWorkerFemale?: number;
+  packingMovingCost?: number;
+  deliveryMovingCost?: number;
   materials: Record<string, number>;
   tvBoxInches?: string;
   lastCalculatedSource?: string;
@@ -611,7 +617,13 @@ export const useWizardStore = create<WizardState>()(
             vehicles: resources.vehicles || { fiveTon: 0, twoHalfTon: 0, oneTon: 0 },
             materials: resources.materials || {},
             workerMale: contract.worker_count_male || 0,
-            workerFemale: contract.worker_count_female || 0
+            workerFemale: contract.worker_count_female || 0,
+            packingWorkerMale: resources.packingWorkerMale,
+            packingWorkerFemale: resources.packingWorkerFemale,
+            movingWorkerMale: resources.movingWorkerMale,
+            movingWorkerFemale: resources.movingWorkerFemale,
+            packingMovingCost: resources.packingMovingCost,
+            deliveryMovingCost: resources.deliveryMovingCost
           },
           discount: 0,
           surcharge: { noEvilSpirits: false, friday: false, endOfMonth: false },

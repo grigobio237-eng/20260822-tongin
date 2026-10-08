@@ -37,6 +37,12 @@ export interface ContractPrintData {
     vehicles?: Record<string, number>;
     workerMale?: number;
     workerFemale?: number;
+    packingWorkerMale?: number;
+    packingWorkerFemale?: number;
+    movingWorkerMale?: number;
+    movingWorkerFemale?: number;
+    packingMovingCost?: number;
+    deliveryMovingCost?: number;
   };
   totalCbm: number;
   movingCost: number;
@@ -120,10 +126,27 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
             </div>
             <div className="border border-slate-300 p-2.5 rounded bg-slate-50/50">
               <h4 className="font-bold text-blue-900 border-b border-slate-200 pb-1 mb-1.5 text-[11px]">작업 투입 인력 및 장비</h4>
-              <div className="flex justify-between py-1 border-b border-dashed border-slate-200">
-                <span>전문 패커/정리 인력</span>
-                <span className="font-semibold">남 {r?.workerMale || 0}명 / 여 {r?.workerFemale || 0}명</span>
-              </div>
+              {c?.arrivalStatus === '보관이사' || (c?.packingDate && c?.movingDate && c?.packingDate !== c?.movingDate) ? (
+                <div className="flex flex-col py-0.5 border-b border-dashed border-slate-200">
+                  <div className="flex justify-between text-[10px] py-0.5">
+                    <span>포장일 투입 인력 {c?.packingDate ? `(${c.packingDate.slice(5)})` : ''}</span>
+                    <span className="font-semibold text-blue-900">
+                      남 {r?.packingWorkerMale ?? r?.workerMale ?? 0}명 / 여 {r?.packingWorkerFemale ?? 0}명
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] py-0.5">
+                    <span>운송일 투입 인력 {c?.movingDate ? `(${c.movingDate.slice(5)})` : ''}</span>
+                    <span className="font-semibold text-indigo-900">
+                      남 {r?.movingWorkerMale ?? r?.workerMale ?? 0}명 / 여 {r?.movingWorkerFemale ?? r?.workerFemale ?? 0}명
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex justify-between py-1 border-b border-dashed border-slate-200">
+                  <span>전문 패커/정리 인력</span>
+                  <span className="font-semibold">남 {r?.workerMale || 0}명 / 여 {r?.workerFemale || 0}명</span>
+                </div>
+              )}
               <div className="flex justify-between py-1">
                 <span>투입 차량 규격</span>
                 <span className="font-semibold">
@@ -172,6 +195,12 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
                     <span>선택 부대 옵션 비용</span>
                     <span className="font-semibold">{Number(data.optionCost || 0).toLocaleString()} 원</span>
                   </div>
+                  {r?.packingMovingCost && r?.deliveryMovingCost ? (
+                    <div className="flex justify-between border-b border-dotted border-slate-200 py-0.5 text-[9.5px] text-slate-500 col-span-2 pl-1 bg-slate-50/50">
+                      <span>• 포장일 작업비: {Number(r.packingMovingCost).toLocaleString()}원</span>
+                      <span>• 운송일 작업비: {Number(r.deliveryMovingCost).toLocaleString()}원</span>
+                    </div>
+                  ) : null}
                   {isVatIncluded && (
                     <div className="flex justify-between border-b border-slate-200 py-0.5 text-blue-900 col-span-2">
                       <span className="font-medium">부가가치세 (VAT 10%)</span>
