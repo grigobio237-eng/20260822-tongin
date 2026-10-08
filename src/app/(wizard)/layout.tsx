@@ -20,20 +20,70 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
     { num: 4, label: '정산/서명' },
   ];
 
+  const renderActionButtons = (isMobile = false) => (
+    <div className={clsx("flex items-center gap-1.5", !isMobile && "justify-end gap-2 w-full")}>
+      <button
+        onClick={() => {
+          if (window.confirm('새 계약서를 작성하시겠습니까? 현재 작성 중인 내용은 초기화됩니다.')) {
+            useWizardStore.getState().reset();
+            router.push('/step1');
+          }
+        }}
+        className={clsx(
+          "flex items-center gap-1 font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-full hover:bg-blue-100 transition-colors shrink-0",
+          isMobile ? "text-[11px] px-2.5 py-1" : "text-[11px] px-3 py-1.5 mr-1"
+        )}
+      >
+        <FilePlus size={isMobile ? 13 : 14} />
+        <span>새 계약</span>
+      </button>
+      <button 
+        onClick={() => router.push('/schedule')}
+        className={clsx(
+          "text-gray-500 hover:text-blue-600 rounded-full border border-gray-200 transition-colors",
+          isMobile ? "p-1.5 bg-white" : "p-2 bg-gray-50 hover:bg-blue-50"
+        )}
+        aria-label="일정 관리"
+      >
+        <CalendarDays size={isMobile ? 18 : 20} />
+      </button>
+      <NotificationBell />
+      <button 
+        onClick={() => router.push('/settings')}
+        className={clsx(
+          "text-gray-500 hover:text-blue-600 rounded-full border border-gray-200 transition-colors",
+          isMobile ? "p-1.5 bg-white" : "p-2 bg-gray-50 hover:bg-blue-50"
+        )}
+        aria-label="환경 설정"
+      >
+        <Settings size={isMobile ? 18 : 20} />
+      </button>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header / Step Indicator */}
       <header className="bg-white border-b sticky top-0 z-50 shadow-sm w-full">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        {/* 모바일 상단 바 (Row 1): 회사명 & 빠른 액션 버튼들 */}
+        <div className="flex md:hidden items-center justify-between px-3 py-1.5 border-b border-gray-100 bg-slate-50/80">
+          <span className="font-extrabold text-sm text-blue-900 tracking-tight">
+            {companyName || '통인익스프레스'}
+          </span>
+          {renderActionButtons(true)}
+        </div>
+
+        {/* 메인 헤더 (데스크톱 1줄 / 모바일 스텝 전용 Row 2) */}
+        <div className="max-w-5xl mx-auto px-4 py-2.5 md:py-3 flex items-center justify-between">
           
-          {/* Left: Company Name (Dynamic) */}
+          {/* Left: Company Name (Dynamic, Desktop Only) */}
           <div className="hidden md:flex items-center w-1/4">
             <span className="font-black text-xl text-blue-900 tracking-tight">
               {companyName || '통인익스프레스'}
             </span>
           </div>
 
-          {/* Center: Steps with Arrows */}
+          {/* Center: Steps with Arrows (모바일에서는 가로 폭 100%를 활용하여 겹침 없음) */}
           <div className="flex-1 flex items-center justify-center">
             {steps.map((step, idx) => (
               <React.Fragment key={step.num}>
@@ -43,7 +93,7 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                     useWizardStore.getState().setStep(step.num);
                     router.push(`/step${step.num}`);
                   }}
-                  className="flex flex-col items-center focus:outline-none"
+                  className="flex flex-col items-center focus:outline-none px-1"
                 >
                   <div 
                     className={clsx(
@@ -62,43 +112,17 @@ export default function WizardLayout({ children }: { children: React.ReactNode }
                 </button>
                 
                 {idx < steps.length - 1 && (
-                  <div className="px-2 sm:px-4 mb-4 text-gray-300">
-                    <ChevronRight size={18} />
+                  <div className="px-1.5 sm:px-4 mb-4 text-gray-300">
+                    <ChevronRight size={16} />
                   </div>
                 )}
               </React.Fragment>
             ))}
           </div>
           
-          {/* Right: Action Buttons */}
-          <div className="flex items-center justify-end gap-2 w-1/4">
-            <button
-              onClick={() => {
-                if (window.confirm('새 계약서를 작성하시겠습니까? 현재 작성 중인 내용은 초기화됩니다.')) {
-                  useWizardStore.getState().reset();
-                  router.push('/step1');
-                }
-              }}
-              className="flex items-center gap-1.5 text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-full hover:bg-blue-100 transition-colors mr-1 shrink-0"
-            >
-              <FilePlus size={14} />
-              <span className="hidden sm:inline">새 계약</span>
-            </button>
-            <button 
-              onClick={() => router.push('/schedule')}
-              className="text-gray-500 hover:text-blue-600 p-2 bg-gray-50 hover:bg-blue-50 rounded-full border border-gray-200 transition-colors"
-              aria-label="일정 관리"
-            >
-              <CalendarDays size={20} />
-            </button>
-            <NotificationBell />
-            <button 
-              onClick={() => router.push('/settings')}
-              className="text-gray-500 hover:text-blue-600 p-2 bg-gray-50 hover:bg-blue-50 rounded-full border border-gray-200 transition-colors"
-              aria-label="환경 설정"
-            >
-              <Settings size={20} />
-            </button>
+          {/* Right: Action Buttons (Desktop Only) */}
+          <div className="hidden md:flex items-center justify-end w-1/4">
+            {renderActionButtons(false)}
           </div>
         </div>
       </header>
