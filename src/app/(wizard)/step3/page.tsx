@@ -348,7 +348,86 @@ export default function Step3Page() {
 
   return (
     <div className="space-y-8 pb-24">
-      {/* 1. 옵션 선택 */}
+      {/* 1. 투입 차량 및 작업 인원 */}
+      <section>
+        <h2 className="text-xl font-bold mb-4">투입 차량 및 작업 인원</h2>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="flex items-center text-sm font-bold text-gray-700 mb-2">
+                투입 차량 <span className="font-normal text-gray-500 text-xs ml-1">(추천: {recommendedVehicles.fiveTon}대 / {recommendedVehicles.twoHalfTon}대 / {recommendedVehicles.oneTon}대 - 총 {totalCbm} CBM)</span>
+                <button 
+                  onClick={() => updateResources({ vehicles: recommendedVehicles })}
+                  className="ml-2 bg-blue-50 text-blue-600 text-xs px-2 py-0.5 rounded border border-blue-200 hover:bg-blue-100 transition-colors"
+                >
+                  추천 적용
+                </button>
+              </label>
+              <div className="flex gap-2">
+                <div className="flex-1 border rounded p-1 text-center bg-white flex flex-col items-center">
+                   <span className="block text-[10px] text-gray-500 mb-1">5T</span>
+                   <input 
+                     type="number" 
+                     min="0"
+                     className="w-full text-center font-bold outline-none"
+                     value={resources.vehicles.fiveTon || 0}
+                     onChange={(e) => updateResources({ 
+                       vehicles: { ...resources.vehicles, fiveTon: Number(e.target.value) } 
+                     })}
+                   />
+                </div>
+                <div className="flex-1 border rounded p-1 text-center bg-white flex flex-col items-center">
+                   <span className="block text-[10px] text-gray-500 mb-1">2.5T</span>
+                   <input 
+                     type="number" 
+                     min="0"
+                     className="w-full text-center font-bold outline-none"
+                     value={resources.vehicles.twoHalfTon || 0}
+                     onChange={(e) => updateResources({ 
+                       vehicles: { ...resources.vehicles, twoHalfTon: Number(e.target.value) } 
+                     })}
+                   />
+                </div>
+                <div className="flex-1 border rounded p-1 text-center bg-white flex flex-col items-center">
+                   <span className="block text-[10px] text-gray-500 mb-1">1T</span>
+                   <input 
+                     type="number" 
+                     min="0"
+                     className="w-full text-center font-bold outline-none"
+                     value={resources.vehicles.oneTon || 0}
+                     onChange={(e) => updateResources({ 
+                       vehicles: { ...resources.vehicles, oneTon: Number(e.target.value) } 
+                     })}
+                   />
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">작업 인원</label>
+              <div className="flex gap-2">
+                <div className="flex-1 flex items-center border rounded overflow-hidden">
+                  <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600">남</span>
+                  <input type="number" min="0" 
+                    className="w-full p-2 outline-none text-center font-bold" 
+                    value={resources.workerMale} 
+                    onChange={e => updateResources({ workerMale: Number(e.target.value) })}
+                  />
+                </div>
+                <div className="flex-1 flex items-center border rounded overflow-hidden">
+                  <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600">여</span>
+                  <input type="number" min="0" 
+                    className="w-full p-2 outline-none text-center font-bold" 
+                    value={resources.workerFemale} 
+                    onChange={e => updateResources({ workerFemale: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. 옵션 선택 */}
       <section>
         <h2 className="text-xl font-bold mb-4">옵션 항목</h2>
         <div className="bg-white rounded-xl shadow-sm border p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -546,154 +625,78 @@ export default function Step3Page() {
       </section>
 
 
-      {/* 4. 리소스 및 포장재료 */}
+      {/* 4. 포장재료 */}
       <section>
-        <h2 className="text-xl font-bold mb-4">작업 인원 및 포장재료</h2>
-        <div className="bg-white rounded-xl shadow-sm border p-4 space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="flex items-center text-sm font-bold text-gray-700 mb-2">
-                  투입 차량 <span className="font-normal text-gray-500 text-xs ml-1">(추천: {recommendedVehicles.fiveTon}대 / {recommendedVehicles.twoHalfTon}대 / {recommendedVehicles.oneTon}대 - 총 {totalCbm} CBM)</span>
-                  <button 
-                    onClick={() => updateResources({ vehicles: recommendedVehicles })}
-                    className="ml-2 bg-blue-50 text-blue-600 text-xs px-2 py-0.5 rounded border border-blue-200 hover:bg-blue-100 transition-colors"
-                  >
-                    추천 적용
-                  </button>
-                </label>
-                <div className="flex gap-2">
-                  <div className="flex-1 border rounded p-1 text-center bg-white flex flex-col items-center">
-                     <span className="block text-[10px] text-gray-500 mb-1">5T</span>
-                     <input 
-                       type="number" 
-                       min="0"
-                       className="w-full text-center font-bold outline-none"
-                       value={resources.vehicles.fiveTon || 0}
-                       onChange={(e) => updateResources({ 
-                         vehicles: { ...resources.vehicles, fiveTon: Number(e.target.value) } 
-                       })}
-                     />
-                  </div>
-                  <div className="flex-1 border rounded p-1 text-center bg-white flex flex-col items-center">
-                     <span className="block text-[10px] text-gray-500 mb-1">2.5T</span>
-                     <input 
-                       type="number" 
-                       min="0"
-                       className="w-full text-center font-bold outline-none"
-                       value={resources.vehicles.twoHalfTon || 0}
-                       onChange={(e) => updateResources({ 
-                         vehicles: { ...resources.vehicles, twoHalfTon: Number(e.target.value) } 
-                       })}
-                     />
-                  </div>
-                  <div className="flex-1 border rounded p-1 text-center bg-white flex flex-col items-center">
-                     <span className="block text-[10px] text-gray-500 mb-1">1T</span>
-                     <input 
-                       type="number" 
-                       min="0"
-                       className="w-full text-center font-bold outline-none"
-                       value={resources.vehicles.oneTon || 0}
-                       onChange={(e) => updateResources({ 
-                         vehicles: { ...resources.vehicles, oneTon: Number(e.target.value) } 
-                       })}
-                     />
-                  </div>
-                </div>
-              </div>
-             <div>
-               <label className="block text-sm font-bold text-gray-700 mb-2">작업 인원</label>
-               <div className="flex gap-2">
-                 <div className="flex-1 flex items-center border rounded overflow-hidden">
-                   <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600">남</span>
-                   <input type="number" min="0" 
-                     className="w-full p-2 outline-none text-center font-bold" 
-                     value={resources.workerMale} 
-                     onChange={e => updateResources({ workerMale: Number(e.target.value) })}
-                   />
-                 </div>
-                 <div className="flex-1 flex items-center border rounded overflow-hidden">
-                   <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600">여</span>
-                   <input type="number" min="0" 
-                     className="w-full p-2 outline-none text-center font-bold" 
-                     value={resources.workerFemale} 
-                     onChange={e => updateResources({ workerFemale: Number(e.target.value) })}
-                   />
-                 </div>
-               </div>
-             </div>
-          </div>
-          
-          <div>
-              <label className="block text-sm font-bold text-gray-700 mb-3">포장재료</label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {(() => {
-                  const baseMaterials = customPackingMaterials || PACKING_MATERIALS;
-                  const activeExtraMaterials = Object.keys(resources.materials).filter(k => (resources.materials[k] || 0) > 0 && !baseMaterials.includes(k));
-                  const allMaterialsToRender = [...baseMaterials, ...activeExtraMaterials];
-                  
-                  const PREFERRED_ORDER = [
-                    '깔판', '담요(대)', '담요(중)', '특대박스(이불)', '대박스(옷)', 
-                    '중대박스', '중박스', '소박스', '바구니', '아이스박스', 
-                    '속지(노랑색)', '속지(백색)', '테이프', '에어캡', '랩'
-                  ];
+        <h2 className="text-xl font-bold mb-4">포장재료</h2>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {(() => {
+              const baseMaterials = customPackingMaterials || PACKING_MATERIALS;
+              const activeExtraMaterials = Object.keys(resources.materials).filter(k => (resources.materials[k] || 0) > 0 && !baseMaterials.includes(k));
+              const allMaterialsToRender = [...baseMaterials, ...activeExtraMaterials];
+              
+              const PREFERRED_ORDER = [
+                '깔판', '담요(대)', '담요(중)', '특대박스(이불)', '대박스(옷)', 
+                '중대박스', '중박스', '소박스', '바구니', '아이스박스', 
+                '속지(노랑색)', '속지(백색)', '테이프', '에어캡', '랩'
+              ];
 
-                  const renderedMaterials = allMaterialsToRender.filter(mat => {
-                    const hideWhenZero = ['TV(', '침대', '서랍장', '냉장고', '김치냉장고', '세탁기', '건조기', '쇼파', '분해장농', '피아노'];
-                    if (hideWhenZero.some(prefix => mat.startsWith(prefix)) || !baseMaterials.includes(mat)) {
-                      return (resources.materials[mat] || 0) > 0;
-                    }
-                    return true;
-                  }).sort((a, b) => {
-                    const idxA = PREFERRED_ORDER.indexOf(a);
-                    const idxB = PREFERRED_ORDER.indexOf(b);
-                    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                    if (idxA !== -1) return -1;
-                    if (idxB !== -1) return 1;
-                    return 0;
-                  });
+              const renderedMaterials = allMaterialsToRender.filter(mat => {
+                const hideWhenZero = ['TV(', '침대', '서랍장', '냉장고', '김치냉장고', '세탁기', '건조기', '쇼파', '분해장농', '피아노'];
+                if (hideWhenZero.some(prefix => mat.startsWith(prefix)) || !baseMaterials.includes(mat)) {
+                  return (resources.materials[mat] || 0) > 0;
+                }
+                return true;
+              }).sort((a, b) => {
+                const idxA = PREFERRED_ORDER.indexOf(a);
+                const idxB = PREFERRED_ORDER.indexOf(b);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+                return 0;
+              });
 
-                  return renderedMaterials.map(mat => {
-                  const val = resources.materials[mat] || 0;
-                  return (
-                    <div key={mat} className="flex flex-col gap-1 border rounded p-2 bg-gray-50">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-gray-700 truncate" title={mat}>{mat}</span>
-                        <div className="flex items-center gap-1 bg-white border rounded">
-                          <button 
-                            className="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-gray-100"
-                            onClick={() => updateMaterial(mat, Math.max(0, val - 1))}
-                          >
-                            -
-                          </button>
-                          <input 
-                            type="number" min="0" placeholder="0"
-                            className="w-8 text-center outline-none font-bold text-blue-600 text-sm" 
-                            value={val || ''}
-                            onChange={e => updateMaterial(mat, Number(e.target.value))}
-                          />
-                          <button 
-                            className="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-gray-100"
-                            onClick={() => updateMaterial(mat, val + 1)}
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                      {mat === 'TV박스 (인치)' && (
+              return renderedMaterials.map(mat => {
+                const val = resources.materials[mat] || 0;
+                return (
+                  <div key={mat} className="flex flex-col gap-1 border rounded p-2 bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-gray-700 truncate" title={mat}>{mat}</span>
+                      <div className="flex items-center gap-1 bg-white border rounded">
+                        <button 
+                          className="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-gray-100"
+                          onClick={() => updateMaterial(mat, Math.max(0, val - 1))}
+                        >
+                          -
+                        </button>
                         <input 
-                          type="text" 
-                          placeholder="인치 입력 (예: 65, 75)"
-                          className="w-full text-xs p-1 border rounded mt-1"
-                          value={resources.tvBoxInches || ''}
-                          onChange={e => updateResources({ tvBoxInches: e.target.value })}
+                          type="number" min="0" placeholder="0"
+                          className="w-8 text-center outline-none font-bold text-blue-600 text-sm" 
+                          value={val || ''}
+                          onChange={e => updateMaterial(mat, Number(e.target.value))}
                         />
-                      )}
+                        <button 
+                          className="w-6 h-6 flex items-center justify-center text-gray-500 hover:bg-gray-100"
+                          onClick={() => updateMaterial(mat, val + 1)}
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                  );
-                })
-                })()}
-              </div>
-            </div>
+                    {mat === 'TV박스 (인치)' && (
+                      <input 
+                        type="text" 
+                        placeholder="인치 입력 (예: 65, 75)"
+                        className="w-full text-xs p-1 border rounded mt-1"
+                        value={resources.tvBoxInches || ''}
+                        onChange={e => updateResources({ tvBoxInches: e.target.value })}
+                      />
+                    )}
+                  </div>
+                );
+              });
+            })()}
+          </div>
         </div>
       </section>
 
