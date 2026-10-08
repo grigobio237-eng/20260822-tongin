@@ -214,6 +214,10 @@ export default function Step4Page() {
             workerMale: store.resources?.workerMale || 0,
             workerFemale: store.resources?.workerFemale || 0,
             materials: store.resources?.materials || {},
+            packingWorkerMale: isStorageMove ? (store.resources?.packingWorkerMale ?? store.resources?.workerMale ?? 3) : undefined,
+            packingWorkerFemale: isStorageMove ? (store.resources?.packingWorkerFemale ?? 0) : undefined,
+            movingWorkerMale: isStorageMove ? (store.resources?.movingWorkerMale ?? Math.max(1, (store.resources?.workerMale ?? 3) - 1)) : undefined,
+            movingWorkerFemale: isStorageMove ? (store.resources?.movingWorkerFemale ?? (store.resources?.workerFemale > 0 ? store.resources?.workerFemale : 1)) : undefined,
             packingMovingCost: isStorageMove ? effectivePackingCost : undefined,
             deliveryMovingCost: isStorageMove ? effectiveDeliveryCost : undefined
           },
@@ -365,6 +369,10 @@ export default function Step4Page() {
       })),
       resources: {
         ...store.resources,
+        packingWorkerMale: isStorageMove ? (store.resources?.packingWorkerMale ?? store.resources?.workerMale ?? 3) : undefined,
+        packingWorkerFemale: isStorageMove ? (store.resources?.packingWorkerFemale ?? 0) : undefined,
+        movingWorkerMale: isStorageMove ? (store.resources?.movingWorkerMale ?? Math.max(1, (store.resources?.workerMale ?? 3) - 1)) : undefined,
+        movingWorkerFemale: isStorageMove ? (store.resources?.movingWorkerFemale ?? (store.resources?.workerFemale > 0 ? store.resources?.workerFemale : 1)) : undefined,
         packingMovingCost: isStorageMove ? effectivePackingCost : undefined,
         deliveryMovingCost: isStorageMove ? effectiveDeliveryCost : undefined
       } as any,

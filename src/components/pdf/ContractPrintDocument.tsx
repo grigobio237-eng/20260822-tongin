@@ -131,13 +131,13 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
                   <div className="flex justify-between text-[10px] py-0.5">
                     <span>포장일 투입 인력 {c?.packingDate ? `(${c.packingDate.slice(5)})` : ''}</span>
                     <span className="font-semibold text-blue-900">
-                      남 {r?.packingWorkerMale ?? r?.workerMale ?? 0}명 / 여 {r?.packingWorkerFemale ?? 0}명
+                      남 {r?.packingWorkerMale !== undefined ? r.packingWorkerMale : (r?.workerMale ?? 3)}명 / 여 {r?.packingWorkerFemale !== undefined ? r.packingWorkerFemale : 0}명
                     </span>
                   </div>
                   <div className="flex justify-between text-[10px] py-0.5">
                     <span>운송일 투입 인력 {c?.movingDate ? `(${c.movingDate.slice(5)})` : ''}</span>
                     <span className="font-semibold text-indigo-900">
-                      남 {r?.movingWorkerMale ?? r?.workerMale ?? 0}명 / 여 {r?.movingWorkerFemale ?? r?.workerFemale ?? 0}명
+                      남 {r?.movingWorkerMale !== undefined ? r.movingWorkerMale : Math.max(1, (r?.workerMale ?? 3) - 1)}명 / 여 {r?.movingWorkerFemale !== undefined ? r.movingWorkerFemale : ((r?.workerFemale ?? 0) > 0 ? (r?.workerFemale || 0) : 1)}명
                     </span>
                   </div>
                 </div>

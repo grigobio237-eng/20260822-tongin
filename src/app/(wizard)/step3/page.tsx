@@ -351,6 +351,28 @@ export default function Step3Page() {
     customerInfo.arrivalStatus === '보관이사'
   );
 
+  // 보관이사 시 기본 인원(포장일: 남3/여0, 운송일: 남2/여1)이 스토어에 즉시 저장되도록 보장
+  useEffect(() => {
+    if (isStorageMove) {
+      const updates: Partial<typeof resources> = {};
+      if (resources.packingWorkerMale === undefined) {
+        updates.packingWorkerMale = resources.workerMale || 3;
+      }
+      if (resources.packingWorkerFemale === undefined) {
+        updates.packingWorkerFemale = 0;
+      }
+      if (resources.movingWorkerMale === undefined) {
+        updates.movingWorkerMale = Math.max(1, (resources.workerMale || 3) - 1);
+      }
+      if (resources.movingWorkerFemale === undefined) {
+        updates.movingWorkerFemale = resources.workerFemale > 0 ? resources.workerFemale : 1;
+      }
+      if (Object.keys(updates).length > 0) {
+        updateResources(updates);
+      }
+    }
+  }, [isStorageMove, resources.workerMale, resources.workerFemale, resources.packingWorkerMale, resources.packingWorkerFemale, resources.movingWorkerMale, resources.movingWorkerFemale, updateResources]);
+
   return (
     <div className="space-y-8 pb-24">
       {/* 1. 투입 차량 및 작업 인원 */}
