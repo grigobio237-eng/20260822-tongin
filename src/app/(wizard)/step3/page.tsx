@@ -350,12 +350,17 @@ export default function Step3Page() {
     <div className="space-y-8 pb-24">
       {/* 1. 투입 차량 및 작업 인원 */}
       <section>
-        <h2 className="text-xl font-bold mb-4">투입 차량 및 작업 인원</h2>
+        <h2 className="text-xl font-bold mb-4 flex items-center gap-2 flex-wrap">
+          <span>투입 차량 및 작업 인원</span>
+          <span className="text-blue-700 font-bold text-base bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-lg shadow-xs">
+            (총 CBM : {totalCbm})
+          </span>
+        </h2>
         <div className="bg-white rounded-xl shadow-sm border p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="flex items-center text-sm font-bold text-gray-700 mb-2">
-                투입 차량 <span className="font-normal text-gray-500 text-xs ml-1">(추천: {recommendedVehicles.fiveTon}대 / {recommendedVehicles.twoHalfTon}대 / {recommendedVehicles.oneTon}대 - 총 {totalCbm} CBM)</span>
+                투입 차량 <span className="font-normal text-gray-500 text-xs ml-1">(추천: {recommendedVehicles.fiveTon}대 / {recommendedVehicles.twoHalfTon}대 / {recommendedVehicles.oneTon}대)</span>
                 <button 
                   onClick={() => updateResources({ vehicles: recommendedVehicles })}
                   className="ml-2 bg-blue-50 text-blue-600 text-xs px-2 py-0.5 rounded border border-blue-200 hover:bg-blue-100 transition-colors"
