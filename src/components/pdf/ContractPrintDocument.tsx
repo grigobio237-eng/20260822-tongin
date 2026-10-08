@@ -215,7 +215,14 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
         {/* 5. 견적담당자 및 전자서명란 */}
         <div className="border-t border-slate-300 pt-2 flex justify-between items-center">
           <div className="text-[10px] text-slate-600 space-y-0.5">
-            <p className="font-semibold text-slate-800">통인익스프레스 견적 담당: 김택형 (010-4880-9424)</p>
+            <div className="flex items-center gap-2">
+              <p className="font-semibold text-slate-800">통인익스프레스 견적 담당: 김택형 (010-4880-9424)</p>
+              {data.signatureBase64 && (
+                <span className="inline-flex items-center justify-center border-2 border-red-600 text-red-600 font-black text-[9px] rounded-full px-1.5 py-0.5 tracking-tighter shadow-sm transform -rotate-12 bg-red-50/80 select-none">
+                  통인 직인
+                </span>
+              )}
+            </div>
             <p>입금 계좌: 신한은행 110-340-826378 (예금주: 김택형)</p>
           </div>
           <div className="flex items-center gap-2">
@@ -224,7 +231,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
               {data.signatureBase64 ? (
                 <img src={data.signatureBase64} alt="고객서명" className="max-h-full max-w-full object-contain" />
               ) : (
-                <span className="text-gray-400 text-[9px]">서명 완료</span>
+                <span className="text-gray-400 text-[9px]">서명 대기</span>
               )}
             </div>
           </div>
