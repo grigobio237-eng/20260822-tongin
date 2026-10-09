@@ -5,7 +5,7 @@ import { useWizardStore } from '@/store/wizardStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { OPTION_ITEMS, PACKING_MATERIALS } from '@/lib/constants/items';
-import { calculateVehicles } from '@/lib/cbm';
+import { calculateVehicles, calculateWorkers } from '@/lib/cbm';
 import { useSpeechToText } from '@/hooks/useSpeechToText';
 import { Mic, MicOff, Edit2 } from 'lucide-react';
 import clsx from 'clsx';
@@ -54,9 +54,11 @@ export default function Step3Page() {
   const roomItemMapping = useSettingsStore(state => state.roomItemMapping);
   const ladderRates = useSettingsStore(state => state.ladderRates);
   const vehicleLimits = useSettingsStore(state => state.vehicleCbmLimits);
+  const cbmWorkerTiers = useSettingsStore(state => state.cbmWorkerTiers);
   const router = useRouter();
 
   const recommendedVehicles = useMemo(() => calculateVehicles(totalCbm, vehicleLimits), [totalCbm, vehicleLimits]);
+  const recommendedWorkers = useMemo(() => calculateWorkers(totalCbm, cbmWorkerTiers), [totalCbm, cbmWorkerTiers]);
 
   const [ladderTons, setLadderTons] = useState<{ [key: string]: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' }>({
     '사다리·출발지': 'fiveTon',
@@ -437,7 +439,16 @@ export default function Step3Page() {
             <div>
               {!isStorageMove ? (
                 <>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">작업 인원</label>
+                  <label className="flex items-center text-sm font-bold text-gray-700 mb-2">
+                    작업 인원 <span className="font-normal text-gray-500 text-xs ml-1">(추천: 남 {recommendedWorkers.male}명 / 여 {recommendedWorkers.female}명)</span>
+                    <button 
+                      type="button"
+                      onClick={() => updateResources({ workerMale: recommendedWorkers.male, workerFemale: recommendedWorkers.female })}
+                      className="ml-2 bg-blue-50 text-blue-600 text-xs px-2 py-0.5 rounded border border-blue-200 hover:bg-blue-100 transition-colors"
+                    >
+                      추천 적용
+                    </button>
+                  </label>
                   <div className="flex gap-2">
                     <div className="flex-1 flex items-center border rounded overflow-hidden">
                       <span className="bg-gray-100 px-3 py-2 text-sm text-gray-600">남</span>

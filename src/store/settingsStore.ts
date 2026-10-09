@@ -33,6 +33,15 @@ export interface PartnerContact {
   memo: string;
 }
 
+export interface CbmWorkerTier {
+  id: string;
+  minCbm: number;
+  maxCbm: number; // 999 for upper bound
+  male: number;
+  female: number;
+  memo?: string;
+}
+
 export interface SettingsState {
   companyName: string; // 동적 회사명
   businessNumber?: string; // 사업자등록번호
@@ -58,6 +67,7 @@ export interface SettingsState {
     male: number;
     female: number;
   };
+  cbmWorkerTiers?: CbmWorkerTier[];
   optionPrices: Record<string, number>;
   materialCbmSettings: Record<string, number>;
   itemCbmSettings: Record<string, number>; // 가전/가구 기본 CBM 사용자 재정의
@@ -146,6 +156,17 @@ const generateDefaultRoomMapping = () => {
   return mapping as Record<RoomCategory, string[]>;
 };
 
+export const DEFAULT_CBM_WORKER_TIERS: CbmWorkerTier[] = [
+  { id: 'tier_under_20', minCbm: 0, maxCbm: 20, male: 2, female: 1, memo: '1T~2.5T / 소형' },
+  { id: 'tier_20_25', minCbm: 20, maxCbm: 25, male: 3, female: 1, memo: '5톤 기본' },
+  { id: 'tier_25_30', minCbm: 25, maxCbm: 30, male: 3, female: 1, memo: '5톤 만차 / 6톤' },
+  { id: 'tier_30_35', minCbm: 30, maxCbm: 35, male: 4, female: 1, memo: '5톤 + 1톤 (약 7.5톤)' },
+  { id: 'tier_35_40', minCbm: 35, maxCbm: 40, male: 4, female: 1, memo: '5톤 + 2.5톤 (약 8톤)' },
+  { id: 'tier_40_45', minCbm: 40, maxCbm: 45, male: 5, female: 1, memo: '10톤 (5톤 2대)' },
+  { id: 'tier_45_50', minCbm: 45, maxCbm: 50, male: 5, female: 2, memo: '10톤 만차' },
+  { id: 'tier_50_plus', minCbm: 50, maxCbm: 999, male: 6, female: 2, memo: '50 CBM 초과 / 대형' },
+];
+
 const defaultValues = {
   companyName: '통인익스프레스',
   businessNumber: '',
@@ -160,6 +181,7 @@ const defaultValues = {
     oneTon: {}
   },
   workerPrices: { male: 200000, female: 150000 },
+  cbmWorkerTiers: DEFAULT_CBM_WORKER_TIERS,
   optionPrices: initialOptionPrices,
   materialCbmSettings: {
     '특대박스(이불)': 0,
@@ -206,6 +228,7 @@ export const useSettingsStore = create<SettingsState>()(
               vehicleCbmLimits: data.vehicleCbmLimits || get().vehicleCbmLimits,
               defaultPackingMaterials: data.defaultPackingMaterials || get().defaultPackingMaterials,
               workerPrices: data.workerPrices || get().workerPrices,
+              cbmWorkerTiers: (data.cbmWorkerTiers && data.cbmWorkerTiers.length > 0) ? data.cbmWorkerTiers : (get().cbmWorkerTiers || DEFAULT_CBM_WORKER_TIERS),
               itemCbmSettings: data.itemCbmSettings || get().itemCbmSettings,
               itemPackingSettings: data.itemPackingSettings || get().itemPackingSettings,
               optionPrices: data.optionPrices || get().optionPrices,

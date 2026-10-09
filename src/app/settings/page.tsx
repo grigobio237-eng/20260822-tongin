@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSettingsStore, LadderRateTier, PartnerContact, DEFAULT_LADDER_RATES } from '@/store/settingsStore';
+import { useSettingsStore, LadderRateTier, PartnerContact, DEFAULT_LADDER_RATES, CbmWorkerTier, DEFAULT_CBM_WORKER_TIERS } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
-import { Loader2, ArrowLeft, Save } from 'lucide-react';
+import { Loader2, ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
 import { OPTION_ITEMS, PACKING_MATERIALS, ROOM_ITEMS, LIVING_ROOM_ITEMS, KITCHEN_ITEMS, VERANDA_ITEMS, REAR_BALCONY_ITEMS, UTILITY_ROOM_ITEMS, MasterItem, RoomCategory, ROOM_CATEGORIES, ItemCategory, ITEM_CATEGORIES, getDefaultItemCategory } from '@/lib/constants/items';
 
 // 모든 가전/가구 리스트 병합 (중복 제거)
@@ -57,7 +57,8 @@ const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
   
   const formatNum = (num: number | undefined | null) => num ? num.toLocaleString() : '';
 const parseNum = (str: string) => Number(str.replace(/,/g, ''));
-  const [activeTab, setActiveTab] = useState<'general' | 'db' | 'roomMapping' | 'distance' | 'packing' | 'ladder'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'db' | 'roomMapping' | 'cbmWorkers' | 'distance' | 'packing' | 'ladder'>('general');
+  const [localCbmWorkerTiers, setLocalCbmWorkerTiers] = useState<CbmWorkerTier[]>(store.cbmWorkerTiers || DEFAULT_CBM_WORKER_TIERS);
   const [localItemCbm, setLocalItemCbm] = useState(store.itemCbmSettings || {});
   const [localItemPacking, setLocalItemPacking] = useState(store.itemPackingSettings || {});
   
@@ -225,6 +226,9 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
     if (store.itemCbmSettings) setLocalItemCbm(store.itemCbmSettings);
     if (store.itemPackingSettings) setLocalItemPacking(store.itemPackingSettings);
     if (store.distanceRates) setLocalDistanceRates(store.distanceRates);
+    if (store.cbmWorkerTiers && store.cbmWorkerTiers.length > 0) {
+      setLocalCbmWorkerTiers(store.cbmWorkerTiers);
+    }
   }, [store]);
 
   const handleSave = async () => {
@@ -238,6 +242,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
       vehicleCbmLimits: localVehicleCbmLimits,
       defaultPackingMaterials: localDefaultPackingMaterials,
       workerPrices: localWorkerPrices,
+      cbmWorkerTiers: localCbmWorkerTiers,
       optionPrices: localOptionPrices,
       materialCbmSettings: localMaterialCbm,
       ladderRates: localLadderRates,
@@ -323,6 +328,12 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
               onClick={() => setActiveTab('packing')}
             >
               포장재료 DB 설정
+            </button>
+            <button
+              className={`px-6 py-3 font-bold transition-colors ${activeTab === 'cbmWorkers' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              onClick={() => setActiveTab('cbmWorkers')}
+            >
+              CBM별 인원 DB 설정
             </button>
             <button
               className={`px-6 py-3 font-bold transition-colors ${activeTab === 'distance' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
@@ -843,10 +854,187 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
           </div>
         )}
 
-      </div>
-    </div>
-      
-    
+        {activeTab === 'cbmWorkers' && (
+          <div className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl text-sm text-blue-900 leading-relaxed">
+              <div className="font-bold flex items-center gap-1.5 mb-1">
+                <span>📋 CBM 구간별 기본 투입 인원 DB 설정</span>
+              </div>
+              <p className="text-xs text-blue-700">
+                총 CBM 규모에 따라 스텝3에 기본 추천되는 <strong>남자/여자 작업인원</strong>을 셋팅합니다.
+                <br />
+                기본 20 CBM부터 5 CBM 단위로 구간이 구분되어 있으며, 구간 범위를 수정하거나 행을 추가/삭제할 수 있습니다.
+              </p>
+            </div>
+
+            <div className="bg-white border rounded-xl overflow-hidden shadow-xs">
+              <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
+                <div>
+                  <h3 className="font-bold text-gray-800 text-base">CBM 구간별 인원 매트릭스</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">최소 CBM 이상 ~ 최대 CBM 미만 기준 (마지막 행은 이상 기준)</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const last = localCbmWorkerTiers[localCbmWorkerTiers.length - 1];
+                    const nextMin = last ? (last.maxCbm === 999 ? last.minCbm + 5 : last.maxCbm) : 20;
+                    const nextMax = nextMin + 5;
+                    const newTier: CbmWorkerTier = {
+                      id: `tier_${Date.now()}`,
+                      minCbm: nextMin,
+                      maxCbm: nextMax,
+                      male: last ? last.male : 3,
+                      female: last ? last.female : 1,
+                      memo: `${nextMin}~${nextMax} CBM`
+                    };
+                    setLocalCbmWorkerTiers(prev => [...prev, newTier]);
+                  }}
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow-xs transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>구간 추가</span>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-sm">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-700 border-b text-xs font-semibold">
+                      <th className="p-3 text-center w-14">순번</th>
+                      <th className="p-3 text-center w-36">최소 CBM</th>
+                      <th className="p-3 text-center w-36">최대 CBM</th>
+                      <th className="p-3 text-center w-28">남성 인원</th>
+                      <th className="p-3 text-center w-28">여성 인원</th>
+                      <th className="p-3 text-center w-24">합계</th>
+                      <th className="p-3 text-left">참고/메모</th>
+                      <th className="p-3 text-center w-16">관리</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {localCbmWorkerTiers.map((tier, idx) => (
+                      <tr key={tier.id || idx} className="hover:bg-blue-50/30 transition-colors">
+                        <td className="p-3 text-center text-xs font-bold text-gray-400">
+                          {idx + 1}
+                        </td>
+                        <td className="p-2 text-center">
+                          <div className="inline-flex items-center gap-1">
+                            <input
+                              type="number"
+                              step="1"
+                              min="0"
+                              value={tier.minCbm}
+                              onChange={(e) => {
+                                const val = parseFloat(e.target.value) || 0;
+                                setLocalCbmWorkerTiers(prev => prev.map((t, i) => i === idx ? { ...t, minCbm: val } : t));
+                              }}
+                              className="w-20 border rounded p-1.5 text-center font-bold text-gray-800 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                            />
+                            <span className="text-xs text-gray-500 font-medium">CBM</span>
+                          </div>
+                        </td>
+                        <td className="p-2 text-center">
+                          <div className="inline-flex items-center gap-1">
+                            <input
+                              type="number"
+                              step="1"
+                              min="0"
+                              value={tier.maxCbm}
+                              onChange={(e) => {
+                                const val = parseFloat(e.target.value) || 0;
+                                setLocalCbmWorkerTiers(prev => prev.map((t, i) => i === idx ? { ...t, maxCbm: val } : t));
+                              }}
+                              className="w-20 border rounded p-1.5 text-center font-bold text-gray-800 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                            />
+                            <span className="text-xs text-gray-500 font-medium">{tier.maxCbm >= 999 ? '이상' : 'CBM'}</span>
+                          </div>
+                        </td>
+                        <td className="p-2 text-center">
+                          <div className="inline-flex items-center gap-1">
+                            <input
+                              type="number"
+                              min="0"
+                              value={tier.male}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value, 10) || 0;
+                                setLocalCbmWorkerTiers(prev => prev.map((t, i) => i === idx ? { ...t, male: val } : t));
+                              }}
+                              className="w-16 border rounded p-1.5 text-center font-black text-blue-700 text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-blue-50/40"
+                            />
+                            <span className="text-xs text-gray-600 font-semibold">명</span>
+                          </div>
+                        </td>
+                        <td className="p-2 text-center">
+                          <div className="inline-flex items-center gap-1">
+                            <input
+                              type="number"
+                              min="0"
+                              value={tier.female}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value, 10) || 0;
+                                setLocalCbmWorkerTiers(prev => prev.map((t, i) => i === idx ? { ...t, female: val } : t));
+                              }}
+                              className="w-16 border rounded p-1.5 text-center font-black text-rose-700 text-sm focus:ring-1 focus:ring-rose-500 outline-none bg-rose-50/40"
+                            />
+                            <span className="text-xs text-gray-600 font-semibold">명</span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className="inline-block px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 font-bold text-xs">
+                            총 {tier.male + tier.female}명
+                          </span>
+                        </td>
+                        <td className="p-2">
+                          <input
+                            type="text"
+                            value={tier.memo || ''}
+                            placeholder="예: 5톤 기본 / 6톤"
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setLocalCbmWorkerTiers(prev => prev.map((t, i) => i === idx ? { ...t, memo: val } : t));
+                            }}
+                            className="w-full border rounded p-1.5 text-xs text-gray-700 focus:ring-1 focus:ring-blue-500 outline-none"
+                          />
+                        </td>
+                        <td className="p-2 text-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (localCbmWorkerTiers.length <= 1) {
+                                alert('최소 1개 이상의 구간이 필요합니다.');
+                                return;
+                              }
+                              setLocalCbmWorkerTiers(prev => prev.filter((_, i) => i !== idx));
+                            }}
+                            className="text-gray-400 hover:text-red-600 p-1 rounded transition-colors"
+                            title="구간 삭제"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="p-3 bg-gray-50 border-t flex justify-between items-center text-xs text-gray-500">
+                <span>* 견적 작성 시 스텝2에서 계산된 총 CBM에 해당하는 구간의 작업인원이 스텝3에 기본 추천됩니다.</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm('CBM별 기본 인원 설정을 초기 기본값으로 재설정하시겠습니까?')) {
+                      setLocalCbmWorkerTiers(DEFAULT_CBM_WORKER_TIERS);
+                    }
+                  }}
+                  className="text-blue-600 hover:underline font-semibold"
+                >
+                  기본값 복원
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'ladder' && (
           <div className="space-y-8">
             <div className="bg-indigo-50 p-4 rounded-xl text-sm text-indigo-800">
@@ -919,16 +1107,19 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
           </div>
         )}
 
+        </div>
+
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <div className="max-w-4xl mx-auto">
-          <button 
-            onClick={handleSave}
-            disabled={store.isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
-          >
-            {store.isLoading ? <Loader2 className="animate-spin" /> : <Save />}
-            {store.isLoading ? '저장 중...' : '설정 저장하기'}
-          </button>
+          <div className="max-w-4xl mx-auto">
+            <button 
+              onClick={handleSave}
+              disabled={store.isLoading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
+            >
+              {store.isLoading ? <Loader2 className="animate-spin" /> : <Save />}
+              {store.isLoading ? '저장 중...' : '설정 저장하기'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

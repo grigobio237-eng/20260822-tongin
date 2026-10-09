@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { RoomCategory, ROOM_CATEGORIES, OPTION_ITEMS } from '../lib/constants/items';
-import { calculateVehicles, VehicleRecommendation } from '../lib/cbm';
+import { calculateVehicles, calculateWorkers, VehicleRecommendation } from '../lib/cbm';
 
 export interface CustomerInfo {
   name: string;
@@ -491,6 +491,7 @@ export const useWizardStore = create<WizardState>()(
         
         const limits = settings.vehicleCbmLimits;
         const calculated = calculateVehicles(totalCbm, limits);
+        const calculatedWorkers = calculateWorkers(totalCbm, settings.cbmWorkerTiers);
         
         set({ 
           roomItems: newRoomItems,
@@ -498,7 +499,9 @@ export const useWizardStore = create<WizardState>()(
           calculatedVehicles: calculated,
           resources: { 
             ...resources, 
-            vehicles: calculated
+            vehicles: calculated,
+            workerMale: calculatedWorkers.male,
+            workerFemale: calculatedWorkers.female
           } 
         });
       },
