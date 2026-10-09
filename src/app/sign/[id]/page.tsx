@@ -89,7 +89,7 @@ export default function CustomerSignPage() {
   };
 
   const handleCopyAccount = async () => {
-    const textToCopy = '신한은행 110-340-826378 (예금주: 김택형)';
+    const textToCopy = parsedData?.companyInfo?.bankAccount || '신한은행 110-340-826378 (예금주: 김택형)';
     try {
       await navigator.clipboard.writeText(textToCopy);
     } catch {
@@ -186,6 +186,7 @@ export default function CustomerSignPage() {
       signatureBase64: contract.signature_url || undefined,
       includeVat: contract.include_vat === 1 || Boolean(contract.vat_amount && contract.vat_amount > 0),
       vatAmount: contract.vat_amount,
+      companyInfo: contract.company_info_json ? JSON.parse(contract.company_info_json) : undefined,
     };
   } catch (e) {
     console.error("데이터 파싱 에러", e);
@@ -207,7 +208,7 @@ export default function CustomerSignPage() {
       `}</style>
       {/* 헤더 */}
       <div className="bg-blue-900 text-white p-4 text-center shadow w-full">
-        <h1 className="text-xl font-black">통인익스프레스 견적서 검토</h1>
+        <h1 className="text-xl font-black">{parsedData?.companyInfo?.companyName || '통인익스프레스'} 견적서 검토</h1>
         <p className="text-sm text-blue-200">내역을 확인하시고 서명을 진행해 주세요</p>
       </div>
 
@@ -407,7 +408,7 @@ export default function CustomerSignPage() {
               </h2>
               <p className="text-xs text-blue-100/90 leading-relaxed font-light max-w-sm mx-auto">
                 <strong className="font-semibold text-amber-300">{parsedData?.customerInfo?.name || '고객'}</strong>님의 소중한 새 출발,<br />
-                통인익스프레스가 품격과 정성을 다해 안전하게 모시겠습니다.
+                {parsedData?.companyInfo?.companyName || '통인익스프레스'}가 품격과 정성을 다해 안전하게 모시겠습니다.
               </p>
             </div>
 
@@ -476,9 +477,11 @@ export default function CustomerSignPage() {
                 <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-amber-200/80 shadow-xs">
                   <div className="text-xs">
                     <span className="font-bold text-slate-800 block text-xs">
-                      신한은행 110-340-826378
+                      {parsedData?.companyInfo?.bankAccount || '신한은행 110-340-826378 (예금주: 김택형)'}
                     </span>
-                    <span className="text-slate-500 text-[10px]">예금주: 김택형 (통인익스프레스)</span>
+                    <span className="text-slate-500 text-[10px]">
+                      담당: {parsedData?.companyInfo?.representativeName || '김택형'} ({parsedData?.companyInfo?.companyName || '통인익스프레스'})
+                    </span>
                   </div>
 
                   <button
@@ -506,7 +509,7 @@ export default function CustomerSignPage() {
               </div>
 
               <p className="text-[10px] text-slate-400 text-center">
-                전자서명된 원본 계약서는 통인익스프레스 본사 시스템에 공식 보관됩니다.
+                전자서명된 원본 계약서는 {parsedData?.companyInfo?.companyName || '통인익스프레스'} 본사 시스템에 공식 보관됩니다.
               </p>
             </div>
 

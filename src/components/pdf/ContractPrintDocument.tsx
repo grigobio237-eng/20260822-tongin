@@ -55,10 +55,22 @@ export interface ContractPrintData {
   sttMemo?: string;
   includeVat?: boolean;
   vatAmount?: number;
+  companyInfo?: {
+    companyName?: string;
+    representativeName?: string;
+    contactPhone?: string;
+    bankAccount?: string;
+    businessNumber?: string;
+  };
 }
 
 export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ data }) => {
-  const { customerInfo: c, resources: r } = data;
+  const { customerInfo: c, resources: r, companyInfo } = data;
+
+  const displayCompanyName = companyInfo?.companyName || '통인익스프레스';
+  const displayRepresentative = companyInfo?.representativeName || '김택형';
+  const displayPhone = companyInfo?.contactPhone || '010-4880-9424';
+  const displayBankAccount = companyInfo?.bankAccount || '신한은행 110-340-826378 (예금주: 김택형)';
 
   return (
     <div id="contract-print-root" className="bg-white text-slate-800 font-sans text-[11px] leading-[1.4] select-none">
@@ -70,7 +82,7 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
           <div className="flex justify-between items-end border-b-2 border-blue-900 pb-2 mb-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xl font-black text-blue-900 tracking-tight">통인익스프레스</span>
+                <span className="text-xl font-black text-blue-900 tracking-tight">{displayCompanyName}</span>
                 <span className="text-sm font-bold text-slate-700">이사견적·계약서</span>
               </div>
               <p className="text-[10px] text-gray-500 mt-0.5">기분 좋은 프리미엄 이사 서비스</p>
@@ -245,14 +257,14 @@ export const ContractPrintDocument: React.FC<{ data: ContractPrintData }> = ({ d
         <div className="border-t border-slate-300 pt-2 flex justify-between items-center">
           <div className="text-[10px] text-slate-600 space-y-0.5">
             <div className="flex items-center gap-2">
-              <p className="font-semibold text-slate-800">통인익스프레스 견적 담당: 김택형 (010-4880-9424)</p>
+              <p className="font-semibold text-slate-800">{displayCompanyName} 견적 담당: {displayRepresentative} ({displayPhone})</p>
               {data.signatureBase64 && (
                 <span className="inline-flex items-center justify-center border-2 border-red-600 text-red-600 font-black text-[9px] rounded-full px-1.5 py-0.5 tracking-tighter shadow-sm transform -rotate-12 bg-red-50/80 select-none">
-                  통인 직인
+                  {displayCompanyName.slice(0, 2)} 직인
                 </span>
               )}
             </div>
-            <p>입금 계좌: 신한은행 110-340-826378 (예금주: 김택형)</p>
+            <p>입금 계좌: {displayBankAccount}</p>
           </div>
           <div className="flex items-center gap-2">
             <span className="font-bold text-xs">고객 전자서명:</span>

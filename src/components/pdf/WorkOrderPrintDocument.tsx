@@ -7,8 +7,9 @@ export interface WorkOrderPrintData extends ContractPrintData {
 }
 
 export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({ data }) => {
-  const { customerInfo: c, resources: r, rooms, sttMemo, materials, deposit, middlePayment, balance, options } = data;
+  const { customerInfo: c, resources: r, rooms, sttMemo, materials, deposit, middlePayment, balance, options, companyInfo } = data;
 
+  const displayCompanyName = companyInfo?.companyName || '통인익스프레스';
   const totalWorkers = (r?.workerMale || 0) + (r?.workerFemale || 0);
   
   return (
@@ -18,7 +19,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
         <div className="flex justify-between items-end border-b-2 border-blue-900 pb-2">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-black text-blue-900 tracking-tight">통인익스프레스</span>
+              <span className="text-xl font-black text-blue-900 tracking-tight">{displayCompanyName}</span>
               <span className="text-sm font-bold text-slate-700">작업 지시서</span>
             </div>
           </div>
@@ -249,7 +250,7 @@ export const WorkOrderPrintDocument: React.FC<{ data: WorkOrderPrintData }> = ({
         </div>
 
         <div className="text-center text-[10px] text-gray-500 border-t pt-3 mt-4 pb-4">
-          본 작업지시서는 현장 작업자용으로 고객에게 배포하지 마십시오. / 통인익스프레스
+          본 작업지시서는 현장 작업자용으로 고객에게 배포하지 마십시오. / {displayCompanyName}
         </div>
       </div>
     </div>

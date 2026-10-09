@@ -24,6 +24,10 @@ export default function SettingsPage() {
   const store = useSettingsStore();
   
   const [localCompanyName, setLocalCompanyName] = useState(store.companyName || '통인익스프레스');
+  const [localBusinessNumber, setLocalBusinessNumber] = useState(store.businessNumber || '');
+  const [localRepresentativeName, setLocalRepresentativeName] = useState(store.representativeName || '김택형');
+  const [localContactPhone, setLocalContactPhone] = useState(store.contactPhone || '010-4880-9424');
+  const [localBankAccount, setLocalBankAccount] = useState(store.bankAccount || '신한은행 110-340-826378 (예금주: 김택형)');
   const [localVehiclePrices, setLocalVehiclePrices] = useState(store.vehiclePrices);
   const [localVehicleCbmLimits, setLocalVehicleCbmLimits] = useState(store.vehicleCbmLimits || { fiveTon: 15, twoHalfTon: 7.5, oneTon: 3 });
   const [localDefaultPackingMaterials, setLocalDefaultPackingMaterials] = useState(store.defaultPackingMaterials || { fiveTon: {}, twoHalfTon: {}, oneTon: {} });
@@ -181,6 +185,10 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
 
   useEffect(() => {
     setLocalCompanyName(store.companyName || '통인익스프레스');
+    setLocalBusinessNumber(store.businessNumber || '');
+    setLocalRepresentativeName(store.representativeName || '김택형');
+    setLocalContactPhone(store.contactPhone || '010-4880-9424');
+    setLocalBankAccount(store.bankAccount || '신한은행 110-340-826378 (예금주: 김택형)');
     setLocalVehiclePrices(store.vehiclePrices);
     if (store.vehicleCbmLimits) setLocalVehicleCbmLimits(store.vehicleCbmLimits);
     if (store.defaultPackingMaterials) setLocalDefaultPackingMaterials(store.defaultPackingMaterials);
@@ -222,6 +230,10 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
   const handleSave = async () => {
     await store.updateSettings({
       companyName: localCompanyName,
+      businessNumber: localBusinessNumber,
+      representativeName: localRepresentativeName,
+      contactPhone: localContactPhone,
+      bankAccount: localBankAccount,
       vehiclePrices: localVehiclePrices,
       vehicleCbmLimits: localVehicleCbmLimits,
       defaultPackingMaterials: localDefaultPackingMaterials,
@@ -329,23 +341,78 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
           {activeTab === 'general' && (
             <div className="space-y-8">
               <section>
-            <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">기본 정보 설정</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold mb-2">회사명 (브랜드명)</label>
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    value={localCompanyName} 
-                    onChange={(e) => setLocalCompanyName(e.target.value)} 
-                    className="w-full border rounded-lg p-3 font-bold text-gray-800"
-                    placeholder="예: 통인익스프레스" 
-                  />
+                <div className="flex items-center justify-between border-b pb-2 mb-4">
+                  <h2 className="text-lg font-bold text-blue-600">기본 정보 및 사업자 설정</h2>
+                  <span className="text-xs text-gray-500 font-medium">견적서, 계약서, 고객 안내 메시지에 적용됩니다</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">견적서 상단 및 고객 전송 메시지에 표시되는 이름입니다.</p>
-              </div>
-            </div>
-          </section>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/70 p-5 rounded-xl border border-gray-200">
+                  {/* 회사명 (브랜드명) */}
+                  <div>
+                    <label className="block text-sm font-semibold mb-1.5 text-gray-800">회사명 (브랜드명)</label>
+                    <input 
+                      type="text" 
+                      value={localCompanyName} 
+                      onChange={(e) => setLocalCompanyName(e.target.value)} 
+                      className="w-full border rounded-lg p-2.5 font-bold text-gray-800 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      placeholder="예: 통인익스프레스" 
+                    />
+                    <p className="text-xs text-gray-500 mt-1.5">견적서 상단 타이틀 및 고객 전송 메시지에 표시되는 이름입니다.</p>
+                  </div>
+
+                  {/* 대표자명 */}
+                  <div>
+                    <label className="block text-sm font-semibold mb-1.5 text-gray-800">대표자명</label>
+                    <input 
+                      type="text" 
+                      value={localRepresentativeName} 
+                      onChange={(e) => setLocalRepresentativeName(e.target.value)} 
+                      className="w-full border rounded-lg p-2.5 font-bold text-gray-800 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      placeholder="예: 김택형" 
+                    />
+                    <p className="text-xs text-gray-500 mt-1.5">계약서 견적 담당자 및 예금주 기본 명의로 활용됩니다.</p>
+                  </div>
+
+                  {/* 사업자등록번호 */}
+                  <div>
+                    <label className="block text-sm font-semibold mb-1.5 text-gray-800">사업자등록번호</label>
+                    <input 
+                      type="text" 
+                      value={localBusinessNumber} 
+                      onChange={(e) => setLocalBusinessNumber(e.target.value)} 
+                      className="w-full border rounded-lg p-2.5 font-medium text-gray-800 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      placeholder="예: 123-45-67890" 
+                    />
+                    <p className="text-xs text-gray-500 mt-1.5">사업자등록증에 기재된 등록번호입니다.</p>
+                  </div>
+
+                  {/* 대표 전화번호 */}
+                  <div>
+                    <label className="block text-sm font-semibold mb-1.5 text-gray-800">대표 전화번호 (연락처)</label>
+                    <input 
+                      type="text" 
+                      value={localContactPhone} 
+                      onChange={(e) => setLocalContactPhone(e.target.value)} 
+                      className="w-full border rounded-lg p-2.5 font-medium text-gray-800 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      placeholder="예: 010-4880-9424 또는 1588-0000" 
+                    />
+                    <p className="text-xs text-gray-500 mt-1.5">계약서 하단 담당자 연락처 및 안내에 표기됩니다.</p>
+                  </div>
+
+                  {/* 입금 계좌번호 */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold mb-1.5 text-gray-800">입금 계좌번호 (은행명, 계좌번호, 예금주)</label>
+                    <input 
+                      type="text" 
+                      value={localBankAccount} 
+                      onChange={(e) => setLocalBankAccount(e.target.value)} 
+                      className="w-full border rounded-lg p-2.5 font-bold text-gray-800 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      placeholder="예: 신한은행 110-340-826378 (예금주: 김택형)" 
+                    />
+                    <p className="text-xs text-gray-500 mt-1.5">계약서 하단 및 서명 완료 페이지의 계약금 복사 기능에 적용됩니다.</p>
+                  </div>
+                </div>
+              </section>
 
           <section>
             <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">차량 단가 및 적재량(CBM) 설정</h2>

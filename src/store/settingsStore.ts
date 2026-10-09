@@ -35,6 +35,10 @@ export interface PartnerContact {
 
 export interface SettingsState {
   companyName: string; // 동적 회사명
+  businessNumber?: string; // 사업자등록번호
+  representativeName?: string; // 대표자명
+  contactPhone?: string; // 전화번호 (대표 연락처)
+  bankAccount?: string; // 입금 계좌번호
   vehiclePrices: {
     fiveTon: number;
     twoHalfTon: number;
@@ -144,6 +148,10 @@ const generateDefaultRoomMapping = () => {
 
 const defaultValues = {
   companyName: '통인익스프레스',
+  businessNumber: '',
+  representativeName: '김택형',
+  contactPhone: '010-4880-9424',
+  bankAccount: '신한은행 110-340-826378 (예금주: 김택형)',
   vehiclePrices: { fiveTon: 300000, twoHalfTon: 200000, oneTon: 150000 },
   vehicleCbmLimits: { fiveTon: 15, twoHalfTon: 7.5, oneTon: 3 },
   defaultPackingMaterials: {
@@ -189,7 +197,11 @@ export const useSettingsStore = create<SettingsState>()(
           if (res.ok) {
             const data = (await res.json()) as Partial<SettingsState>;
             set({
-              companyName: data.companyName || get().companyName,
+              companyName: data.companyName !== undefined ? data.companyName : get().companyName,
+              businessNumber: data.businessNumber !== undefined ? data.businessNumber : get().businessNumber,
+              representativeName: data.representativeName !== undefined ? data.representativeName : get().representativeName,
+              contactPhone: data.contactPhone !== undefined ? data.contactPhone : get().contactPhone,
+              bankAccount: data.bankAccount !== undefined ? data.bankAccount : get().bankAccount,
               vehiclePrices: data.vehiclePrices || get().vehiclePrices,
               vehicleCbmLimits: data.vehicleCbmLimits || get().vehicleCbmLimits,
               defaultPackingMaterials: data.defaultPackingMaterials || get().defaultPackingMaterials,

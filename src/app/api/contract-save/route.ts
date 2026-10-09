@@ -50,6 +50,7 @@ export async function POST(req: Request) {
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN secondary_phone TEXT").run(); } catch (e) {}
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN include_vat INTEGER").run(); } catch (e) {}
     try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN vat_amount INTEGER").run(); } catch (e) {}
+    try { await (db as any).prepare("ALTER TABLE contracts ADD COLUMN company_info_json TEXT").run(); } catch (e) {}
 
     const sql = `
       INSERT OR REPLACE INTO contracts (
@@ -62,8 +63,8 @@ export async function POST(req: Request) {
         stt_memo, signature_url, pdf_url, status, created_at, updated_at,
         rooms_json, options_json, resources_json, departure_detail_address, arrival_detail_address,
         distance_km, duration_min, apply_distance_price, middle_payment, secondary_phone,
-        include_vat, vat_amount
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        include_vat, vat_amount, company_info_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const result = await (db as any).prepare(sql).bind(
@@ -107,7 +108,8 @@ export async function POST(req: Request) {
       Number(body.middlePayment) || 0,
       String(customer.secondaryPhone || ''),
       body.includeVat ? 1 : 0,
-      Number(body.vatAmount) || 0
+      Number(body.vatAmount) || 0,
+      JSON.stringify(body.companyInfo || {})
     ).run();
 
     if (!result.success) {

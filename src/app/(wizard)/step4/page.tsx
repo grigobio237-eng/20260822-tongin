@@ -221,6 +221,13 @@ export default function Step4Page() {
             packingMovingCost: isStorageMove ? effectivePackingCost : undefined,
             deliveryMovingCost: isStorageMove ? effectiveDeliveryCost : undefined
           },
+          companyInfo: {
+            companyName: settingsStore.companyName || '통인익스프레스',
+            representativeName: settingsStore.representativeName || '김택형',
+            contactPhone: settingsStore.contactPhone || '010-4880-9424',
+            bankAccount: settingsStore.bankAccount || '신한은행 110-340-826378 (예금주: 김택형)',
+            businessNumber: settingsStore.businessNumber || ''
+          },
           sttMemo: store.sttMemo,
           optionCost: optionsCost
         })
@@ -385,7 +392,14 @@ export default function Step4Page() {
       deposit: deposit,
       middlePayment,
       balance: balance,
-      sttMemo: store.sttMemo
+      sttMemo: store.sttMemo,
+      companyInfo: {
+        companyName: settingsStore.companyName || '통인익스프레스',
+        representativeName: settingsStore.representativeName || '김택형',
+        contactPhone: settingsStore.contactPhone || '010-4880-9424',
+        bankAccount: settingsStore.bankAccount || '신한은행 110-340-826378 (예금주: 김택형)',
+        businessNumber: settingsStore.businessNumber || ''
+      }
     };
 
     return (
