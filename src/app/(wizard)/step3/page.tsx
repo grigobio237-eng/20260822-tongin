@@ -70,17 +70,12 @@ export default function Step3Page() {
 
   const recommendedStorageTon = useMemo(() => getRecommendedStorageTon(totalCbm), [totalCbm]);
 
-  const [storageTons, setStorageTons] = useState<{ [key: string]: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' }>({
-    '컨테이너보관료 (1일)': 'fiveTon',
-    '실내보관료 (1일)': 'fiveTon',
-  });
+  const [manualStorageTons, setManualStorageTons] = useState<{ [key: string]: boolean }>({});
 
-  useEffect(() => {
-    setStorageTons(prev => ({
-      '컨테이너보관료 (1일)': prev['컨테이너보관료 (1일)'] || recommendedStorageTon,
-      '실내보관료 (1일)': prev['실내보관료 (1일)'] || recommendedStorageTon,
-    }));
-  }, [recommendedStorageTon]);
+  const [storageTons, setStorageTons] = useState<{ [key: string]: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' }>({
+    '컨테이너보관료 (1일)': recommendedStorageTon,
+    '실내보관료 (1일)': recommendedStorageTon,
+  });
 
   const getCalculatedStoragePrice = (optName: string, ton: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon') => {
     const rates = storageRates || DEFAULT_STORAGE_RATES;
@@ -99,6 +94,28 @@ export default function Step3Page() {
   });
 
   const [manualPrices, setManualPrices] = useState<{ [key: string]: number }>({});
+
+  // 권장 톤수 변경 시 수동 지정되지 않은 보관 옵션의 적용 톤수 및 단가를 자동으로 100% 동기화
+  useEffect(() => {
+    setStorageTons(prev => {
+      const updated = { ...prev };
+      const currentOptions = useWizardStore.getState().options;
+
+      ['컨테이너보관료 (1일)', '실내보관료 (1일)'].forEach(optName => {
+        if (!manualStorageTons[optName]) {
+          updated[optName] = recommendedStorageTon;
+
+          // 이미 선택된 옵션이고 사용자가 임의 단가를 직접 타이핑하지 않았다면 단가도 권장 톤수로 즉시 갱신
+          if (currentOptions[optName] && !manualPrices[optName]) {
+            const price = getCalculatedStoragePrice(optName, recommendedStorageTon);
+            const days = currentOptions[optName].quantity || 1;
+            updateOption(optName, days, price, currentOptions[optName].startDate, currentOptions[optName].endDate);
+          }
+        }
+      });
+      return updated;
+    });
+  }, [recommendedStorageTon, manualStorageTons, manualPrices, updateOption, storageRates]);
 
   const handleSttResult = React.useCallback((text: string) => {
     const currentMemo = useWizardStore.getState().sttMemo;
@@ -138,7 +155,8 @@ export default function Step3Page() {
         const ton = ladderTons[optName];
         price = manualPrices[optName] ?? getCalculatedLadderPrice(optName, ton);
       } else if (optName.includes('보관료')) {
-        const ton = storageTons[optName] || recommendedStorageTon;
+        const ton = manualStorageTons[optName] ? (storageTons[optName] || recommendedStorageTon) : recommendedStorageTon;
+        setStorageTons(prev => ({ ...prev, [optName]: ton }));
         price = manualPrices[optName] ?? getCalculatedStoragePrice(optName, ton);
       }
       
@@ -166,6 +184,7 @@ export default function Step3Page() {
   };
 
   const handleStorageTonChange = (optName: string, ton: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon') => {
+    setManualStorageTons(prev => ({ ...prev, [optName]: true }));
     setStorageTons(prev => ({ ...prev, [optName]: ton }));
     setManualPrices(prev => {
       const next = { ...prev };
@@ -173,6 +192,20 @@ export default function Step3Page() {
       return next;
     });
     const price = getCalculatedStoragePrice(optName, ton);
+    if (options[optName]) {
+      updateOption(optName, options[optName].quantity || 1, price, options[optName].startDate, options[optName].endDate);
+    }
+  };
+
+  const handleResetToRecommendedStorageTon = (optName: string) => {
+    setManualStorageTons(prev => ({ ...prev, [optName]: false }));
+    setStorageTons(prev => ({ ...prev, [optName]: recommendedStorageTon }));
+    setManualPrices(prev => {
+      const next = { ...prev };
+      delete next[optName];
+      return next;
+    });
+    const price = getCalculatedStoragePrice(optName, recommendedStorageTon);
     if (options[optName]) {
       updateOption(optName, options[optName].quantity || 1, price, options[optName].startDate, options[optName].endDate);
     }
@@ -672,9 +705,24 @@ export default function Step3Page() {
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-blue-200 rounded-lg p-2.5 shadow-sm gap-2">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-gray-700">보관 차량 톤수</span>
-                          <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">
-                            권장: {recommendedStorageTon === 'fiveTon' ? '5톤' : recommendedStorageTon === 'sixTon' ? '6톤' : recommendedStorageTon === 'sevenHalfTon' ? '7.5톤' : '10톤'}
-                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleResetToRecommendedStorageTon(opt.name)}
+                            className={clsx(
+                              "text-[10px] px-2 py-0.5 rounded font-bold transition-all flex items-center gap-1 cursor-pointer",
+                              (storageTons[opt.name] || recommendedStorageTon) === recommendedStorageTon
+                                ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                : "bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200 shadow-sm"
+                            )}
+                            title="권장 톤수로 재설정"
+                          >
+                            <span>권장: {recommendedStorageTon === 'fiveTon' ? '5톤' : recommendedStorageTon === 'sixTon' ? '6톤' : recommendedStorageTon === 'sevenHalfTon' ? '7.5톤' : '10톤'}</span>
+                            {(storageTons[opt.name] || recommendedStorageTon) !== recommendedStorageTon ? (
+                              <span className="underline font-extrabold">(클릭 시 권장연동)</span>
+                            ) : (
+                              <span className="text-[9px] text-blue-600 font-medium">● 자동연동됨</span>
+                            )}
+                          </button>
                         </div>
                         <select
                           value={storageTons[opt.name] || recommendedStorageTon}
