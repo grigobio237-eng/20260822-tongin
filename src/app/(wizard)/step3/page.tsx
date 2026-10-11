@@ -61,14 +61,31 @@ export default function Step3Page() {
   const recommendedVehicles = useMemo(() => calculateVehicles(totalCbm, vehicleLimits), [totalCbm, vehicleLimits]);
   const recommendedWorkers = useMemo(() => calculateWorkers(totalCbm, cbmWorkerTiers), [totalCbm, cbmWorkerTiers]);
 
-  const getRecommendedStorageTon = (cbm: number): 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' => {
+  const getRecommendedStorageTon = (
+    cbm: number,
+    vehicles?: { fiveTon: number; twoHalfTon: number; oneTon: number }
+  ): 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' => {
+    // 1. 배정된 투입 차량(톤수)이 있는 경우 투입 차량 합계를 최우선 반영
+    if (vehicles) {
+      const totalTons = (vehicles.fiveTon || 0) * 5 + (vehicles.twoHalfTon || 0) * 2.5 + (vehicles.oneTon || 0) * 1;
+      if (totalTons > 0) {
+        if (totalTons <= 5) return 'fiveTon';
+        if (totalTons <= 6) return 'sixTon';
+        if (totalTons <= 7.5) return 'sevenHalfTon';
+        return 'tenTon';
+      }
+    }
+    // 2. 차량 미지정 시 CBM 기준 산정 (34.5 CBM 등 25~35 CBM은 5톤+1톤인 6톤급 적재 물량)
     if (cbm <= 25) return 'fiveTon';
-    if (cbm <= 30) return 'sixTon';
-    if (cbm <= 35) return 'sevenHalfTon';
+    if (cbm <= 35) return 'sixTon';
+    if (cbm <= 42) return 'sevenHalfTon';
     return 'tenTon';
   };
 
-  const recommendedStorageTon = useMemo(() => getRecommendedStorageTon(totalCbm), [totalCbm]);
+  const recommendedStorageTon = useMemo(
+    () => getRecommendedStorageTon(totalCbm, resources.vehicles),
+    [totalCbm, resources.vehicles]
+  );
 
   const [manualStorageTons, setManualStorageTons] = useState<{ [key: string]: boolean }>({});
 
