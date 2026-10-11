@@ -326,7 +326,7 @@ export const OPTION_ITEMS: OptionDef[] = [
   { name: '벽걸이·대형TV/탈·부착', defaultPrice: 50000 },
   { name: '홈시어터/탈·부착', defaultPrice: 30000 },
   { name: '계단/이송작업비', defaultPrice: 50000 },
-  { name: '실내보관료 (1일)', defaultPrice: 10000, isPerDay: true },
+  { name: '실내보관료 (1일)', defaultPrice: 15000, isPerDay: true },
   { name: '컨테이너보관료 (1일)', defaultPrice: 8000, isPerDay: true },
   { name: '대기료 (1시간 이상 지연 시)', defaultPrice: 50000 },
 ];

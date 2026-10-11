@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
-import { useSettingsStore } from '@/store/settingsStore';
+import { useSettingsStore, DEFAULT_STORAGE_RATES } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { OPTION_ITEMS, PACKING_MATERIALS } from '@/lib/constants/items';
 import { calculateVehicles, calculateWorkers } from '@/lib/cbm';
@@ -49,6 +49,7 @@ export default function Step3Page() {
   } = useWizardStore();
   
   const optionPrices = useSettingsStore(state => state.optionPrices);
+  const storageRates = useSettingsStore(state => state.storageRates || DEFAULT_STORAGE_RATES);
   const customPackingMaterials = useSettingsStore(state => state.customPackingMaterials || PACKING_MATERIALS);
   const itemPackingSettings = useSettingsStore(state => state.itemPackingSettings);
   const roomItemMapping = useSettingsStore(state => state.roomItemMapping);
@@ -59,6 +60,38 @@ export default function Step3Page() {
 
   const recommendedVehicles = useMemo(() => calculateVehicles(totalCbm, vehicleLimits), [totalCbm, vehicleLimits]);
   const recommendedWorkers = useMemo(() => calculateWorkers(totalCbm, cbmWorkerTiers), [totalCbm, cbmWorkerTiers]);
+
+  const getRecommendedStorageTon = (cbm: number): 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' => {
+    if (cbm <= 25) return 'fiveTon';
+    if (cbm <= 30) return 'sixTon';
+    if (cbm <= 35) return 'sevenHalfTon';
+    return 'tenTon';
+  };
+
+  const recommendedStorageTon = useMemo(() => getRecommendedStorageTon(totalCbm), [totalCbm]);
+
+  const [storageTons, setStorageTons] = useState<{ [key: string]: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' }>({
+    '컨테이너보관료 (1일)': 'fiveTon',
+    '실내보관료 (1일)': 'fiveTon',
+  });
+
+  useEffect(() => {
+    setStorageTons(prev => ({
+      '컨테이너보관료 (1일)': prev['컨테이너보관료 (1일)'] || recommendedStorageTon,
+      '실내보관료 (1일)': prev['실내보관료 (1일)'] || recommendedStorageTon,
+    }));
+  }, [recommendedStorageTon]);
+
+  const getCalculatedStoragePrice = (optName: string, ton: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon') => {
+    const rates = storageRates || DEFAULT_STORAGE_RATES;
+    if (optName.includes('컨테이너')) {
+      return rates.container?.[ton] ?? DEFAULT_STORAGE_RATES.container[ton];
+    }
+    if (optName.includes('실내')) {
+      return rates.indoor?.[ton] ?? DEFAULT_STORAGE_RATES.indoor[ton];
+    }
+    return optionPrices[optName] ?? 8000;
+  };
 
   const [ladderTons, setLadderTons] = useState<{ [key: string]: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon' }>({
     '사다리·출발지': 'fiveTon',
@@ -104,6 +137,9 @@ export default function Step3Page() {
       if (optName === '사다리·출발지' || optName === '사다리·도착지') {
         const ton = ladderTons[optName];
         price = manualPrices[optName] ?? getCalculatedLadderPrice(optName, ton);
+      } else if (optName.includes('보관료')) {
+        const ton = storageTons[optName] || recommendedStorageTon;
+        price = manualPrices[optName] ?? getCalculatedStoragePrice(optName, ton);
       }
       
       let initialDays = 1;
@@ -126,6 +162,19 @@ export default function Step3Page() {
       // update price immediately if selected
       const price = manualPrices[optName] ?? getCalculatedLadderPrice(optName, ton);
       updateOption(optName, 1, price);
+    }
+  };
+
+  const handleStorageTonChange = (optName: string, ton: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon') => {
+    setStorageTons(prev => ({ ...prev, [optName]: ton }));
+    setManualPrices(prev => {
+      const next = { ...prev };
+      delete next[optName];
+      return next;
+    });
+    const price = getCalculatedStoragePrice(optName, ton);
+    if (options[optName]) {
+      updateOption(optName, options[optName].quantity || 1, price, options[optName].startDate, options[optName].endDate);
     }
   };
 
@@ -234,21 +283,27 @@ export default function Step3Page() {
       const currentOptions = useWizardStore.getState().options;
       
       if (!currentOptions['컨테이너보관료 (1일)'] && !currentOptions['실내보관료 (1일)']) {
-        const defaultPrice = optionPrices['컨테이너보관료 (1일)'] ?? 8000;
+        const ton = storageTons['컨테이너보관료 (1일)'] || recommendedStorageTon;
+        const defaultPrice = getCalculatedStoragePrice('컨테이너보관료 (1일)', ton);
         const initialDays = calculateStorageDays('컨테이너보관료 (1일)', packingDate, movingDate);
         updateOption('컨테이너보관료 (1일)', initialDays, defaultPrice, packingDate, movingDate);
       } else {
         ['컨테이너보관료 (1일)', '실내보관료 (1일)'].forEach(optName => {
           if (currentOptions[optName]) {
              const targetDays = calculateStorageDays(optName, packingDate, movingDate);
+             const ton = storageTons[optName] || recommendedStorageTon;
+             const ratePrice = getCalculatedStoragePrice(optName, ton);
+             const unitPrice = currentOptions[optName].totalPrice > 0 
+               ? (currentOptions[optName].totalPrice / Math.max(1, currentOptions[optName].quantity))
+               : ratePrice;
              if (currentOptions[optName].startDate !== packingDate || currentOptions[optName].endDate !== movingDate || currentOptions[optName].quantity !== targetDays) {
-               updateOption(optName, targetDays, optionPrices[optName] ?? currentOptions[optName].totalPrice / Math.max(1, currentOptions[optName].quantity), packingDate, movingDate);
+               updateOption(optName, targetDays, unitPrice, packingDate, movingDate);
              }
           }
         });
       }
     }
-  }, [customerInfo.packingDate, customerInfo.movingDate, optionPrices, updateOption]);
+  }, [customerInfo.packingDate, customerInfo.movingDate, optionPrices, updateOption, storageTons, recommendedStorageTon, storageRates]);
 
   useEffect(() => {
     let customCounts: Record<string, number> = {};
@@ -567,11 +622,15 @@ export default function Step3Page() {
         <div className="bg-white rounded-xl shadow-sm border p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {OPTION_ITEMS.map(opt => {
             const isLadder = opt.name === '사다리·출발지' || opt.name === '사다리·도착지';
+            const isStorage = opt.name.includes('보관료');
             const isSelected = !!options[opt.name];
             
             let displayPrice = manualPrices[opt.name] ?? optionPrices[opt.name] ?? opt.defaultPrice;
             if (isLadder) {
               displayPrice = manualPrices[opt.name] ?? getCalculatedLadderPrice(opt.name, ladderTons[opt.name]);
+            } else if (isStorage) {
+              const ton = storageTons[opt.name] || recommendedStorageTon;
+              displayPrice = manualPrices[opt.name] ?? getCalculatedStoragePrice(opt.name, ton);
             }
             
             return (
@@ -609,6 +668,26 @@ export default function Step3Page() {
 
                 {opt.isPerDay && isSelected && (
                   <div className="mt-3 pt-3 border-t border-blue-100 flex flex-col gap-3">
+                    {isStorage && (
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-blue-200 rounded-lg p-2.5 shadow-sm gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-gray-700">보관 차량 톤수</span>
+                          <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">
+                            권장: {recommendedStorageTon === 'fiveTon' ? '5톤' : recommendedStorageTon === 'sixTon' ? '6톤' : recommendedStorageTon === 'sevenHalfTon' ? '7.5톤' : '10톤'}
+                          </span>
+                        </div>
+                        <select
+                          value={storageTons[opt.name] || recommendedStorageTon}
+                          onChange={(e) => handleStorageTonChange(opt.name, e.target.value as any)}
+                          className="border border-blue-300 rounded px-2.5 py-1 text-xs font-bold bg-white text-gray-800 shadow-sm focus:outline-blue-500"
+                        >
+                          <option value="fiveTon">5톤 (1일 {(getCalculatedStoragePrice(opt.name, 'fiveTon')).toLocaleString()}원)</option>
+                          <option value="sixTon">6톤 (1일 {(getCalculatedStoragePrice(opt.name, 'sixTon')).toLocaleString()}원)</option>
+                          <option value="sevenHalfTon">7.5톤 (1일 {(getCalculatedStoragePrice(opt.name, 'sevenHalfTon')).toLocaleString()}원)</option>
+                          <option value="tenTon">10톤 (1일 {(getCalculatedStoragePrice(opt.name, 'tenTon')).toLocaleString()}원)</option>
+                        </select>
+                      </div>
+                    )}
                     <div className="flex flex-col xl:flex-row gap-2 justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-gray-500 w-12">시작일</span>

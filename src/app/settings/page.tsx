@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSettingsStore, LadderRateTier, PartnerContact, DEFAULT_LADDER_RATES, CbmWorkerTier, DEFAULT_CBM_WORKER_TIERS } from '@/store/settingsStore';
+import { useSettingsStore, LadderRateTier, PartnerContact, DEFAULT_LADDER_RATES, CbmWorkerTier, DEFAULT_CBM_WORKER_TIERS, StorageRates, DEFAULT_STORAGE_RATES } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
 import { OPTION_ITEMS, PACKING_MATERIALS, ROOM_ITEMS, LIVING_ROOM_ITEMS, KITCHEN_ITEMS, VERANDA_ITEMS, REAR_BALCONY_ITEMS, UTILITY_ROOM_ITEMS, MasterItem, RoomCategory, ROOM_CATEGORIES, ItemCategory, ITEM_CATEGORIES, getDefaultItemCategory } from '@/lib/constants/items';
@@ -54,6 +54,24 @@ const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
   const [localLadderRates, setLocalLadderRates] = useState<Record<string, LadderRateTier>>(isOldLadderFormat ? DEFAULT_LADDER_RATES : (store.ladderRates || DEFAULT_LADDER_RATES));
   const [localDistanceRates, setLocalDistanceRates] = useState<Record<string, any>>(store.distanceRates || {});
   const [localPartnerContacts, setLocalPartnerContacts] = useState(store.partnerContacts);
+  const [localStorageRates, setLocalStorageRates] = useState<StorageRates>(store.storageRates || DEFAULT_STORAGE_RATES);
+  
+  const handleStorageRateChange = (type: 'container' | 'indoor', ton: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon', value: number) => {
+    setLocalStorageRates(prev => {
+      const updated = {
+        ...prev,
+        [type]: {
+          ...prev[type],
+          [ton]: value
+        }
+      };
+      if (ton === 'fiveTon') {
+        const optName = type === 'container' ? '컨테이너보관료 (1일)' : '실내보관료 (1일)';
+        setLocalOptionPrices(opPrev => ({ ...opPrev, [optName]: value }));
+      }
+      return updated;
+    });
+  };
   
   const formatNum = (num: number | undefined | null) => num ? num.toLocaleString() : '';
 const parseNum = (str: string) => Number(str.replace(/,/g, ''));
@@ -229,6 +247,9 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
     if (store.cbmWorkerTiers && store.cbmWorkerTiers.length > 0) {
       setLocalCbmWorkerTiers(store.cbmWorkerTiers);
     }
+    if (store.storageRates) {
+      setLocalStorageRates(store.storageRates);
+    }
   }, [store]);
 
   const handleSave = async () => {
@@ -244,6 +265,7 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
       workerPrices: localWorkerPrices,
       cbmWorkerTiers: localCbmWorkerTiers,
       optionPrices: localOptionPrices,
+      storageRates: localStorageRates,
       materialCbmSettings: localMaterialCbm,
       ladderRates: localLadderRates,
       partnerContacts: localPartnerContacts,
@@ -551,10 +573,152 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
             </div>
           </section>
 
+          {/* 보관료 톤수별 일일 단가 설정 */}
+          <section className="bg-white border rounded-xl p-5 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 mb-4 gap-1">
+              <div>
+                <h2 className="text-lg font-bold text-blue-600 flex items-center gap-2">
+                  <span>📦</span> 보관료 톤수별 단가 설정 (1일 기준)
+                </h2>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  보관이사 시 이사 물량(차량 톤수)에 따라 1일당 보관료가 자동 차등 적용됩니다.
+                </p>
+              </div>
+              <span className="text-[11px] bg-blue-50 text-blue-700 font-semibold px-2.5 py-1 rounded-full border border-blue-200 self-start sm:self-auto">
+                견적서 Step 3 톤수별 자동 연동
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse text-center">
+                <thead>
+                  <tr className="bg-gray-100/80 border-y border-gray-200 text-gray-700 font-bold text-xs">
+                    <th className="py-2.5 px-3 text-left w-44">보관 구분</th>
+                    <th className="py-2.5 px-3">5톤 (1일)</th>
+                    <th className="py-2.5 px-3">6톤 (1일)</th>
+                    <th className="py-2.5 px-3">7.5톤 (1일)</th>
+                    <th className="py-2.5 px-3">10톤 (1일)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {/* 컨테이너 보관 */}
+                  <tr className="hover:bg-amber-50/30 transition-colors">
+                    <td className="py-3 px-3 text-left font-bold text-gray-800">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+                        <span className="text-sm">컨테이너 보관</span>
+                      </div>
+                      <span className="text-[11px] text-gray-400 block ml-4">야외 컨테이너 (5일 단위)</span>
+                    </td>
+                    <td className="py-3 px-2">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNum(localStorageRates.container.fiveTon)}
+                          onChange={(e) => handleStorageRateChange('container', 'fiveTon', parseNum(e.target.value))}
+                          className="w-full border rounded-lg p-2 text-right pr-7 font-bold text-gray-800 focus:ring-1 focus:ring-blue-500 bg-white"
+                        />
+                        <span className="absolute right-2.5 top-2.5 text-xs text-gray-400">원</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-2">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNum(localStorageRates.container.sixTon)}
+                          onChange={(e) => handleStorageRateChange('container', 'sixTon', parseNum(e.target.value))}
+                          className="w-full border rounded-lg p-2 text-right pr-7 font-bold text-gray-800 focus:ring-1 focus:ring-blue-500 bg-white"
+                        />
+                        <span className="absolute right-2.5 top-2.5 text-xs text-gray-400">원</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-2">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNum(localStorageRates.container.sevenHalfTon)}
+                          onChange={(e) => handleStorageRateChange('container', 'sevenHalfTon', parseNum(e.target.value))}
+                          className="w-full border rounded-lg p-2 text-right pr-7 font-bold text-gray-800 focus:ring-1 focus:ring-blue-500 bg-white"
+                        />
+                        <span className="absolute right-2.5 top-2.5 text-xs text-gray-400">원</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-2">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNum(localStorageRates.container.tenTon)}
+                          onChange={(e) => handleStorageRateChange('container', 'tenTon', parseNum(e.target.value))}
+                          className="w-full border rounded-lg p-2 text-right pr-7 font-bold text-gray-800 focus:ring-1 focus:ring-blue-500 bg-white"
+                        />
+                        <span className="absolute right-2.5 top-2.5 text-xs text-gray-400">원</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  {/* 실내 보관 */}
+                  <tr className="hover:bg-blue-50/30 transition-colors">
+                    <td className="py-3 px-3 text-left font-bold text-gray-800">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>
+                        <span className="text-sm">실내 보관</span>
+                      </div>
+                      <span className="text-[11px] text-gray-400 block ml-4">항온·항습 실내창고</span>
+                    </td>
+                    <td className="py-3 px-2">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNum(localStorageRates.indoor.fiveTon)}
+                          onChange={(e) => handleStorageRateChange('indoor', 'fiveTon', parseNum(e.target.value))}
+                          className="w-full border rounded-lg p-2 text-right pr-7 font-bold text-gray-800 focus:ring-1 focus:ring-blue-500 bg-white"
+                        />
+                        <span className="absolute right-2.5 top-2.5 text-xs text-gray-400">원</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-2">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNum(localStorageRates.indoor.sixTon)}
+                          onChange={(e) => handleStorageRateChange('indoor', 'sixTon', parseNum(e.target.value))}
+                          className="w-full border rounded-lg p-2 text-right pr-7 font-bold text-gray-800 focus:ring-1 focus:ring-blue-500 bg-white"
+                        />
+                        <span className="absolute right-2.5 top-2.5 text-xs text-gray-400">원</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-2">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNum(localStorageRates.indoor.sevenHalfTon)}
+                          onChange={(e) => handleStorageRateChange('indoor', 'sevenHalfTon', parseNum(e.target.value))}
+                          className="w-full border rounded-lg p-2 text-right pr-7 font-bold text-gray-800 focus:ring-1 focus:ring-blue-500 bg-white"
+                        />
+                        <span className="absolute right-2.5 top-2.5 text-xs text-gray-400">원</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-2">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formatNum(localStorageRates.indoor.tenTon)}
+                          onChange={(e) => handleStorageRateChange('indoor', 'tenTon', parseNum(e.target.value))}
+                          className="w-full border rounded-lg p-2 text-right pr-7 font-bold text-gray-800 focus:ring-1 focus:ring-blue-500 bg-white"
+                        />
+                        <span className="absolute right-2.5 top-2.5 text-xs text-gray-400">원</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
           <section>
             <h2 className="text-lg font-bold text-blue-600 mb-4 border-b pb-2">일반 부대 옵션 단가</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {OPTION_ITEMS.map((item) => (
+              {OPTION_ITEMS.filter(item => !item.name.includes('보관료')).map((item) => (
                 <div key={item.name} className="flex flex-col">
                   <label className="block text-xs font-semibold mb-1 text-gray-600 truncate" title={item.name}>{item.name}</label>
                   <div className="relative">

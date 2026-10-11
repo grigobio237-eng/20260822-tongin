@@ -33,6 +33,18 @@ export interface PartnerContact {
   memo: string;
 }
 
+export interface StorageRateTier {
+  fiveTon: number;
+  sixTon: number;
+  sevenHalfTon: number;
+  tenTon: number;
+}
+
+export interface StorageRates {
+  container: StorageRateTier;
+  indoor: StorageRateTier;
+}
+
 export interface CbmWorkerTier {
   id: string;
   minCbm: number;
@@ -80,6 +92,7 @@ export interface SettingsState {
   // 사다리차 층수/톤수별 단가 테이블 (단위: 원)
   ladderRates: Record<string, LadderRateTier>;
   distanceRates: Record<string, DistanceRateTier>;
+  storageRates: StorageRates;
   
   // 부가서비스 협력업체 정보
   partnerContacts: {
@@ -167,6 +180,21 @@ export const DEFAULT_CBM_WORKER_TIERS: CbmWorkerTier[] = [
   { id: 'tier_50_plus', minCbm: 50, maxCbm: 999, male: 6, female: 2, memo: '50 CBM 초과 / 대형' },
 ];
 
+export const DEFAULT_STORAGE_RATES: StorageRates = {
+  container: {
+    fiveTon: 8000,
+    sixTon: 12000,
+    sevenHalfTon: 18000,
+    tenTon: 22000,
+  },
+  indoor: {
+    fiveTon: 15000,
+    sixTon: 20000,
+    sevenHalfTon: 25000,
+    tenTon: 30000,
+  },
+};
+
 const defaultValues = {
   companyName: '통인익스프레스',
   businessNumber: '',
@@ -194,6 +222,7 @@ const defaultValues = {
   },
   ladderRates: DEFAULT_LADDER_RATES,
   distanceRates: DEFAULT_DISTANCE_RATES,
+  storageRates: DEFAULT_STORAGE_RATES,
   partnerContacts: {
     cleaning: { companyName: '', phone: '', memo: '' },
     organizing: { companyName: '', phone: '', memo: '' },
@@ -235,6 +264,7 @@ export const useSettingsStore = create<SettingsState>()(
               materialCbmSettings: data.materialCbmSettings || get().materialCbmSettings,
               distanceRates: (data.distanceRates && (data.distanceRates as any).tier_30_under?.fiveTonMarket !== undefined) ? data.distanceRates : ((get().distanceRates as any)?.tier_30_under?.fiveTonMarket !== undefined ? get().distanceRates : DEFAULT_DISTANCE_RATES),
               ladderRates: (data.ladderRates && data.ladderRates.tier_14) ? data.ladderRates : (get().ladderRates?.tier_14 ? get().ladderRates : DEFAULT_LADDER_RATES),
+              storageRates: (data.storageRates && data.storageRates.container && data.storageRates.indoor) ? data.storageRates : (get().storageRates?.container ? get().storageRates : DEFAULT_STORAGE_RATES),
               partnerContacts: data.partnerContacts || get().partnerContacts,
               customMasterItems: data.customMasterItems ? Array.from(new Map(data.customMasterItems.map(i => [i.name, i])).values()) : get().customMasterItems,
               customPackingMaterials: data.customPackingMaterials || get().customPackingMaterials,

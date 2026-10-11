@@ -118,7 +118,8 @@ export default function Step4Page() {
       if (opt.startDate && opt.endDate) {
         dateStr = ` (${opt.startDate.slice(5)} ~ ${opt.endDate.slice(5)})`;
       }
-      displayName = name.replace(' (1일)', ' (' + opt.quantity + '일)' + dateStr);
+      const unitRate = Math.round(basePrice);
+      displayName = name.replace(' (1일)', ` (${opt.quantity}일 / 일 ${unitRate.toLocaleString()}원)${dateStr}`);
     } else if (name.includes('대기료')) {
       price = basePrice * opt.quantity * totalWorkers;
       displayName = `${name} (${totalWorkers}명)`;
