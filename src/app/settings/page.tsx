@@ -1077,7 +1077,8 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                     <tr className="border-b border-gray-300">
                       <th
                         rowSpan={2}
-                        className="sticky left-0 top-0 z-40 bg-slate-800 text-white font-bold text-center px-4 py-3 min-w-[130px] border-r border-slate-700 shadow-[2px_0_5px_-1px_rgba(0,0,0,0.2)]"
+                        style={{ backgroundColor: '#1e293b', color: '#ffffff' }}
+                        className="sticky left-0 top-0 z-40 font-bold text-center px-4 py-3 min-w-[130px] border-r border-slate-700 shadow-[2px_0_5px_-1px_rgba(0,0,0,0.2)]"
                       >
                         구분(기준거리)
                       </th>
@@ -1085,10 +1086,8 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                         <th
                           key={group.tonnage}
                           colSpan={group.columns.length}
-                          className={clsx(
-                            "text-center font-bold px-3 py-2 text-white border-r border-white/20 tracking-wider text-xs",
-                            group.headerBg
-                          )}
+                          style={{ backgroundColor: group.headerColor, color: '#ffffff' }}
+                          className="text-center font-bold px-3 py-2.5 border-r border-white/20 tracking-wider text-xs shadow-xs"
                         >
                           {group.tonnage}
                         </th>
@@ -1101,13 +1100,11 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
                         group.columns.map(col => (
                           <th
                             key={col.key}
-                            className={clsx(
-                              "text-center px-2 py-2 text-white border-r border-white/10 min-w-[105px]",
-                              group.subHeaderBg
-                            )}
+                            style={{ backgroundColor: group.subHeaderColor, color: '#ffffff' }}
+                            className="text-center px-2 py-2 border-r border-white/10 min-w-[105px]"
                           >
-                            <div className="font-extrabold text-xs">{col.subHeader}</div>
-                            <div className="text-[10px] text-white/80 font-normal mt-0.5">{col.description}</div>
+                            <div className="font-extrabold text-xs text-white">{col.subHeader}</div>
+                            <div className="text-[10px] text-white/90 font-medium mt-0.5">{col.description}</div>
                           </th>
                         ))
                       )}

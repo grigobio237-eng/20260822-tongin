@@ -13,6 +13,8 @@ export interface DistanceGroupDef {
   tonnageNum: number;
   headerBg: string;
   subHeaderBg: string;
+  headerColor: string;
+  subHeaderColor: string;
   columns: DistanceColumnDef[];
 }
 
@@ -22,6 +24,8 @@ export const DISTANCE_GROUPS: DistanceGroupDef[] = [
     tonnageNum: 2.5,
     headerBg: 'bg-[#2E75B6]',
     subHeaderBg: 'bg-[#1F4E79]',
+    headerColor: '#2E75B6',
+    subHeaderColor: '#1F4E79',
     columns: [
       { key: 'twoHalfTon_2_0', subHeader: '2명', description: '남2 여0', male: 2, female: 0 },
       { key: 'twoHalfTon_2_1', subHeader: '2+1', description: '남2 여1', male: 2, female: 1 },
@@ -32,6 +36,8 @@ export const DISTANCE_GROUPS: DistanceGroupDef[] = [
     tonnageNum: 5,
     headerBg: 'bg-[#C00000]',
     subHeaderBg: 'bg-[#8B0000]',
+    headerColor: '#C00000',
+    subHeaderColor: '#8B0000',
     columns: [
       { key: 'fiveTon_2_1', subHeader: '2+1', description: '남2 여1', male: 2, female: 1 },
       { key: 'fiveTon_3_1', subHeader: '3+1', description: '남3 여1', male: 3, female: 1 },
@@ -43,6 +49,8 @@ export const DISTANCE_GROUPS: DistanceGroupDef[] = [
     tonnageNum: 6,
     headerBg: 'bg-[#A67C00]',
     subHeaderBg: 'bg-[#7E5E00]',
+    headerColor: '#A67C00',
+    subHeaderColor: '#7E5E00',
     columns: [
       { key: 'sixTon_3_1', subHeader: '3+1', description: '남3 여1', male: 3, female: 1 },
       { key: 'sixTon_4_1', subHeader: '4+1', description: '남4 여1', male: 4, female: 1 },
@@ -54,6 +62,8 @@ export const DISTANCE_GROUPS: DistanceGroupDef[] = [
     tonnageNum: 7.5,
     headerBg: 'bg-[#385723]',
     subHeaderBg: 'bg-[#273D18]',
+    headerColor: '#385723',
+    subHeaderColor: '#273D18',
     columns: [
       { key: 'sevenHalfTon_4_1', subHeader: '4+1', description: '남4 여1', male: 4, female: 1 },
       { key: 'sevenHalfTon_5_1', subHeader: '5+1', description: '남5 여1', male: 5, female: 1 },
@@ -65,6 +75,8 @@ export const DISTANCE_GROUPS: DistanceGroupDef[] = [
     tonnageNum: 10,
     headerBg: 'bg-[#C55A11]',
     subHeaderBg: 'bg-[#833C0C]',
+    headerColor: '#C55A11',
+    subHeaderColor: '#833C0C',
     columns: [
       { key: 'tenTon_5_1', subHeader: '5+1 / 4+2', description: '남5 여1 (남4 여2)', male: 5, female: 1, altMale: 4, altFemale: 2 },
       { key: 'tenTon_6_1', subHeader: '6+1 / 5+2', description: '남6 여1 (남5 여2)', male: 6, female: 1, altMale: 5, altFemale: 2 },
@@ -76,6 +88,8 @@ export const DISTANCE_GROUPS: DistanceGroupDef[] = [
     tonnageNum: 11,
     headerBg: 'bg-[#1F4E79]',
     subHeaderBg: 'bg-[#163857]',
+    headerColor: '#1F4E79',
+    subHeaderColor: '#163857',
     columns: [
       { key: 'elevenTon_6_1', subHeader: '6+1 / 5+2', description: '남6 여1 (남5 여2)', male: 6, female: 1, altMale: 5, altFemale: 2 },
       { key: 'elevenTon_7_1', subHeader: '7+1 / 6+2', description: '남7 여1 (남6 여2)', male: 7, female: 1, altMale: 6, altFemale: 2 },
@@ -83,6 +97,7 @@ export const DISTANCE_GROUPS: DistanceGroupDef[] = [
     ],
   },
 ];
+
 
 export const DISTANCE_TIERS_DEF = [
   { key: 'tier_30_under', label: '30km이하' },
