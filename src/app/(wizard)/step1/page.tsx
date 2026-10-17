@@ -1,6 +1,7 @@
 'use client';
 
 import { checkSpecialDate } from '@/lib/dateUtils';
+import { OneTouchDatePicker } from '@/components/common/OneTouchDatePicker';
 
 import React, { useState, useEffect } from 'react';
 import { useWizardStore } from '@/store/wizardStore';
@@ -163,23 +164,23 @@ export default function Step1Page() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">견적(계약)일</label>
-            <input 
-              type="date" 
-              className="w-full border rounded-lg p-2.5"
+            <label className="block text-xs sm:text-sm font-medium mb-1">견적(계약)일</label>
+            <OneTouchDatePicker 
+              label="견적(계약)일"
               value={customerInfo.contractDate}
-              onChange={(e) => updateCustomerInfo({ contractDate: e.target.value })}
+              onChange={(dateStr) => updateCustomerInfo({ contractDate: dateStr })}
+              placeholder="날짜 선택"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">포장일</label>
-            <input 
-              type="date" 
-              className="w-full border rounded-lg p-2.5"
+            <label className="block text-xs sm:text-sm font-medium mb-1">포장일</label>
+            <OneTouchDatePicker 
+              label="포장일"
               value={customerInfo.packingDate}
-              onChange={(e) => updateCustomerInfo({ packingDate: e.target.value })}
+              onChange={(dateStr) => updateCustomerInfo({ packingDate: dateStr })}
+              placeholder="날짜 선택"
             />
             {customerInfo.packingDate && (() => {
               const info = checkSpecialDate(customerInfo.packingDate);
@@ -192,7 +193,7 @@ export default function Step1Page() {
               return (
                 <div className="flex flex-wrap gap-1 mt-1.5">
                   {badges.map((b, idx) => (
-                    <span key={idx} className={`text-[11px] font-bold px-2 py-0.5 rounded-full border shadow-sm ${b.color}`}>
+                    <span key={idx} className={`text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full border shadow-sm ${b.color}`}>
                       {b.label}
                     </span>
                   ))}
@@ -201,12 +202,12 @@ export default function Step1Page() {
             })()}
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">운송일</label>
-            <input 
-              type="date" 
-              className="w-full border rounded-lg p-2.5"
+            <label className="block text-xs sm:text-sm font-medium mb-1">운송일</label>
+            <OneTouchDatePicker 
+              label="운송일"
               value={customerInfo.movingDate}
-              onChange={(e) => updateCustomerInfo({ movingDate: e.target.value })}
+              onChange={(dateStr) => updateCustomerInfo({ movingDate: dateStr })}
+              placeholder="날짜 선택"
             />
             {customerInfo.movingDate && (() => {
               const info = checkSpecialDate(customerInfo.movingDate);
@@ -219,7 +220,7 @@ export default function Step1Page() {
               return (
                 <div className="flex flex-wrap gap-1 mt-1.5">
                   {badges.map((b, idx) => (
-                    <span key={idx} className={`text-[11px] font-bold px-2 py-0.5 rounded-full border shadow-sm ${b.color}`}>
+                    <span key={idx} className={`text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full border shadow-sm ${b.color}`}>
                       {b.label}
                     </span>
                   ))}

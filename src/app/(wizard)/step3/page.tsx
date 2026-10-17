@@ -9,6 +9,7 @@ import { calculateVehicles, calculateWorkers } from '@/lib/cbm';
 import { useSpeechToText } from '@/hooks/useSpeechToText';
 import { Mic, MicOff, Edit2 } from 'lucide-react';
 import clsx from 'clsx';
+import { OneTouchDatePicker } from '@/components/common/OneTouchDatePicker';
 
 const calculateStorageDays = (optName: string, startStr?: string, endStr?: string) => {
   if (!startStr || !endStr) {
@@ -754,32 +755,30 @@ export default function Step3Page() {
                       </div>
                     )}
                     <div className="flex flex-col xl:flex-row gap-2 justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 w-12">시작일</span>
-                        <input
-                          type="date"
+                      <div className="flex items-center gap-2 flex-1">
+                        <span className="text-xs text-gray-500 w-12 shrink-0">시작일</span>
+                        <OneTouchDatePicker
+                          label={`${opt.name} 시작일`}
                           value={options[opt.name]?.startDate || ''}
-                          onChange={(e) => {
-                            const newStart = e.target.value;
+                          onChange={(newStart) => {
                             const currentEnd = options[opt.name]?.endDate;
                             const days = calculateStorageDays(opt.name, newStart, currentEnd);
                             updateOption(opt.name, days, displayPrice, newStart, currentEnd);
                           }}
-                          className="flex-1 border rounded px-2 py-1 text-sm focus:outline-blue-500"
+                          className="flex-1 text-xs py-1.5 px-2"
                         />
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-500 w-12">종료일</span>
-                        <input
-                          type="date"
+                      <div className="flex items-center gap-2 flex-1">
+                        <span className="text-xs text-gray-500 w-12 shrink-0">종료일</span>
+                        <OneTouchDatePicker
+                          label={`${opt.name} 종료일`}
                           value={options[opt.name]?.endDate || ''}
-                          onChange={(e) => {
-                            const newEnd = e.target.value;
+                          onChange={(newEnd) => {
                             const currentStart = options[opt.name]?.startDate;
                             const days = calculateStorageDays(opt.name, currentStart, newEnd);
                             updateOption(opt.name, days, displayPrice, currentStart, newEnd);
                           }}
-                          className="flex-1 border rounded px-2 py-1 text-sm focus:outline-blue-500"
+                          className="flex-1 text-xs py-1.5 px-2"
                         />
                       </div>
                     </div>
