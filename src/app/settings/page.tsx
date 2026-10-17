@@ -4,7 +4,15 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSettingsStore, LadderRateTier, PartnerContact, DEFAULT_LADDER_RATES, CbmWorkerTier, DEFAULT_CBM_WORKER_TIERS, StorageRates, DEFAULT_STORAGE_RATES } from '@/store/settingsStore';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
+import clsx from 'clsx';
 import { OPTION_ITEMS, PACKING_MATERIALS, ROOM_ITEMS, LIVING_ROOM_ITEMS, KITCHEN_ITEMS, VERANDA_ITEMS, REAR_BALCONY_ITEMS, UTILITY_ROOM_ITEMS, MasterItem, RoomCategory, ROOM_CATEGORIES, ItemCategory, ITEM_CATEGORIES, getDefaultItemCategory } from '@/lib/constants/items';
+import {
+  DISTANCE_GROUPS,
+  DISTANCE_TIERS_DEF,
+  DistanceRateTier,
+  DEFAULT_DISTANCE_RATES,
+  generateDefaultDistanceRates
+} from '@/lib/constants/distanceRates';
 
 // 모든 가전/가구 리스트 병합 (중복 제거)
 const allMasterItems = [
@@ -52,9 +60,82 @@ const [localOptionPrices, setLocalOptionPrices] = useState(store.optionPrices);
   });
   const isOldLadderFormat = store.ladderRates && !store.ladderRates.tier_14;
   const [localLadderRates, setLocalLadderRates] = useState<Record<string, LadderRateTier>>(isOldLadderFormat ? DEFAULT_LADDER_RATES : (store.ladderRates || DEFAULT_LADDER_RATES));
-  const [localDistanceRates, setLocalDistanceRates] = useState<Record<string, any>>(store.distanceRates || {});
+  const [localDistanceRates, setLocalDistanceRates] = useState<Record<string, DistanceRateTier>>(() => {
+    if (store.distanceRates && (store.distanceRates as any).tier_30_under?.twoHalfTon_2_0 !== undefined) {
+      return store.distanceRates;
+    }
+    return DEFAULT_DISTANCE_RATES;
+  });
   const [localPartnerContacts, setLocalPartnerContacts] = useState(store.partnerContacts);
   const [localStorageRates, setLocalStorageRates] = useState<StorageRates>(store.storageRates || DEFAULT_STORAGE_RATES);
+
+  const handleDistanceRateChange = (tierKey: string, colKey: string, value: number) => {
+    setLocalDistanceRates(prev => {
+      const currentTier = prev[tierKey] || DEFAULT_DISTANCE_RATES[tierKey] || { label: '' };
+      const updatedTier: any = {
+        ...currentTier,
+        [colKey]: value,
+      };
+
+      if (colKey === 'fiveTon_3_1') updatedTier.fiveTon = value;
+      if (colKey === 'sixTon_4_1') updatedTier.sixTon = value;
+      if (colKey === 'sevenHalfTon_5_1') updatedTier.sevenHalfTon = value;
+      if (colKey === 'tenTon_6_1') updatedTier.tenTon = value;
+      if (colKey === 'twoHalfTon_2_1') updatedTier.twoHalfTon = value;
+      if (colKey === 'elevenTon_6_1') updatedTier.elevenTon = value;
+
+      return {
+        ...prev,
+        [tierKey]: updatedTier,
+      };
+    });
+  };
+
+  const handleResetDistanceRates = () => {
+    if (confirm('모든 구간단가를 엑셀 표준 기본값으로 초기화하시겠습니까?')) {
+      setLocalDistanceRates(generateDefaultDistanceRates());
+    }
+  };
+
+  const handleAutoFillDistanceRates = () => {
+    if (!confirm('첫 번째 행(30km이하)의 입력값을 기준으로, 각 구간마다 +200,000원씩 자동으로 증가시켜 전체 표를 완성하시겠습니까?')) {
+      return;
+    }
+    setLocalDistanceRates(prev => {
+      const baseTier = prev['tier_30_under'] || DEFAULT_DISTANCE_RATES['tier_30_under'];
+      const updated: Record<string, DistanceRateTier> = {};
+
+      DISTANCE_TIERS_DEF.forEach((tier, index) => {
+        const stepAdd = index * 200000;
+        const tierObj: any = {
+          label: tier.label,
+        };
+
+        DISTANCE_GROUPS.forEach(group => {
+          group.columns.forEach(col => {
+            const baseVal = (baseTier as any)[col.key] || 0;
+            if (col.key === 'elevenTon_7_1' || col.key === 'elevenTon_8_1') {
+              tierObj[col.key] = index === 0 ? 0 : stepAdd;
+            } else {
+              tierObj[col.key] = baseVal + stepAdd;
+            }
+          });
+        });
+
+        // Aliases
+        tierObj.fiveTon = tierObj.fiveTon_3_1;
+        tierObj.sixTon = tierObj.sixTon_4_1;
+        tierObj.sevenHalfTon = tierObj.sevenHalfTon_5_1;
+        tierObj.tenTon = tierObj.tenTon_6_1;
+        tierObj.twoHalfTon = tierObj.twoHalfTon_2_1;
+        tierObj.elevenTon = tierObj.elevenTon_6_1;
+
+        updated[tier.key] = tierObj;
+      });
+
+      return updated;
+    });
+  };
   
   const handleStorageRateChange = (type: 'container' | 'indoor', ton: 'fiveTon' | 'sixTon' | 'sevenHalfTon' | 'tenTon', value: number) => {
     setLocalStorageRates(prev => {
@@ -243,7 +324,13 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
     if (store.partnerContacts) setLocalPartnerContacts(store.partnerContacts);
     if (store.itemCbmSettings) setLocalItemCbm(store.itemCbmSettings);
     if (store.itemPackingSettings) setLocalItemPacking(store.itemPackingSettings);
-    if (store.distanceRates) setLocalDistanceRates(store.distanceRates);
+    if (store.distanceRates) {
+      if ((store.distanceRates as any).tier_30_under?.twoHalfTon_2_0 !== undefined) {
+        setLocalDistanceRates(store.distanceRates);
+      } else {
+        setLocalDistanceRates(DEFAULT_DISTANCE_RATES);
+      }
+    }
     if (store.cbmWorkerTiers && store.cbmWorkerTiers.length > 0) {
       setLocalCbmWorkerTiers(store.cbmWorkerTiers);
     }
@@ -943,80 +1030,133 @@ const handleItemCbmChange = (itemName: string, variantName: string, value: strin
         )}
 
         {activeTab === 'distance' && (
-          <div className="space-y-8">
-            <div className="bg-blue-50 p-4 rounded-xl text-sm text-blue-800">
-              <strong>구간별 단가 (장거리) 매트릭스 설정</strong><br/>
-              거리에 따른 기본 비용(차량+인건비 포함)을 설정합니다.
+          <div className="space-y-6">
+            <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-white border border-blue-200 p-5 rounded-2xl shadow-xs">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <span className="text-xl">🛣️</span>
+                    <span>구간 단가 DB 설정 (차량 톤수 & 투입 인원별 표준 엑셀 단가표)</span>
+                  </h2>
+                  <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
+                    거리 구간별 차량 톤수 및 세부 작업 인원(남+여)에 따른 표준 견적 단가를 엑셀 표 형식으로 직접 조회 및 수정합니다.
+                    <br />
+                    <span className="text-blue-700 font-semibold">※ 인원 표기 안내: </span>
+                    <span className="bg-white px-1.5 py-0.5 rounded border border-blue-200 text-blue-800 font-semibold mr-1">2+1</span> 총 3명 (남2 여1),&nbsp;
+                    <span className="bg-white px-1.5 py-0.5 rounded border border-blue-200 text-blue-800 font-semibold mr-1">3+1</span> 총 4명 (남3 여1),&nbsp;
+                    <span className="bg-white px-1.5 py-0.5 rounded border border-blue-200 text-blue-800 font-semibold mr-1">4+1</span> 총 5명 (남4 여1),&nbsp;
+                    <span className="bg-white px-1.5 py-0.5 rounded border border-blue-200 text-blue-800 font-semibold mr-1">5+1</span> 총 6명 (남5 여1),&nbsp;
+                    <span className="bg-white px-1.5 py-0.5 rounded border border-blue-200 text-blue-800 font-semibold mr-1">5+2 / 6+1</span> 총 7명
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={handleAutoFillDistanceRates}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-700 border border-emerald-300 rounded-lg hover:bg-emerald-100 font-bold text-xs transition-colors shadow-xs"
+                    title="첫 번째 행(30km이하) 가격을 기준으로 아래 16개 구간을 20만원씩 자동 증가시킵니다"
+                  >
+                    <span>⚡ 30km 기준 +20만/구간 자동완성</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResetDistanceRates}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-200 font-bold text-xs transition-colors"
+                  >
+                    <span>🔄 엑셀 표준값 복원</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <section>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1000px] border-collapse bg-white border text-sm">
-                  <thead>
-                    <tr className="bg-gray-100 border-b">
-                      <th className="p-3 text-center border-r font-semibold">구분 (기준거리)</th>
-                      <th className="p-3 text-center border-r font-semibold">5톤</th>
-                      <th className="p-3 text-center border-r font-semibold">6톤</th>
-                      <th className="p-3 text-center border-r font-semibold">7.5톤</th>
-                      <th className="p-3 text-center font-semibold">10톤</th>
+            <section className="bg-white border rounded-2xl shadow-sm overflow-hidden">
+              <div className="overflow-x-auto max-h-[720px] overflow-y-auto">
+                <table className="w-full text-xs border-collapse">
+                  <thead className="sticky top-0 z-30 shadow-xs">
+                    {/* Row 1: Tonnage Headers */}
+                    <tr className="border-b border-gray-300">
+                      <th
+                        rowSpan={2}
+                        className="sticky left-0 top-0 z-40 bg-slate-800 text-white font-bold text-center px-4 py-3 min-w-[130px] border-r border-slate-700 shadow-[2px_0_5px_-1px_rgba(0,0,0,0.2)]"
+                      >
+                        구분(기준거리)
+                      </th>
+                      {DISTANCE_GROUPS.map(group => (
+                        <th
+                          key={group.tonnage}
+                          colSpan={group.columns.length}
+                          className={clsx(
+                            "text-center font-bold px-3 py-2 text-white border-r border-white/20 tracking-wider text-xs",
+                            group.headerBg
+                          )}
+                        >
+                          {group.tonnage}
+                        </th>
+                      ))}
+                    </tr>
+
+                    {/* Row 2: Worker Sub-headers */}
+                    <tr className="border-b border-gray-300">
+                      {DISTANCE_GROUPS.map(group =>
+                        group.columns.map(col => (
+                          <th
+                            key={col.key}
+                            className={clsx(
+                              "text-center px-2 py-2 text-white border-r border-white/10 min-w-[105px]",
+                              group.subHeaderBg
+                            )}
+                          >
+                            <div className="font-extrabold text-xs">{col.subHeader}</div>
+                            <div className="text-[10px] text-white/80 font-normal mt-0.5">{col.description}</div>
+                          </th>
+                        ))
+                      )}
                     </tr>
                   </thead>
-                  <tbody>
-                    {Object.entries(localDistanceRates).map(([tierKey, tier]) => (
-                      <tr key={tierKey} className="border-b hover:bg-gray-50">
-                        <td className="p-3 font-medium text-center border-r bg-gray-50 whitespace-nowrap">{tier.label}</td>
-                        {['fiveTon', 'sixTon', 'sevenHalfTon', 'tenTon'].map(cap => (
-                          <td key={cap} className="p-2 border-r align-top">
-                            <div className="flex flex-col gap-1">
-                              <div className="flex justify-between items-center text-xs text-gray-500">
-                                <span>시중가</span>
-                                <input 
-                                  className="w-24 text-right border p-1 rounded" 
-                                  value={(tier as any)[`${cap}Market`]?.toLocaleString() || ''}
-                                  onChange={(e) => {
-                                    const val = parseInt(e.target.value.replace(/,/g, ''), 10) || 0;
-                                    setLocalDistanceRates(prev => {
-                                      const newTier = { ...prev[tierKey] };
-                                      newTier[`${cap}Market`] = val;
-                                      const rate = newTier[`${cap}Rate`] || 0;
-                                      newTier[cap] = Math.round(val * (1 - rate / 100) / 1000) * 1000;
-                                      return { ...prev, [tierKey]: newTier };
-                                    });
-                                  }}
-                                />
-                              </div>
-                              <div className="flex justify-between items-center text-xs text-gray-500">
-                                <span>할인율(%)</span>
-                                <input 
-                                  className="w-16 text-right border p-1 rounded" 
-                                  value={(tier as any)[`${cap}Rate`] || ''}
-                                  onChange={(e) => {
-                                    const val = parseInt(e.target.value, 10) || 0;
-                                    setLocalDistanceRates(prev => {
-                                      const newTier = { ...prev[tierKey] };
-                                      newTier[`${cap}Rate`] = val;
-                                      const market = newTier[`${cap}Market`] || 0;
-                                      newTier[cap] = Math.round(market * (1 - val / 100) / 1000) * 1000;
-                                      return { ...prev, [tierKey]: newTier };
-                                    });
-                                  }}
-                                />
-                              </div>
-                              <div className="flex justify-between items-center text-sm font-bold text-blue-600 mt-1">
-                                <span>할인가</span>
-                                <span>{(tier as any)[cap]?.toLocaleString() || '0'}</span>
-                              </div>
-                            </div>
+
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {DISTANCE_TIERS_DEF.map((tier, idx) => {
+                      const tierData = localDistanceRates[tier.key] || DEFAULT_DISTANCE_RATES[tier.key] || {};
+                      const isEven = idx % 2 === 0;
+
+                      return (
+                        <tr
+                          key={tier.key}
+                          className={clsx(
+                            "hover:bg-blue-50/50 transition-colors",
+                            isEven ? "bg-white" : "bg-slate-50/50"
+                          )}
+                        >
+                          <td className="sticky left-0 z-20 bg-slate-100 font-bold text-slate-800 text-center px-3 py-2 border-r border-slate-300 whitespace-nowrap shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                            {tier.label}
                           </td>
-                        ))}
-                      </tr>
-                    ))}
+
+                          {DISTANCE_GROUPS.map(group =>
+                            group.columns.map(col => {
+                              const rawVal = tierData[col.key] ?? 0;
+                              return (
+                                <td key={col.key} className="p-1 border-r border-gray-200 text-right">
+                                  <input
+                                    type="text"
+                                    value={rawVal ? formatNum(rawVal) : ''}
+                                    placeholder="0"
+                                    onChange={(e) => handleDistanceRateChange(tier.key, col.key, parseNum(e.target.value))}
+                                    className="w-full border border-gray-200 hover:border-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-400 rounded px-2 py-1.5 text-right font-medium text-xs text-gray-800 bg-white"
+                                  />
+                                </td>
+                              );
+                            })
+                          )}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             </section>
           </div>
         )}
+
 
         {activeTab === 'cbmWorkers' && (
           <div className="space-y-6">

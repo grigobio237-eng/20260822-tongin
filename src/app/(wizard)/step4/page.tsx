@@ -9,6 +9,7 @@ import { WorkOrderPrintDocument } from '@/components/pdf/WorkOrderPrintDocument'
 import { Loader2, CheckCircle, FileText } from 'lucide-react';
 import clsx from 'clsx';
 import { checkSpecialDate } from '@/lib/dateUtils';
+import { calculateDistanceRatePrice } from '@/lib/constants/distanceRates';
 
 export default function Step4Page() {
   const store = useWizardStore();
@@ -46,12 +47,6 @@ export default function Step4Page() {
 
   
   const totalTonnage = (store.resources.vehicles.fiveTon * 5) + (store.resources.vehicles.twoHalfTon * 2.5) + (store.resources.vehicles.oneTon * 1);
-  let tonnageKey = 'fiveTon';
-  if (totalTonnage >= 10) tonnageKey = 'tenTon';
-  else if (totalTonnage >= 7.5) tonnageKey = 'sevenHalfTon';
-  else if (totalTonnage >= 6) tonnageKey = 'sixTon';
-  else tonnageKey = 'fiveTon';
-
   let distanceValue = customerInfo.distanceKm ? parseFloat(customerInfo.distanceKm) : 0;
   const getDistanceTier = (dist: number) => {
     if (dist <= 30) return 'tier_30_under';
@@ -74,7 +69,13 @@ export default function Step4Page() {
   };
   
   const currentDistanceTier = getDistanceTier(distanceValue);
-  const distanceMatrixPrice = (settingsStore.distanceRates?.[currentDistanceTier] as any)?.[tonnageKey] || 0;
+  const distanceMatrixPrice = calculateDistanceRatePrice(
+    settingsStore.distanceRates,
+    currentDistanceTier,
+    totalTonnage,
+    store.resources.workerMale,
+    store.resources.workerFemale
+  );
 
   const isStorageMove = Boolean(
     (customerInfo.packingDate && customerInfo.movingDate && customerInfo.packingDate !== customerInfo.movingDate) ||
