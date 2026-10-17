@@ -9,7 +9,7 @@ import { WorkOrderPrintDocument } from '@/components/pdf/WorkOrderPrintDocument'
 import { Loader2, CheckCircle, FileText } from 'lucide-react';
 import clsx from 'clsx';
 import { checkSpecialDate } from '@/lib/dateUtils';
-import { calculateDistanceRatePrice } from '@/lib/constants/distanceRates';
+import { calculateDistanceRatePrice, DISTANCE_TIERS_DEF } from '@/lib/constants/distanceRates';
 
 export default function Step4Page() {
   const store = useWizardStore();
@@ -82,7 +82,13 @@ export default function Step4Page() {
     customerInfo.arrivalStatus === '보관이사'
   );
 
-  const singleBaseCost = customerInfo.applyDistancePrice ? distanceMatrixPrice : calculatedBaseCost;
+  const isDistanceRateEnabled = customerInfo.applyDistancePrice !== false;
+  const singleBaseCost = (isDistanceRateEnabled && distanceMatrixPrice > 0)
+    ? distanceMatrixPrice 
+    : calculatedBaseCost;
+
+  const currentTierObj = DISTANCE_TIERS_DEF.find(t => t.key === currentDistanceTier);
+  const currentDistanceTierLabel = currentTierObj ? currentTierObj.label : '30km이하';
   
   // 보관이사 시 포장일 / 운송일 작업비
   const effectivePackingCost = packingCost !== null 
@@ -679,19 +685,30 @@ export default function Step4Page() {
       {/* 1. 정산 금액 요약 */}
       <section>
         
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">비용 정산</h2>
-          <label className="flex items-center gap-2 cursor-pointer bg-blue-50 text-blue-700 px-3 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors text-sm">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-xl font-bold">비용 정산</h2>
+            {isDistanceRateEnabled && distanceMatrixPrice > 0 && (
+              <span className="text-xs bg-blue-50 text-blue-700 font-bold px-2.5 py-1 rounded-full border border-blue-200">
+                표준 구간단가 DB 적용 ({currentDistanceTierLabel} · {totalTonnage}톤 · 남{store.resources.workerMale} 여{store.resources.workerFemale})
+              </span>
+            )}
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer bg-slate-50 text-slate-700 px-3 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors text-sm self-start sm:self-auto">
             <input 
               type="checkbox" 
-              className="w-4 h-4 text-blue-600"
-              checked={customerInfo.applyDistancePrice || false}
+              className="w-4 h-4 text-blue-600 rounded"
+              checked={isDistanceRateEnabled}
               onChange={(e) => {
                 store.updateCustomerInfo({ applyDistancePrice: e.target.checked });
                 setEditableBaseCost(null);
+                setPackingCost(null);
+                setDeliveryCost(null);
+                store.updateManualBaseCost(undefined);
+                store.updateResources({ packingMovingCost: undefined, deliveryMovingCost: undefined });
               }}
             />
-            <span className="font-semibold">장거리(구간별) 단가표 적용</span>
+            <span className="font-semibold text-xs">표준 구간단가 DB 연동</span>
           </label>
         </div>
 
@@ -700,11 +717,16 @@ export default function Step4Page() {
           {isStorageMove ? (
             <div className="py-2.5 border-b space-y-2">
               <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-bold text-gray-800 text-sm">이사 기본비용 (보관이사 2회)</span>
                   <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
                     포장일 / 운송일 분리
                   </span>
+                  {isDistanceRateEnabled && distanceMatrixPrice > 0 && (
+                    <span className="text-[11px] bg-emerald-50 text-emerald-800 font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
+                      회당 {distanceMatrixPrice.toLocaleString()}원 기준
+                    </span>
+                  )}
                   {(packingCost !== null || deliveryCost !== null || editableBaseCost !== null) && (
                     <button 
                       onClick={() => {
@@ -788,15 +810,20 @@ export default function Step4Page() {
             </div>
           ) : (
             <div className="flex justify-between items-center py-2 border-b">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">이사 기본비용</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-gray-600 font-medium">이사 기본비용</span>
+                {isDistanceRateEnabled && distanceMatrixPrice > 0 && (
+                  <span className="text-[11px] bg-emerald-50 text-emerald-800 font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
+                    구간단가 DB 권장: {distanceMatrixPrice.toLocaleString()}원
+                  </span>
+                )}
                 {editableBaseCost !== null && (
                   <button 
                     onClick={() => {
                       setEditableBaseCost(null);
                       store.updateManualBaseCost(undefined);
                     }}
-                    className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full hover:bg-gray-300"
+                    className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full hover:bg-gray-300 transition-colors"
                   >
                     초기화
                   </button>

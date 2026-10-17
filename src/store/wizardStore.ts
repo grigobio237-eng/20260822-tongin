@@ -117,7 +117,7 @@ const initialCustomerInfo: CustomerInfo = {
   name: '', phone: '', secondaryPhone: '', contractDate: '', packingDate: '', movingDate: '',
   departureAddress: '', departureDetailAddress: '', departureFloor: '', departureConditions: [], departureLadderCount: 1,
   arrivalAddress: '', arrivalDetailAddress: '', arrivalFloor: '', arrivalConditions: [], arrivalLadderCount: 1, arrivalStatus: '',
-  applyDistancePrice: false,
+  applyDistancePrice: true,
 };
 
 const initialRoomItems: AllRoomsState = (Object.keys(ROOM_CATEGORIES) as RoomCategory[]).reduce((acc, room) => {
