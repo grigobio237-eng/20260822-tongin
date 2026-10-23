@@ -135,9 +135,8 @@ export default function Step3Page() {
     });
   }, [recommendedStorageTon, manualStorageTons, manualPrices, updateOption, storageRates]);
 
-  const handleSttResult = React.useCallback((text: string) => {
-    const currentMemo = useWizardStore.getState().sttMemo;
-    useWizardStore.getState().setSttMemo(currentMemo ? `${currentMemo} ${text}` : text);
+  const handleSttResult = React.useCallback((fullText: string) => {
+    useWizardStore.getState().setSttMemo(fullText);
   }, []);
 
   const { isListening, startListening, stopListening } = useSpeechToText(handleSttResult);
@@ -880,7 +879,14 @@ export default function Step3Page() {
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">마이크를 켜고 말씀하시면 텍스트로 변환됩니다.</span>
             <button
-              onClick={isListening ? stopListening : startListening}
+              type="button"
+              onClick={() => {
+                if (isListening) {
+                  stopListening();
+                } else {
+                  startListening(sttMemo || '');
+                }
+              }}
               className={clsx(
                 "flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm transition-colors",
                 isListening 

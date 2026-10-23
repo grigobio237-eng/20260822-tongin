@@ -30,12 +30,17 @@ export default function Step2Page() {
   const roomItems = useWizardStore((state) => state.roomItems);
   const updateRoomItemQuantity = useWizardStore((state) => state.updateRoomItemQuantity);
   const changeItemVariant = useWizardStore((state) => state.changeItemVariant);
-  const handleSttResult = useCallback((text: string) => {
-    const currentNote = useWizardStore.getState().roomItems[activeTab]?.note || '';
-    useWizardStore.getState().updateRoomNote(activeTab, currentNote ? `${currentNote} ${text}` : text);
+  const handleSttResult = useCallback((fullText: string) => {
+    useWizardStore.getState().updateRoomNote(activeTab, fullText);
   }, [activeTab]);
 
   const { isListening, startListening, stopListening } = useSpeechToText(handleSttResult);
+
+  useEffect(() => {
+    if (isListening) {
+      stopListening();
+    }
+  }, [activeTab]);
 
   const addRoomItemInstance = useWizardStore((state) => state.addRoomItemInstance);
   const removeRoomItemInstance = useWizardStore((state) => state.removeRoomItemInstance);
@@ -400,7 +405,14 @@ export default function Step2Page() {
           <div className="flex justify-between items-center mb-2">
             <label className="block text-sm font-medium text-gray-700">공간 특이사항 (음성/수기)</label>
             <button
-              onClick={isListening ? stopListening : startListening}
+              type="button"
+              onClick={() => {
+                if (isListening) {
+                  stopListening();
+                } else {
+                  startListening(roomItems[activeTab]?.note || "");
+                }
+              }}
               className={clsx(
                 "flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-xs transition-colors",
                 isListening 
